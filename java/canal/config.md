@@ -2,11 +2,17 @@ Canal安装与部署
 
 1.开启MySQL的binlog功能并配置为row模式(my.ini)
 
-  log-bin=mysql-bin #添加这一行就ok
-
-  binlog-format=ROW #选择row模式  
-
-  server_id=1 #配置mysql replaction需要定义，不能和canal的slaveId重复
+  #log bin
+  
+  log-bin=mysql-bin
+  
+  #binlog mode: ROW mode
+  
+  binlog-format=ROW
+  
+  #config mysql replaction privileges，mustn't repeat with slaveId of canal
+  
+  server-id=1
   
 2.下载Canal(下载地址:  https://github.com/alibaba/canal/releases/download/canal-1.0.24/canal.deployer-1.0.24.tar.gz   )并解压至指定路径
 
