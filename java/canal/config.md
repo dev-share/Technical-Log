@@ -8,7 +8,7 @@ Canal安装与部署
 
   server_id=1 #配置mysql replaction需要定义，不能和canal的slaveId重复
   
-2.下载Canal(下载地址:https://github.com/alibaba/canal/releases/download/canal-1.0.24/canal.deployer-1.0.24.tar.gz)并解压至指定路径
+2.下载Canal(下载地址:  https://github.com/alibaba/canal/releases/download/canal-1.0.24/canal.deployer-1.0.24.tar.gz   )并解压至指定路径
 
 3.配置canal
 
