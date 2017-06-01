@@ -48,6 +48,6 @@ canal.instance.dbPassword = canal
 
 #默认数据库名称(可为空)
 
-canal.instance.defaultDatabaseName = cdr
+canal.instance.defaultDatabaseName = 
 
 canal.instance.connectionCharset = UTF-8
