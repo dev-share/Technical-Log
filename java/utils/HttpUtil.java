@@ -1,4 +1,4 @@
-package com.ucloudlink.uklink.util;
+package com.ucloudlink.canal.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -105,9 +106,10 @@ public class HttpUtil {
 	 * @param url 请求URL
 	 * @param method 请求URL
 	 * @param param	json参数(post|put)
+	 * @param auth	认证信息(username+":"+password)
 	 * @return
 	 */
-	public static String httpRequest(String url,String method,String param){
+	public static String httpRequest(String url,String method,String param,String auth){
 		String result = null;
 		HttpResponse httpResponse = null;
 		try {
@@ -131,6 +133,10 @@ public class HttpUtil {
 			}else if(method.equalsIgnoreCase(METHOD_TRACE)){
 				http = new HttpTrace(url);
 			}
+			if(auth!=null&&!"".equals(auth)){
+				String authorization = "Basic "+new String(Base64.encodeBase64(auth.getBytes()));
+				http.setHeader("Authorization", authorization);
+			}
 			httpResponse = httpClient.execute(http);
 			HttpEntity entity = httpResponse.getEntity();
 			result = EntityUtils.toString(entity,Consts.UTF_8);
@@ -148,13 +154,17 @@ public class HttpUtil {
 	 * @param param	json参数(post|put)
 	 * @return
 	 */
-	public static String urlRequest(String url,String method,String param){
+	public static String urlRequest(String url,String method,String param,String auth){
 		String result = null;
 		try {
 			HttpURLConnection connection = (HttpURLConnection)new URL(url).openConnection();
 			connection.setConnectTimeout(60*1000);
 //			connection.setRequestProperty("Content-Type", "application/json");
 			connection.setRequestMethod(method.toUpperCase());
+			if(auth!=null&&!"".equals(auth)){
+				String authorization = "Basic "+new String(Base64.encodeBase64(auth.getBytes()));
+				connection.setRequestProperty("Authorization", authorization);
+			}
 			connection.connect();
 			if(param!=null&&!"".equals(param)){
 				connection.setDoOutput(true);
@@ -203,3 +213,4 @@ public class HttpUtil {
 		System.out.println(result);
 	}
 }
+
