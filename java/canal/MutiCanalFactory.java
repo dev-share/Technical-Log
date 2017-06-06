@@ -3,6 +3,7 @@ package com.ucloudlink.canal.common;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,10 +16,12 @@ import com.alibaba.otter.canal.client.CanalConnectors;
 import com.alibaba.otter.canal.protocol.CanalEntry.Column;
 import com.alibaba.otter.canal.protocol.CanalEntry.Entry;
 import com.alibaba.otter.canal.protocol.CanalEntry.EntryType;
+import com.alibaba.otter.canal.protocol.CanalEntry.EventType;
 import com.alibaba.otter.canal.protocol.CanalEntry.RowChange;
 import com.alibaba.otter.canal.protocol.CanalEntry.RowData;
 import com.alibaba.otter.canal.protocol.Message;
 import com.ucloudlink.canal.pojo.MonitorInfo;
+import com.ucloudlink.canal.util.DateUtil;
 /**
  * @decription Canal服务(MySQL数据库监控)
  * @author yi.zhang
@@ -26,7 +29,7 @@ import com.ucloudlink.canal.pojo.MonitorInfo;
  * @since 1.0
  * @jdk 1.8
  */
-public class MutiCanalFactory {
+public class CanalFactory {
 	private static Logger log = LogManager.getLogger(CanalFactory.class);
 	/**
 	 * 多实例列表连接
@@ -164,10 +167,10 @@ public class MutiCanalFactory {
                 monitor.setSchema(schema);
                 monitor.setTable(table);
                 monitor.setType(type);
-                monitor.setSql(sql);
                 List<MonitorInfo.RowInfo> rows = monitor.getRows();
                 for (RowData rowData : event.getRowDatasList()) {
                 	MonitorInfo.RowInfo row = monitor.new RowInfo();
+                	String kid = null;
                 	JSONObject before = row.getBefore();
                 	JSONObject after = row.getAfter();
                 	JSONObject change = row.getChange();
@@ -175,13 +178,34 @@ public class MutiCanalFactory {
                 	List<Column> cafters = rowData.getAfterColumnsList();
                     for (Column column : cbefores) {
                     	String key = column.getName();
-                    	String value = column.getValue();
+                    	Object value = column.getValue();
+                    	String ctype = column.getMysqlType().toLowerCase();
+                    	if(ctype.contains("int")){
+                    		if(ctype.contains("bigint")){
+                    			value = Long.valueOf(column.getValue());
+                    		}else{
+                    			value = Integer.valueOf(column.getValue());
+                    		}
+                    	}
+                    	if(ctype.contains("decimal")||ctype.contains("numeric")||ctype.contains("double")||ctype.contains("float")){
+                    		value = Double.valueOf(column.getValue());
+                    	}
+                    	if(ctype.contains("timestamp")||ctype.contains("date")){
+                    		if(ctype.contains("timestamp")){
+                    			value = DateUtil.formatDateTime(column.getValue());
+                    		}else{
+                    			value = DateUtil.formatDate(column.getValue());
+                    		}
+                    	}
                     	boolean update = column.getUpdated();
                     	before.put(key, value);
                     	if(update){
                     		change.put(key, value);
                     	}
-                        System.out.println("--"+type+"--before----{"+key+ ": " + value + ",update: " + update+"}");
+                    	if(column.getIsKey()&&kid==null){
+                    		kid = key;
+                    	}
+                        System.out.println("--"+type+"--before----{"+key+ ": " + value + ",update: " + update+","+column.getSqlType()+":"+column.getMysqlType()+":"+column.getLength()+"}");
                     }
                     for (Column column : cafters) {
                     	String key = column.getName();
@@ -191,10 +215,53 @@ public class MutiCanalFactory {
                     	if(update){
                     		change.put(key, value);
                     	}
+                    	if(column.getIsKey()&&kid==null){
+                    		kid = key;
+                    	}
                         System.out.println("--"+type+"--after----{"+key+ ": " + value + ",update: " + update+"}");
+                    }
+                    row.setKid(kid);
+                    if (event.getEventType() == EventType.DELETE) {
+                    	Object id = before.get(kid);
+                    	sql += "delete from "+table+" where "+kid+"="+(id instanceof String?"'"+id+"'":id)+";";
+                    }
+                    if (event.getEventType() == EventType.INSERT) {
+                    	String keys = "";
+                    	String values = "";
+                    	for (String key : after.keySet()) {
+                    		Object value = after.get(key);
+                    		if(value instanceof Date){
+                    			value = DateUtil.formatDateTimeStr((Date)value);
+                    		}
+							if("".equals(keys)){
+								keys = key;
+								values = (value instanceof String?"'"+value+"'":value+"");
+							}else{
+								keys +=',' + key;
+								values +=',' + (value instanceof String?"'"+value+"'":value+"");
+							}
+						}
+                    	sql += "insert into "+table+"("+keys+")values("+values+");";
+                    }
+                    if (event.getEventType() == EventType.UPDATE) {
+                    	String set = "";
+                    	for (String key : change.keySet()) {
+                    		Object value = after.get(key);
+                    		if(value instanceof Date){
+                    			value = DateUtil.formatDateTimeStr((Date)value);
+                    		}
+                    		if("".equals(set)){
+                    			set = key+"="+(value instanceof String?"'"+value+"'":value+"");
+                    		}else{
+                    			set +=',' + key+"="+(value instanceof String?"'"+value+"'":value+"");
+                    		}
+                    	}
+                    	Object id = before.get(kid);
+                    	sql += "update "+table+" set "+set+" where "+kid+"="+(id instanceof String?"'"+id+"'":id)+";";
                     }
                     rows.add(row);
                 }
+                monitor.setSql(sql);
                 monitors.add(monitor);
 			}
         }
