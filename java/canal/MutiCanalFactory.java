@@ -29,8 +29,8 @@ import com.ucloudlink.canal.util.DateUtil;
  * @since 1.0
  * @jdk 1.8
  */
-public class CanalFactory {
-	private static Logger log = LogManager.getLogger(CanalFactory.class);
+public class MutiCanalFactory {
+	private static Logger log = LogManager.getLogger(MutiCanalFactory.class);
 	/**
 	 * 多实例列表连接
 	 */
