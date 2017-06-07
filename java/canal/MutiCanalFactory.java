@@ -31,6 +31,14 @@ import com.ucloudlink.canal.util.DateUtil;
  */
 public class MutiCanalFactory {
 	private static Logger log = LogManager.getLogger(MutiCanalFactory.class);
+	/**
+	 * 监控过滤规则(默认所有操作:.*\\..*)
+	 * EX:
+	 * 1.库db1下所有表:db1\\..*
+	 * 2.库db1/库db2下所有表:db1\\..*,db2\\..*
+	 * 3.库db1下table1表以及库db2下table2表:db1.table1,db2.table2
+	 * 4.以name1开头以及包含name2的所有库表:.*\\.name1.*,.*\\.*.name2.*
+	 */
 	private static String CANAL_FILTER_REGEX = ".*\\..*";
 	/**
 	 * 多实例列表连接
