@@ -29,6 +29,15 @@ public class CanalFactory {
 	private static Logger log = LogManager.getLogger(CanalFactory.class);
 	private static CanalConnector connector;
 	private static int BATCH_SIZE = 1000;
+	/**
+	 * 监控过滤规则(默认所有操作:.*\\..*)
+	 * EX:
+	 * 1.库db1下所有表:db1\\..*
+	 * 2.库db1/库db2下所有表:db1\\..*,db2\\..*
+	 * 3.库db1下table1表以及库db2下table2表:db1.table1,db2.table2
+	 * 4.以name1开头以及包含name2的所有库表:.*\\.name1.*,.*\\.*.name2.*
+	 */
+	private static String CANAL_FILTER_REGEX = ".*\\..*";
 	static{
 		try {
 			log.info("-----------------Canal 初始化-----------------");
@@ -48,9 +57,13 @@ public class CanalFactory {
 	 */
 	protected static void init() throws Exception{
 		String destination = CanalConfig.getProperty("canal.destination");
-		String servers = CanalConfig.getProperty("canal.address");
+		String servers = CanalConfig.getProperty("canal.servers");
 		String username = CanalConfig.getProperty("canal.username");
 		String password = CanalConfig.getProperty("canal.password");
+		String filter_regex = CanalConfig.getProperty("canal.filter_regex");
+		if(filter_regex!=null){
+			CANAL_FILTER_REGEX = filter_regex;
+		}
 		boolean isZookeeper = Boolean.valueOf(CanalConfig.getProperty("canal.zookeeper.enabled"));
 		String batch_size = CanalConfig.getProperty("canal.batch_size");
 		if(batch_size!=null){
@@ -72,8 +85,8 @@ public class CanalFactory {
 			connector = CanalConnectors.newClusterConnector(addresses, destination, username, password);
 		}
 		connector.connect();
-        connector.subscribe(".*\\..*");
-        connector.rollback();
+        	connector.subscribe(CANAL_FILTER_REGEX);
+        	connector.rollback();
 	}
 	/**
 	 * 关闭服务
