@@ -31,6 +31,7 @@ import com.ucloudlink.canal.util.DateUtil;
  */
 public class MutiCanalFactory {
 	private static Logger log = LogManager.getLogger(MutiCanalFactory.class);
+	private static String CANAL_FILTER_REGEX = ".*\\..*";
 	/**
 	 * 多实例列表连接
 	 */
@@ -55,9 +56,13 @@ public class MutiCanalFactory {
 	 */
 	protected static void init() throws Exception{
 		String destinations = CanalConfig.getProperty("canal.destinations");
-		String servers = CanalConfig.getProperty("canal.address");
+		String servers = CanalConfig.getProperty("canal.servers");
 		String username = CanalConfig.getProperty("canal.username");
 		String password = CanalConfig.getProperty("canal.password");
+		String filter_regex = CanalConfig.getProperty("canal.filter_regex");
+		if(filter_regex!=null){
+			CANAL_FILTER_REGEX = filter_regex;
+		}
 		boolean isZookeeper = Boolean.valueOf(CanalConfig.getProperty("canal.zookeeper.enabled"));
 		String batch_size = CanalConfig.getProperty("canal.batch_size");
 		if(batch_size!=null){
@@ -92,7 +97,7 @@ public class MutiCanalFactory {
 					}
 				}
 				connector.connect();
-		        connector.subscribe(".*\\..*");
+		        connector.subscribe(CANAL_FILTER_REGEX);
 		        connector.rollback();
 		        cache.put(destination, connector);
 			}
