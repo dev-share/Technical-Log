@@ -2,11 +2,9 @@ package com.ucloudlink.canal.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 
@@ -14,7 +12,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -26,6 +23,7 @@ import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +34,7 @@ public class HttpUtil {
 	/**
 	 * http客户端
 	 */
-	private static HttpClient httpClient = HttpClients.createDefault();
+	private static CloseableHttpClient httpClient = HttpClients.createDefault();
 	/**
 	 * Get请求
 	 */
@@ -85,13 +83,18 @@ public class HttpUtil {
 	 * @author yi.zhang
 	 * @time 2017年4月19日 下午6:00:40
 	 * @param url
+	 * @param auth	认证信息(username+":"+password)
 	 * @return (true:连接成功,false:连接失败)
 	 */
-	public static boolean checkConnection(String url){
+	public static boolean checkConnection(String url,String auth){
 		boolean flag = false;
 		try {
 			HttpURLConnection connection = (HttpURLConnection)new URL(url).openConnection();
 			connection.setConnectTimeout(5*1000);
+			if(auth!=null&&!"".equals(auth)){
+				String authorization = "Basic "+new String(Base64.encodeBase64(auth.getBytes()));
+				connection.setRequestProperty("Authorization", authorization);
+			}
 			connection.connect();
 			if(connection.getResponseCode()==HttpURLConnection.HTTP_OK){
 				flag = true;
@@ -159,19 +162,21 @@ public class HttpUtil {
 		try {
 			HttpURLConnection connection = (HttpURLConnection)new URL(url).openConnection();
 			connection.setConnectTimeout(60*1000);
-//			connection.setRequestProperty("Content-Type", "application/json");
 			connection.setRequestMethod(method.toUpperCase());
 			if(auth!=null&&!"".equals(auth)){
 				String authorization = "Basic "+new String(Base64.encodeBase64(auth.getBytes()));
 				connection.setRequestProperty("Authorization", authorization);
 			}
-			connection.connect();
 			if(param!=null&&!"".equals(param)){
+				connection.setDoInput(true);
 				connection.setDoOutput(true);
+				connection.connect();
 				DataOutputStream dos = new DataOutputStream(connection.getOutputStream());
-				dos.writeUTF(param);
+				dos.write(param.getBytes(Consts.UTF_8));
 				dos.flush();
 				dos.close();
+			}else{
+				connection.connect();
 			}
 			InputStream in = connection.getInputStream();
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -205,8 +210,9 @@ public class HttpUtil {
 //		String body = "{\"query\":{\"match\":{\"operator\":\"test\"}}}";
 		String body = "{\"name\":\"mobile music\",\"operator\":\"10000\",\"content\":\"I like music!\",\"createTime\":\"2017-04-20\"}";
 		String result = null;
-//		result = checkConnection("http://127.0.0.1:9200")+"";
-		result = httpRequest(url, method, body);
+		String auth="elastic:elastic";
+		result = checkConnection("http://127.0.0.1:9200",auth)+"";
+		result = httpRequest(url, method, body,null);
 		System.out.println(result);
 		System.out.println("---------------------------------------------------------");
 //		result = urlRequest(url, method, param);
