@@ -48,6 +48,9 @@ public class ElasticsearchHttpFactory implements ElasticsearchFactory {
 		String servers = CanalConfig.getProperty("elasticsearch.cluster.servers");
 		String username = CanalConfig.getProperty("elasticsearch.cluster.username");
 		String password = CanalConfig.getProperty("elasticsearch.cluster.password");
+		if(username!=null&&password!=null){
+			auth = username+":"+password;
+		}
 		for(String server : servers.split(",")){
 			String[] addresses = server.split(":");
 			address = addresses[0];
@@ -56,16 +59,13 @@ public class ElasticsearchHttpFactory implements ElasticsearchFactory {
 				port = Integer.valueOf(addresses[1]);
 			}
 			api = "http://"+address+":"+port;
-			boolean flag = HttpUtil.checkConnection(api);
+			boolean flag = HttpUtil.checkConnection(api,auth);
 			if(flag){
 				logger.info("--------------Elasticsearch["+api+"] connect success-------------");
 				break;
 			}else{
 				logger.warn("--------------Elasticsearch["+api+"] connect error-------------");
 			}
-		}
-		if(username!=null&&password!=null){
-			auth = username+":"+password;
 		}
 	}
 	
@@ -74,8 +74,10 @@ public class ElasticsearchHttpFactory implements ElasticsearchFactory {
 			if(url!=null&&!(url.startsWith("http://")||url.startsWith("https://"))){
 				url= api+(url.startsWith("/")?"":"/")+url;
 			}
-			body = body.contains("_bulk")?body:JSON.parseObject(body).toJSONString();
-			String result  = HttpUtil.httpRequest(url, method, body, auth);
+			if(body!=null){
+				body = url.contains("_bulk")?body:JSON.parseObject(body).toJSONString();
+			}
+			String result  = HttpUtil.urlRequest(url, method, body, auth);
 			if(result!=null&&result.contains("Connection refused")){
 				init();
 			}
