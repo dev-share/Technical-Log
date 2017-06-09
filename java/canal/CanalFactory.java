@@ -152,7 +152,7 @@ public class CanalFactory {
                 	List<Column> cafters = rowData.getAfterColumnsList();
                     for (Column column : cbefores) {
                     	String key = column.getName();
-                    	String value = column.getValue();
+                    	Object value = column.getValue();
 			String ctype = column.getMysqlType().toLowerCase();
                     	if(ctype.contains("int")){
                     		if(ctype.contains("bigint")){
@@ -180,7 +180,25 @@ public class CanalFactory {
                     }
                     for (Column column : cafters) {
                     	String key = column.getName();
-                    	String value = column.getValue();
+                    	Object value = column.getValue();
+			String ctype = column.getMysqlType().toLowerCase();
+                    	if(ctype.contains("int")){
+                    		if(ctype.contains("bigint")){
+                    			value = Long.valueOf(column.getValue());
+                    		}else{
+                    			value = Integer.valueOf(column.getValue());
+                    		}
+                    	}
+                    	if(ctype.contains("decimal")||ctype.contains("numeric")||ctype.contains("double")||ctype.contains("float")){
+                    		value = Double.valueOf(column.getValue());
+                    	}
+                    	if(ctype.contains("timestamp")||ctype.contains("date")){
+                    		if(ctype.contains("timestamp")){
+                    			value = DateUtil.formatDateTime(column.getValue());
+                    		}else{
+                    			value = DateUtil.formatDate(column.getValue());
+                    		}
+                    	}
                     	boolean update = column.getUpdated();
                     	after.put(key, value);
                     	if(update){
@@ -191,7 +209,7 @@ public class CanalFactory {
                     rows.add(row);
                 }
                 monitors.add(monitor);
-			}
+		}
         }
         ack(batchId);
        return monitors; 
