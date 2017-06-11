@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+<plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-war-plugin</artifactId>
+	<version>3.1.0</version>
+	<configuration>
+		<outputDirectory>${project.basedir}/target/${project.artifactId}-${project.version}</outputDirectory>
+		<packagingExcludes>WEB-INF/web.xml</packagingExcludes>
+		<warSourceExcludes>**/.idea/**,**/svn/**</warSourceExcludes>
+	</configuration>
+</plugin>
+<plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-assembly-plugin</artifactId>
+	<version>3.0.0</version>
+	<configuration>
+		<finalName>${project.artifactId}-${project.version}.${maven.build.timestamp}</finalName>
+		<formats>zip</formats>
+		<appendAssemblyId>false</appendAssemblyId>
+		自定义descriptors或自带descriptorRefs
+		<descriptors>
+			<descriptor>assembly.xml</descriptor>
+		</descriptors>
+		<descriptorRefs>
+			<descriptorRef>jar-with-dependencies</descriptorRef>
+		</descriptorRefs>
+		<archive>
+            <manifest>
+              <mainClass>com.ucloudlink.elastic.common.ElasticsearchService</mainClass>
+            </manifest>
+        </archive>
+	</configuration>
+	<executions>
+		<execution>
+			<id>make-assembly</id>
+			<phase>package</phase>
+			<goals>
+				<goal>single</goal>
+			</goals>
+		</execution>
+	</executions>
+</plugin>
+ -->
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+	<id>update</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<baseDirectory>${project.basedir}/${project.artifactId}-${project.version}</baseDirectory>
+	<fileSets>
+		<fileSet>
+			<useDefaultExcludes>false</useDefaultExcludes>
+			<excludes>
+				<exclude>**/target/**</exclude>
+				<exclude>%regex[(?!.*src/).*target.*]</exclude>
+			</excludes>
+		</fileSet>
+		<!-- api -->
+		<fileSet>
+			<directory>${project.basedir}/target/apidocs</directory>
+			<outputDirectory>/${project.version}-api</outputDirectory>
+		</fileSet>
+		<!-- 升级说明 -->
+		<fileSet>
+			<!-- <useStrictFiltering>true</useStrictFiltering> -->
+			<outputDirectory>META-INF</outputDirectory>
+			<includes>
+				<include>LICENSE.txt</include>
+			</includes>
+		</fileSet>
+		<!-- 数据库脚本 -->
+		<fileSet>
+			<directory>${project.basedir}/SQL</directory>
+			<outputDirectory>/SQL</outputDirectory>
+			<includes>
+				<include>*.sql</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/target/${project.artifactId}</directory>
+			<outputDirectory>/${project.artifactId}</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+			<excludes>
+				<exclude>**/WEB-INF/lib/**</exclude>
+				<exclude>**/.idea/**</exclude>
+				<exclude>**/svn/**</exclude>
+				<exclude>**/database.properties</exclude>
+			</excludes>
+		</fileSet>
+	</fileSets>
+	<!-- 将scope为runtime的依赖包打包到lib目录下。 -->
+	<dependencySets>
+		<dependencySet>
+			<useProjectArtifact>true</useProjectArtifact>
+			<outputDirectory>/lib</outputDirectory>
+			<scope>runtime</scope>
+			<includes>
+				<include>*:war:*</include>
+			</includes>
+			<excludes>
+				<exclude>*:sources</exclude>
+			</excludes>
+		</dependencySet>
+	</dependencySets>
+</assembly>
