@@ -13,7 +13,7 @@
 	<mirrors>
 		<mirror>
 			<id>maven2</id>
-			<mirrorOf>*</mirrorOf>
+			<mirrorOf>central</mirrorOf>
 			<url>http://central.maven.org/maven2/</url>
 		</mirror>
 		<mirror>
@@ -21,143 +21,11 @@
 			<mirrorOf>central</mirrorOf>
 			<url>https://oss.sonatype.org/content/repositories/releases/</url>
 		</mirror>
-		<mirror>
-			<id>cloudera</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://repository.cloudera.com/content/repositories/releases/</url>
-		</mirror>
-		<mirror>
-			<id>jahia</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://maven.jahia.org/maven2/</url>
-		</mirror>
-		<mirror>
-			<id>clojars</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://clojars.org/repo/</url>
-		</mirror>
-		<mirror>
-			<id>elasticsearch</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://maven.elasticsearch.org/releases/</url>
-		</mirror>
-		<mirror>
-			<id>entwinemedia</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://maven.entwinemedia.com/content/repositories/releases/</url>
-		</mirror>
-		<mirror>
-			<id>boundlessgeo</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://repo.boundlessgeo.com/main/</url>
-		</mirror>
-		<mirror>
-			<id>3rdparty</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://maven.atlassian.com/3rdparty/</url>
-		</mirror>
-		<mirror>
-			<id>spring</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://repo.spring.io/plugins-release/</url>
-		</mirror>
-		<mirror>
-			<id>atlassian</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://maven.atlassian.com/content/repositories/atlassian-public/
-			</url>
-		</mirror>
-		<mirror>
-			<id>jboss</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://repository.jboss.org/nexus/content/repositories/releases/
-			</url>
-		</mirror>
-		<mirror>
-			<id>nuxeo</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://maven-eu.nuxeo.org/nexus/content/repositories/public-releases/
-			</url>
-		</mirror>
-		<mirror>
-			<id>xwiki</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://maven.xwiki.org/releases/</url>
-		</mirror>
-		<mirror>
-			<id>apache</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://repository.apache.org/content/repositories/releases/
-			</url>
-		</mirror>
-		<mirror>
-			<id>hortonworks</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://repo.hortonworks.com/content/repositories/releases/</url>
-		</mirror>
-		<mirror>
-			<id>alfresco</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://artifacts.alfresco.com/nexus/content/repositories/public/
-			</url>
-		</mirror>
-		<mirror>
-			<id>java</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://maven.java.net/content/repositories/releases/</url>
-		</mirror>
-		<mirror>
-			<id>boundlessgeo</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://repo.boundlessgeo.com/main/</url>
-		</mirror>
-		<mirror>
-			<id>redhat</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://maven.repository.redhat.com/ga/</url>
-		</mirror>
-		<mirror>
-			<id>opennms</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://repo.opennms.org/maven2/</url>
-		</mirror>
-		<mirror>
-			<id>cloudsoftcorp</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://artifactory.cloudsoftcorp.com/artifactory/libs-release-local/
-			</url>
-		</mirror>
-		<mirror>
-			<id>jboss3</id>
-			<mirrorOf>central</mirrorOf>
-			<url>https://repository.jboss.org/nexus/content/repositories/ea/
-			</url>
-		</mirror>
-		<mirror>
-			<id>UK</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://uk.maven.org/maven2</url>
-		</mirror>
-		<mirror>
-			<id>net-cn</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://maven.net.cn/content/groups/public/</url>
-		</mirror>
-		<mirror>
-			<id>osc</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://maven.oschina.net/content/groups/public/</url>
-		</mirror>
-		<mirror>
-			<id>osc_thirdparty</id>
-			<mirrorOf>central</mirrorOf>
-			<url>http://maven.oschina.net/content/repositories/thirdparty/</url>
-		</mirror>
 	</mirrors>
 
 	<profiles>
-		<!-- <profile>
-			<id>cmo</id>
+		<profile>
+			<id>central</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -171,7 +39,6 @@
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
-					<layout>default</layout>
 				</repository>
 			</repositories>
 			<pluginRepositories>
@@ -182,7 +49,7 @@
 			</pluginRepositories>
 		</profile>
 		<profile>
-			<id>oss</id>
+			<id>Sonatype</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -196,7 +63,6 @@
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
-					<layout>default</layout>
 				</repository>
 				<repository>
 					<id>oss_snapshots</id>
@@ -207,18 +73,17 @@
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
-					<layout>default</layout>
 				</repository>
 			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
-					<id>oss</id>
+					<id>Sonatype</id>
 					<url>https://oss.sonatype.org/content/repositories/releases/</url>
 				</pluginRepository>
 			</pluginRepositories>
-		</profile> -->
-		<!-- <profile>
-			<id>mon</id>
+		</profile>
+		<profile>
+			<id>OSChina</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -232,7 +97,6 @@
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
-					<layout>default</layout>
 				</repository>
 				<repository>
 					<id>mon_thirdparty</id>
@@ -244,54 +108,127 @@
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
-					<layout>default</layout>
 				</repository>
 			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
-					<id>osc</id>
+					<id>OSChina</id>
 					<url>http://maven.oschina.net/content/groups/public/</url>
 				</pluginRepository>
 			</pluginRepositories>
-		</profile> -->
+		</profile>
 		
-		<!-- <profile>
-			<id>elasticsearch</id>
+		<profile>
+			<id>releases</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<repositories>
 				<repository>
-					<id>es_public</id>
-					<url>http://maven.elasticsearch.org/releases/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-					<layout>default</layout>
+					<id>clojars</id>
+					<url>http://clojars.org/repo/</url>
 				</repository>
-			</repositories>
-		</profile> -->
-		<!-- <profile>
-			<id>cloudera</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<repositories>
 				<repository>
-					<id>ce_releases</id>
+					<id>spring-plugins</id>
+					<url>http://repo.spring.io/plugins-release/</url>
+				</repository>
+				<repository>
+					<id>spring-libs</id>
+					<url>http://repo.spring.io/libs-milestone/</url>
+				</repository>
+				<repository>
+					<id>atlassian</id>
+					<url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+				</repository>
+				<repository>
+					<id>3rdparty</id>
+					<url>https://maven.atlassian.com/3rdparty/</url>
+				</repository>
+				<repository>
+					<id>jboss</id>
+					<url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>maven-eu-nuxeo</id>
+					<url>https://maven-eu.nuxeo.org/nexus/content/repositories/public-releases/</url>
+				</repository>
+				<repository>
+					<id>xwiki</id>
+					<url>http://maven.xwiki.org/releases/</url>
+				</repository>
+				<repository>
+					<id>apache</id>
+					<url>https://repository.apache.org/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>Hortonworks</id>
+					<url>http://repo.hortonworks.com/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>Redhat</id>
+					<url>https://maven.repository.redhat.com/ga/</url>
+				</repository>
+				<repository>
+					<id>Cloudera</id>
 					<url>https://repository.cloudera.com/content/repositories/releases/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-					<layout>default</layout>
+				</repository>
+				<repository>
+					<id>Alfresco</id>
+					<url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
+				</repository>
+				<repository>
+					<id>WSO2</id>
+					<url>http://dist.wso2.org/maven2/</url>
+				</repository>
+				<repository>
+					<id>Java-Net</id>
+					<url>https://maven.java.net/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>Boundless</id>
+					<url>http://repo.boundlessgeo.com/main/</url>
+				</repository>
+				<repository>
+					<id>OpenNMS</id>
+					<url>http://repo.opennms.org/maven2/</url>
+				</repository>
+				<repository>
+					<id>Cloudsoftcorp</id>
+					<url>https://artifactory.cloudsoftcorp.com/artifactory/libs-release-local/</url>
+				</repository>
+				<repository>
+					<id>JBoss-3rd-party</id>
+					<url>https://repository.jboss.org/nexus/content/repositories/ea/</url>
+				</repository>
+				<repository>
+					<id>3rdparty</id>
+					<url>https://maven.atlassian.com/3rdparty/</url>
+				</repository>
+				<repository>
+					<id>UK</id>
+					<url>http://uk.maven.org/maven2/</url>
+				</repository>
+				<repository>
+					<id>Maven-Net</id>
+					<url>http://maven.net.cn/content/groups/public/</url>
+				</repository>
+				<repository>
+					<id>elasticsearch</id>
+					<url>http://maven.elasticsearch.org/releases/</url>
+				</repository>
+				<repository>
+					<id>entwinemedia</id>
+					<url>http://maven.entwinemedia.com/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>jahia</id>
+					<url>http://maven.jahia.org/maven2/</url>
+				</repository>
+				<repository>
+					<id>devtools</id>
+					<url>https://devtools.jahia.com/nexus/content/groups/maven-jahia-org/</url>
 				</repository>
 			</repositories>
-		</profile> -->
+		</profile>
 	</profiles>
 </settings>
