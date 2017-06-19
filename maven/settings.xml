@@ -217,6 +217,10 @@
 					<url>http://maven.elasticsearch.org/releases/</url>
 				</repository>
 				<repository>
+					<id>elasticsearch-releases</id>
+					<url>https://artifacts.elastic.co/maven/</url>
+				</repository>
+				<repository>
 					<id>entwinemedia</id>
 					<url>http://maven.entwinemedia.com/content/repositories/releases/</url>
 				</repository>
