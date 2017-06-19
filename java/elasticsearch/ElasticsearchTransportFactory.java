@@ -151,20 +151,7 @@ public class ElasticsearchTransportFactory implements ElasticsearchFactory{
 		        .get();
 		return response.toString();
 	}
-	public String selectAll(String indexs,String types,Map<String,String> params){
-		String body = "";
-		for (String key : params.keySet()) {
-			String value = params.get(key);
-			body+="+"+key+":"+value;
-		}
-		SearchResponse response = client.prepareSearch(indexs.split(","))
-				.setTypes(types.split(","))
-				.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-				.setQuery(QueryBuilders.queryStringQuery(body))                 // Query
-				.setFrom(0).setSize(60).setExplain(true)
-				.get();
-		return response.toString();
-	}
+
 	public String selectMatchAll(String indexs,String types,String field,String value){
 		SearchResponse response = client.prepareSearch(indexs.split(","))
 				.setTypes(types.split(","))
