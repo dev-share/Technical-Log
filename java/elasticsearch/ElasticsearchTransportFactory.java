@@ -21,6 +21,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.UUIDs;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -28,6 +29,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -58,13 +60,20 @@ public class ElasticsearchTransportFactory implements ElasticsearchFactory{
 	protected static void init() throws Exception{
 		String clusterName = CanalConfig.getProperty("elasticsearch.cluster.name");
 		String servers = CanalConfig.getProperty("elasticsearch.cluster.servers");
-		String user = CanalConfig.getProperty("elasticsearch.cluster.user");
+		String username = CanalConfig.getProperty("elasticsearch.cluster.username");
 		String password = CanalConfig.getProperty("elasticsearch.cluster.password");
-		Settings settings = Settings.builder()
-				.put("cluster.name", clusterName)
-//				.put("shield.user",user+":"+password)
-				.put("client.transport.sniff", true).build();
-		TransportClient xclient = new PreBuiltTransportClient(settings);
+		Builder builder = Settings.builder();
+		builder.put("cluster.name", clusterName);
+		builder.put("client.transport.sniff", true);
+		TransportClient xclient = null;
+		if(username!=null&&password!=null){
+			builder.put("xpack.security.user",username+":"+password);
+			Settings settings = builder.build();
+			xclient = new PreBuiltXPackTransportClient(settings);
+		}else{
+			Settings settings = builder.build();
+			xclient = new PreBuiltTransportClient(settings);
+		}
 		for(String server : servers.split(",")){
 			String[] address = server.split(":");
 			String ip = address[0];
@@ -77,29 +86,29 @@ public class ElasticsearchTransportFactory implements ElasticsearchFactory{
 		client = xclient;
 	}
 	
-	public static String select(String index,String type,String id){
+	public String select(String index,String type,String id){
 		GetResponse result = client.prepareGet(index, type, id).execute().actionGet();
 		return result.getSourceAsString();
 	}
-	public static String delete(String index,String type,String id){
+	public String delete(String index,String type,String id){
 		DeleteResponse result = client.prepareDelete(index, type, id).execute().actionGet();
 		System.out.println(JSON.toJSONString(result));
 		return result.toString();
 	}
 	
-	public static String insert(String index,String type,String json){
+	public String insert(String index,String type,String json){
 		IndexResponse response = client.prepareIndex(index, type).setSource(json,XContentType.JSON).execute().actionGet();
 		if(response.getResult().equals(Result.CREATED)){
 			System.out.println(JSON.toJSONString(response));
 		}
 		return response.toString();
 	}
-	public static String update(String index,String type,String id,String json){
+	public String update(String index,String type,String id,String json){
 		UpdateResponse result = client.prepareUpdate(index, type, id).setDoc(json,XContentType.JSON).execute().actionGet();
 		System.out.println(JSON.toJSONString(result));
 		return result.toString();
 	}
-	public static String upsert(String index,String type,String id,String json){
+	public String upsert(String index,String type,String id,String json){
 		try {
 			IndexRequest indexRequest = new IndexRequest(index, type, id).source(json,XContentType.JSON);
 			UpdateRequest updateRequest = new UpdateRequest(index, type, id).doc(json,XContentType.JSON).upsert(indexRequest);              
@@ -111,7 +120,7 @@ public class ElasticsearchTransportFactory implements ElasticsearchFactory{
 		}
 		return null;
 	}
-	public static String bulkUpsert(String index,String type,List<String> jsons){
+	public String bulkUpsert(String index,String type,List<String> jsons){
 		try {
 			BulkRequestBuilder bulkRequest = client.prepareBulk();
 			for (String json : jsons) {
@@ -133,7 +142,7 @@ public class ElasticsearchTransportFactory implements ElasticsearchFactory{
 		}
 		return null;
 	}
-	public static String selectAll(String indexs,String types,String condition){
+	public String selectAll(String indexs,String types,String condition){
 		SearchResponse response = client.prepareSearch(indexs.split(","))
 		        .setTypes(types.split(","))
 		        .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
@@ -142,7 +151,7 @@ public class ElasticsearchTransportFactory implements ElasticsearchFactory{
 		        .get();
 		return response.toString();
 	}
-	public static String selectAll(String indexs,String types,Map<String,String> params){
+	public String selectAll(String indexs,String types,Map<String,String> params){
 		String body = "";
 		for (String key : params.keySet()) {
 			String value = params.get(key);
@@ -156,7 +165,7 @@ public class ElasticsearchTransportFactory implements ElasticsearchFactory{
 				.get();
 		return response.toString();
 	}
-	public static String selectMatchAll(String indexs,String types,String field,String value){
+	public String selectMatchAll(String indexs,String types,String field,String value){
 		SearchResponse response = client.prepareSearch(indexs.split(","))
 				.setTypes(types.split(","))
 				.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
@@ -167,7 +176,7 @@ public class ElasticsearchTransportFactory implements ElasticsearchFactory{
 				.get();
 		return response.toString();
 	}
-	public static String selectMatchAll(String indexs,String types,Map<String,String> params){
+	public String selectMatchAll(String indexs,String types,Map<String,String> params){
 		BoolQueryBuilder boolquery = QueryBuilders.boolQuery();
 		HighlightBuilder highlight = new HighlightBuilder();
 		for (String key: params.keySet()) {
