@@ -8,7 +8,13 @@
 	<proxies>
 	</proxies>
 
-	<!-- <servers> </servers> -->
+	<servers>
+		<server>   
+			<id>central</id>   
+			<username>admin</username>   
+			<password>admin123</password>   
+		</server>
+	</servers>
 
 	<mirrors>
 		<mirror>
@@ -199,10 +205,6 @@
 				<repository>
 					<id>JBoss-3rd-party</id>
 					<url>https://repository.jboss.org/nexus/content/repositories/ea/</url>
-				</repository>
-				<repository>
-					<id>3rdparty</id>
-					<url>https://maven.atlassian.com/3rdparty/</url>
 				</repository>
 				<repository>
 					<id>UK</id>
