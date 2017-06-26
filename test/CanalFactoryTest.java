@@ -147,7 +147,7 @@ public class CanalFactoryTest {
 		String table = "css_vsim_cdr";
 		long start = System.currentTimeMillis();
 		MongoDBFactory factory = new MongoDBFactory();
-//		GreenplumFactory tfactory = new GreenplumFactory();
+		GreenplumFactory tfactory = new GreenplumFactory();
 //		JSONObject obj = new JSONObject();
 //		obj.fluentPut("_id", "222");
 //		obj.fluentPut("mvno_code", "100");
@@ -168,23 +168,23 @@ public class CanalFactoryTest {
 		List<JSONObject> list = (List<JSONObject>)factory.executeQuery("css_vsim_cdr", null, null);
 		for (JSONObject json : list) {
 			System.out.println(json.toJSONString());
-//			String keys = "";
-//        	String values = "";
-//        	for (String key : json.keySet()) {
-//        		Object value = json.get(key);
-//        		if(value instanceof Date){
-//        			value = DateUtil.formatDateTimeStr((Date)value);
-//        		}
-//				if("".equals(keys)){
-//					keys = key;
-//					values = (value instanceof String?"'"+value+"'":value+"");
-//				}else{
-//					keys +=',' + key;
-//					values +=',' + (value instanceof String?"'"+value+"'":value+"");
-//				}
-//			}
-//        	String sql = "insert into "+table+"("+keys+")values("+values+");";
-//        	tfactory.excuteUpdate(sql);
+			String keys = "";
+        	String values = "";
+        	for (String key : json.keySet()) {
+        		Object value = json.get(key);
+        		if(value instanceof Date){
+        			value = DateUtil.formatDateTimeStr((Date)value);
+        		}
+				if("".equals(keys)){
+					keys = key;
+					values = (value instanceof String?"'"+value+"'":value+"");
+				}else{
+					keys +=',' + key;
+					values +=',' + (value instanceof String?"'"+value+"'":value+"");
+				}
+			}
+        	String sql = "insert into "+table+"("+keys+")values("+values+");";
+        	tfactory.excuteUpdate(sql);
 		}
 		long end = System.currentTimeMillis();
 		double time = (end-start)/1000.0000;
