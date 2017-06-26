@@ -83,16 +83,16 @@ public class MongoDBFactory {
 	 * @decription 保存数据
 	 * @author yi.zhang
 	 * @time 2017年6月2日 下午6:18:49
-	 * @param collectionName	文档名称(表名)
+	 * @param table	文档名称(表名)
 	 * @param obj
 	 * @return
 	 */
-	public int save(String collectionName, Object obj) {
+	public int save(String table, Object obj) {
 		try {
-			MongoCollection<Document> collection = session.getCollection(collectionName);
+			MongoCollection<Document> collection = session.getCollection(table);
 			if (collection == null) {
-				session.createCollection(collectionName);
-				collection = session.getCollection(collectionName);
+				session.createCollection(table);
+				collection = session.getCollection(table);
 			}
 			collection.insertOne(Document.parse(JSON.toJSONString(obj)));
 			return 1;
@@ -107,13 +107,13 @@ public class MongoDBFactory {
 	 * @decription 更新数据
 	 * @author yi.zhang
 	 * @time 2017年6月2日 下午6:19:08
-	 * @param collectionName	文档名称(表名)
+	 * @param table	文档名称(表名)
 	 * @param obj
 	 * @return
 	 */
-	public int update(String collectionName, Object obj) {
+	public int update(String table, Object obj) {
 		try {
-			MongoCollection<Document> collection = session.getCollection(collectionName);
+			MongoCollection<Document> collection = session.getCollection(table);
 			if (collection == null) {
 				return 0;
 			}
@@ -131,13 +131,13 @@ public class MongoDBFactory {
 	 * @decription 删除数据
 	 * @author yi.zhang
 	 * @time 2017年6月2日 下午6:19:25
-	 * @param collectionName	文档名称(表名)
+	 * @param table	文档名称(表名)
 	 * @param obj
 	 * @return
 	 */
-	public int delete(String collectionName, Object obj) {
+	public int delete(String table, Object obj) {
 		try {
-			MongoCollection<Document> collection = session.getCollection(collectionName);
+			MongoCollection<Document> collection = session.getCollection(table);
 			if (collection == null) {
 				return 0;
 			}
@@ -155,14 +155,14 @@ public class MongoDBFactory {
 	 * @decription 数据库查询
 	 * @author yi.zhang
 	 * @time 2017年6月26日 下午4:12:59
-	 * @param collectionName	文档名称(表名)
+	 * @param table	文档名称(表名)
 	 * @param clazz		映射对象
 	 * @param params	参数
 	 * @return
 	 */
-	public List<?> executeQuery(String collectionName, Class clazz, JSONObject params) {
+	public List<?> executeQuery(String table, Class clazz, JSONObject params) {
 		try {
-			MongoCollection<Document> collection = session.getCollection(collectionName);
+			MongoCollection<Document> collection = session.getCollection(table);
 			if (collection == null) {
 				return null;
 			}
@@ -185,7 +185,7 @@ public class MongoDBFactory {
 				for (String column : document.keySet()) {
 					Object value = document.get(column);
 					if (clazz == null) {
-						obj.put(column, value);
+						obj.put(column.replaceFirst("^(\\_?)", ""), value);
 					} else {
 						String tcolumn = column.replaceAll("_", "");
 						Field[] fields = clazz.getDeclaredFields();
