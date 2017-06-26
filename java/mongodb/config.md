@@ -41,4 +41,5 @@ net start MongoDB
 4.用户权限配置（启动后执行mongo.exe）命令
 
 use admin
+
 db.createUser({user:"mongodb",pwd:"mongodb",roles:["userAdminAnyDatabase","dbAdminAnyDatabase","root"]})
