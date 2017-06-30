@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.druid.pool.xa.DruidXADataSource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ucloudlink.canal.common.CanalConfig;
@@ -55,7 +56,7 @@ public class JDBCFactory {
 	public static void config(String driverName,String url,String username,String password,boolean isDruid,Integer max_pool_size,Integer init_pool_size) throws Exception{
 		if(isDruid){
 			@SuppressWarnings("resource")
-			com.alibaba.druid.pool.DruidDataSource dataSource = new com.alibaba.druid.pool.DruidDataSource();
+			DruidXADataSource dataSource = new DruidXADataSource();
 			dataSource.setDriverClassName(driverName);
 			dataSource.setUrl(url);
 			dataSource.setUsername(username);
@@ -154,6 +155,35 @@ public class JDBCFactory {
 			rs.close();
 			ps.close();
 			return list;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	/**
+	 * @decription 查询数据表字段名(key:字段名,value:字段类型名)
+	 * @author yi.zhang
+	 * @time 2017年6月30日 下午2:16:02
+	 * @param table	表名
+	 * @return
+	 */
+	public Map<String,String> queryColumns(String table){
+		try {
+			String sql = "select * from "+table;
+			PreparedStatement ps = connect.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int count = rsmd.getColumnCount();
+			Map<String,String> reflect = new HashMap<String,String>();
+			for(int i=1;i<=count;i++){
+				String column = rsmd.getColumnName(i);
+				String type = rsmd.getColumnTypeName(i);
+				reflect.put(column, type);
+			}
+			rs.close();
+			ps.close();
+			return reflect;
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
