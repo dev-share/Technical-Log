@@ -144,9 +144,10 @@ public class CanalFactoryTest {
 		}
 	}
 	public static void test3(){
-		String table = "css_vsim_cdr";
+		String table = "src_terminalactivation";
 		long start = System.currentTimeMillis();
 		MongoDBFactory factory = new MongoDBFactory();
+		MongoDBFactory.SYN_TOTAL=1;
 		GreenplumFactory tfactory = new GreenplumFactory();
 //		JSONObject obj = new JSONObject();
 //		obj.fluentPut("_id", "222");
@@ -165,26 +166,32 @@ public class CanalFactoryTest {
 //		obj.fluentPut("visitcountry", "");
 //		obj.fluentPut("createtime", new Date());
 //		factory.save(table, obj);
-		List<JSONObject> list = (List<JSONObject>)factory.executeQuery("css_vsim_cdr", null, null);
+		List<JSONObject> list = (List<JSONObject>)factory.executeQuery("TerminalActivation", null, null);
 		for (JSONObject json : list) {
-			System.out.println(json.toJSONString());
 			String keys = "";
         	String values = "";
         	for (String key : json.keySet()) {
         		Object value = json.get(key);
+//        		if("id".equals(key)||"isdeleted".equalsIgnoreCase(key)){
+//        			value = json.getString(key);
+//        		}
+//        		if("type".equals(key)||"password".equals(key)||"name".equals(key)){
+//        			continue;
+//        		}
         		if(value instanceof Date){
         			value = DateUtil.formatDateTimeStr((Date)value);
         		}
 				if("".equals(keys)){
 					keys = key;
-					values = (value instanceof String?"'"+value+"'":value+"");
+					values = (value instanceof String||value instanceof Boolean?"'"+value+"'":value+"");
 				}else{
 					keys +=',' + key;
-					values +=',' + (value instanceof String?"'"+value+"'":value+"");
+					values +=',' + (value instanceof String||value instanceof Boolean?"'"+value+"'":value+"");
 				}
 			}
-        	String sql = "insert into "+table+"("+keys+")values("+values+");";
-        	tfactory.excuteUpdate(sql);
+        	String sql = "insert into "+table+"("+keys.toLowerCase()+")values("+values+");";
+//        	tfactory.excuteUpdate(sql);
+        	System.out.println("["+(list.indexOf(json)-0+1)+"]Greenplum数据:"+sql);
 		}
 		long end = System.currentTimeMillis();
 		double time = (end-start)/1000.0000;
