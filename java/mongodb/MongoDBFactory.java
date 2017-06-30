@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.bson.types.ObjectId;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -35,7 +36,11 @@ import com.ucloudlink.canal.common.CanalConfig;
  */
 @SuppressWarnings("all")
 public class MongoDBFactory {
-
+	/**
+	 * 同步数据量(-1:所有,n>0:同步数量)
+	 */
+	public static long SYN_TOTAL = -1;
+	
 	private static MongoDatabase session = null;
 	static {
 		init();
@@ -178,12 +183,13 @@ public class MongoDBFactory {
 			} else {
 				documents = collection.find();
 			}
-			MongoCursor<Document> cursor = documents.iterator();
+			MongoCursor<Document> cursor = documents.batchSize(200).iterator();
 			while (cursor.hasNext()) {
 				JSONObject obj = new JSONObject();
 				Document document = cursor.next();
 				for (String column : document.keySet()) {
 					Object value = document.get(column);
+					value = value instanceof ObjectId?value.toString():value;
 					if (clazz == null) {
 						obj.put(column.replaceFirst("^(\\_?)", ""), value);
 					} else {
@@ -203,6 +209,10 @@ public class MongoDBFactory {
 					object = JSON.parseObject(obj.toJSONString(), clazz);
 				}
 				list.add(object);
+				System.out.println("["+list.size()+"]Mongo数据:"+JSON.toJSONString(object));
+				if(SYN_TOTAL>0&&list.size()>=SYN_TOTAL){
+					break;
+				}
 			}
 			return list;
 		} catch (Exception e) {
