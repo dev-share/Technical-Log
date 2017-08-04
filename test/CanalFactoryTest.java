@@ -225,7 +225,7 @@ public class CanalFactoryTest {
 	
 	public static void test5(){
 		MongoDBFactory factory = new MongoDBFactory();
-		factory.init("10.1.75.67:27017,10.1.75.69:27017,10.1.75.70:27017", "admin", "oss_system", "root", "123456");
+		factory.init("localhost:27017,127.0.0.1:27017,192.168.0.1:27017", "admin", "oss_system", "root", "123456");
 		List<String> tables = factory.queryTables();
 		MongoDBFactory tfactory = new MongoDBFactory();
 		tfactory.init("127.0.0.1:27017", "admin", "cdr", "root", "root");
@@ -248,7 +248,7 @@ public class CanalFactoryTest {
 	public static void test6(){
 		String table = "t_css_user_sleep_history";
 		JDBCFactory factory = new JDBCFactory();
-		factory.init("com.mysql.jdbc.Driver", "jdbc:mysql:loadbalance://10.1.75.67:3306,10.1.75.68:3306,10.1.75.69:3306/glocalme_css_0305?useUnicode=true&characterEncoding=UTF8", "root", "123456", true, 100, 10);
+		factory.init("com.mysql.jdbc.Driver", "jdbc:mysql:loadbalance://localhost:3306,127.0.0.1:3306,192.168.0.1:3306/glocalme_css_0305?useUnicode=true&characterEncoding=UTF8", "root", "123456", true, 100, 10);
 		JDBCFactory tfactory = new JDBCFactory();
 		tfactory.init("com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/cdr?useUnicode=true&characterEncoding=UTF8", "root", "root", true, 100, 10);
 		Map<String, String> reflect=tfactory.queryColumns(table);
