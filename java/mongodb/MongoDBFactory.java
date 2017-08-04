@@ -1,18 +1,16 @@
-package com.ucloudlink.canal.common.mongodb;
+package com.share.common.mongodb;
 
 import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
-import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -24,8 +22,8 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Filters;
-import com.ucloudlink.canal.common.CanalConfig;
 
 /**
  * @decription MongoDB数据服务封装
@@ -36,14 +34,57 @@ import com.ucloudlink.canal.common.CanalConfig;
  */
 @SuppressWarnings("all")
 public class MongoDBFactory {
+	private static Logger logger = LogManager.getLogger();
 	/**
-	 * 同步数据量(-1:所有,n>0:同步数量)
+	 * 主键ID是否处理(true:处理[id],false:不处理[_id])
 	 */
-	public static long SYN_TOTAL = -1;
+	public static boolean ID_HANDLE=false;
+	protected MongoDatabase session = null;
 	
-	private static MongoDatabase session = null;
-	static {
-		init();
+	private String servers;
+	private String database;
+	private String schema;
+	private String username;
+	private String password;
+
+	public String getServers() {
+		return servers;
+	}
+
+	public void setServers(String servers) {
+		this.servers = servers;
+	}
+
+	public String getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(String database) {
+		this.database = database;
+	}
+
+	public String getSchema() {
+		return schema;
+	}
+
+	public void setSchema(String schema) {
+		this.schema = schema;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	/**
@@ -51,14 +92,8 @@ public class MongoDBFactory {
 	 * @author yi.zhang
 	 * @time 2017年6月2日 下午2:15:57
 	 */
-	private static void init() {
+	public void init(String servers,String database,String schema,String username,String password) {
 		try {
-			String servers = CanalConfig.getProperty("mongodb.servers");
-			String database = CanalConfig.getProperty("mongodb.database");
-			String schema = CanalConfig.getProperty("mongodb.schema");
-			String username = CanalConfig.getProperty("mongodb.username");
-			String password = CanalConfig.getProperty("mongodb.password");
-
 			List<ServerAddress> saddress = new ArrayList<ServerAddress>();
 			if (servers != null && !"".equals(servers)) {
 				for (String server : servers.split(",")) {
@@ -79,8 +114,7 @@ public class MongoDBFactory {
 			// 连接到数据库
 			session = client.getDatabase(schema);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("-----MongoDB Config init Error-----", e);
 		}
 	}
 
@@ -94,6 +128,9 @@ public class MongoDBFactory {
 	 */
 	public int save(String table, Object obj) {
 		try {
+			if(session==null){
+				init(servers, database, schema, username, password);
+			}
 			MongoCollection<Document> collection = session.getCollection(table);
 			if (collection == null) {
 				session.createCollection(table);
@@ -118,12 +155,15 @@ public class MongoDBFactory {
 	 */
 	public int update(String table, Object obj) {
 		try {
+			if(session==null){
+				init(servers, database, schema, username, password);
+			}
 			MongoCollection<Document> collection = session.getCollection(table);
 			if (collection == null) {
 				return 0;
 			}
 			JSONObject json = JSON.parseObject(JSON.toJSONString(obj));
-			collection.updateOne(Filters.eq("_id", json.get("id")), Document.parse(JSON.toJSONString(obj)));
+			collection.updateOne(Filters.eq("_id", json.containsKey("_id")?json.get("_id"):json.get("id")), Document.parse(JSON.toJSONString(obj)));
 			return 1;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -142,12 +182,15 @@ public class MongoDBFactory {
 	 */
 	public int delete(String table, Object obj) {
 		try {
+			if(session==null){
+				init(servers, database, schema, username, password);
+			}
 			MongoCollection<Document> collection = session.getCollection(table);
 			if (collection == null) {
 				return 0;
 			}
 			JSONObject json = JSON.parseObject(JSON.toJSONString(obj));
-			collection.findOneAndDelete(Filters.eq("_id", json.get("id")));
+			collection.findOneAndDelete(Filters.eq("_id", json.containsKey("_id")?json.get("_id"):json.get("id")));
 			return 1;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -167,6 +210,9 @@ public class MongoDBFactory {
 	 */
 	public List<?> executeQuery(String table, Class clazz, JSONObject params) {
 		try {
+			if(session==null){
+				init(servers, database, schema, username, password);
+			}
 			MongoCollection<Document> collection = session.getCollection(table);
 			if (collection == null) {
 				return null;
@@ -183,15 +229,14 @@ public class MongoDBFactory {
 			} else {
 				documents = collection.find();
 			}
-			MongoCursor<Document> cursor = documents.batchSize(200).iterator();
+			MongoCursor<Document> cursor = documents.iterator();
 			while (cursor.hasNext()) {
 				JSONObject obj = new JSONObject();
 				Document document = cursor.next();
 				for (String column : document.keySet()) {
 					Object value = document.get(column);
-					value = value instanceof ObjectId?value.toString():value;
 					if (clazz == null) {
-						obj.put(column.replaceFirst("^(\\_?)", ""), value);
+						obj.put(ID_HANDLE?column.replaceFirst("^(\\_?)", ""):column, value);
 					} else {
 						String tcolumn = column.replaceAll("_", "");
 						Field[] fields = clazz.getDeclaredFields();
@@ -209,12 +254,87 @@ public class MongoDBFactory {
 					object = JSON.parseObject(obj.toJSONString(), clazz);
 				}
 				list.add(object);
-				System.out.println("["+list.size()+"]Mongo数据:"+JSON.toJSONString(object));
-				if(SYN_TOTAL>0&&list.size()>=SYN_TOTAL){
-					break;
-				}
 			}
 			return list;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * @decription 查询数据表字段名(key:字段名,value:字段类型名)
+	 * @author yi.zhang
+	 * @time 2017年6月30日 下午2:16:02
+	 * @param table	表名
+	 * @return
+	 */
+	public Map<String,String> queryColumns(String table){
+		try {
+			if(session==null){
+				init(servers, database, schema, username, password);
+			}
+			MongoCollection<Document> collection = session.getCollection(table);
+			if (collection == null) {
+				return null;
+			}
+			Map<String,String> reflect = new HashMap<String,String>();
+			FindIterable<Document> documents = collection.find();
+			Document document = documents.first();
+			if(document==null){
+				return reflect;
+			}
+			for (String column : document.keySet()) {
+				Object value = document.get(column);
+				String type = "string";
+				if(value instanceof Integer){
+					type = "int";
+				}
+				if(value instanceof Long){
+					type = "long";
+				}
+				if(value instanceof Double){
+					type = "double";
+				}
+				if(value instanceof Boolean){
+					type = "boolean";
+				}
+				if(value instanceof Date){
+					type = "date";
+				}
+				reflect.put(column, type);
+			}
+			return reflect;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	/**
+	 * @decription 查询数据库表名
+	 * @author yi.zhang
+	 * @time 2017年6月30日 下午2:16:02
+	 * @param table	表名
+	 * @return
+	 */
+	public List<String> queryTables(){
+		try {
+			if(session==null){
+				init(servers, database, schema, username, password);
+			}
+			MongoIterable<String> collection = session.listCollectionNames();
+			if (collection == null) {
+				return null;
+			}
+			List<String> tables = new ArrayList<String>();
+			MongoCursor<String> cursor = collection.iterator();
+			while(cursor.hasNext()){
+				String table = cursor.next();
+				tables.add(table);
+			}
+			return tables;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,29 +1,30 @@
-package com.ucloudlink.canal.common.cassandra;
-
+package com.share.common.cassandra;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Cluster.Builder;
 import com.datastax.driver.core.ColumnDefinitions;
-import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SocketOptions;
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.Mapper.Option;
 import com.datastax.driver.mapping.MappingManager;
-import com.ucloudlink.canal.common.CanalConfig;
 
 /**
  * @decription Cassandra数据服务封装
@@ -34,14 +35,51 @@ import com.ucloudlink.canal.common.CanalConfig;
  */
 @SuppressWarnings("all")
 public class CassandraFactory {
+	private static Logger logger = LogManager.getLogger();
 	/**
 	 * 过期时间(单位:秒)
 	 */
 	private static int EXPIRE_TIME = 15 * 24 * 60 * 60;
 
-	private static Session session = null;
-	static {
-		init();
+	protected Session session = null;
+	
+	protected MappingManager mapping = null;
+	
+	private String servers;
+	private String keyspace;
+	private String username;
+	private String password;
+
+	public String getServers() {
+		return servers;
+	}
+
+	public void setServers(String servers) {
+		this.servers = servers;
+	}
+
+	public String getKeyspace() {
+		return keyspace;
+	}
+
+	public void setKeyspace(String keyspace) {
+		this.keyspace = keyspace;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	/**
@@ -49,23 +87,26 @@ public class CassandraFactory {
 	 * @author yi.zhang
 	 * @time 2017年6月2日 下午2:15:57
 	 */
-	private static void init() {
+	public void init(String servers,String keyspace,String username,String password) {
 		try {
-			String servers = CanalConfig.getProperty("cassandra.servers");
-			String keyspace = CanalConfig.getProperty("cassandra.keyspace");
-			String username = CanalConfig.getProperty("cassandra.username");
-			String password = CanalConfig.getProperty("cassandra.password");
-
-			PoolingOptions options = new PoolingOptions();
-			// options.setMaxRequestsPerConnection(HostDistance.LOCAL, 32);
-			// options.setMaxRequestsPerConnection(HostDistance.REMOTE, 32);
-			// options.setCoreConnectionsPerHost(HostDistance.LOCAL, 2);
-			// options.setCoreConnectionsPerHost(HostDistance.REMOTE, 2);
-			// options.setMaxConnectionsPerHost(HostDistance.LOCAL, 4);
-			// options.setMaxConnectionsPerHost(HostDistance.REMOTE, 4);
-			options.setHeartbeatIntervalSeconds(60);
-			options.setIdleTimeoutSeconds(120);
-			options.setPoolTimeoutMillis(5 * 1000);
+			// socket 链接配置
+			SocketOptions socket = new SocketOptions();
+			socket.setKeepAlive(true);
+			socket.setReceiveBufferSize(1024* 1024);
+			socket.setSendBufferSize(1024* 1024);
+			socket.setConnectTimeoutMillis(5 * 1000);
+			socket.setReadTimeoutMillis(1000);
+			//设置连接池
+			PoolingOptions pool = new PoolingOptions();
+			// pool.setMaxRequestsPerConnection(HostDistance.LOCAL, 32);
+			// pool.setMaxRequestsPerConnection(HostDistance.REMOTE, 32);
+			// pool.setCoreConnectionsPerHost(HostDistance.LOCAL, 2);
+			// pool.setCoreConnectionsPerHost(HostDistance.REMOTE, 2);
+			// pool.setMaxConnectionsPerHost(HostDistance.LOCAL, 4);
+			// pool.setMaxConnectionsPerHost(HostDistance.REMOTE, 4);
+			pool.setHeartbeatIntervalSeconds(60);
+			pool.setIdleTimeoutSeconds(120);
+			pool.setPoolTimeoutMillis(5 * 1000);
 			List<InetSocketAddress> saddress = new ArrayList<InetSocketAddress>();
 			if (servers != null && !"".equals(servers)) {
 				for (String server : servers.split(",")) {
@@ -80,8 +121,17 @@ public class CassandraFactory {
 			}
 			InetSocketAddress[] addresses = new InetSocketAddress[saddress.size()];
 			saddress.toArray(addresses);
+			
 			Builder builder = Cluster.builder();
-			builder.withPoolingOptions(options);
+	        builder.withSocketOptions(socket);
+	        // 设置压缩方式
+	        builder.withCompression(ProtocolOptions.Compression.LZ4);
+	        // 负载策略
+//	        DCAwareRoundRobinPolicy loadBalance = DCAwareRoundRobinPolicy.builder().withLocalDc("localDc").withUsedHostsPerRemoteDc(2).allowRemoteDCsForLocalConsistencyLevel().build();
+//	        builder.withLoadBalancingPolicy(loadBalance);
+	        // 重试策略
+	        builder.withRetryPolicy(DefaultRetryPolicy.INSTANCE);
+			builder.withPoolingOptions(pool);
 			builder.addContactPointsWithPorts(addresses);
 			builder.withCredentials(username, password);
 			Cluster cluster = builder.build();
@@ -90,9 +140,9 @@ public class CassandraFactory {
 			} else {
 				session = cluster.connect();
 			}
+			mapping = new MappingManager(session);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("-----Cassandra Config init Error-----", e);
 		}
 	}
 
@@ -105,7 +155,10 @@ public class CassandraFactory {
 	 */
 	public int save(Object obj) {
 		try {
-			Mapper mapper = new MappingManager(session).mapper(obj.getClass());
+			if(session!=null){
+				init(servers, keyspace, username, password);
+			}
+			Mapper mapper = mapping.mapper(obj.getClass());
 			mapper.save(obj, Option.saveNullFields(true));
 			return 1;
 		} catch (Exception e) {
@@ -124,7 +177,10 @@ public class CassandraFactory {
 	 */
 	public int update(Object obj) {
 		try {
-			Mapper mapper = new MappingManager(session).mapper(obj.getClass());
+			if(session!=null){
+				init(servers, keyspace, username, password);
+			}
+			Mapper mapper = mapping.mapper(obj.getClass());
 			mapper.save(obj, Option.saveNullFields(false),Option.ttl(EXPIRE_TIME));
 			return 1;
 		} catch (Exception e) {
@@ -143,7 +199,10 @@ public class CassandraFactory {
 	 */
 	public int delete(Object obj) {
 		try {
-			Mapper mapper = new MappingManager(session).mapper(obj.getClass());
+			if(session!=null){
+				init(servers, keyspace, username, password);
+			}
+			Mapper mapper = mapping.mapper(obj.getClass());
 			mapper.delete(obj);
 			return 1;
 		} catch (Exception e) {
@@ -163,6 +222,9 @@ public class CassandraFactory {
 	 */
 	public int executeUpdate(String cql, Object... params) {
 		try {
+			if(session!=null){
+				init(servers, keyspace, username, password);
+			}
 			ResultSet rs = session.execute(cql, params);
 			return rs.getAvailableWithoutFetching();
 		} catch (Exception e) {
@@ -186,6 +248,9 @@ public class CassandraFactory {
 	 */
 	public List<?> executeQuery(String cql, Class clazz, Object... params) {
 		try {
+			if(session!=null){
+				init(servers, keyspace, username, password);
+			}
 			List<Object> list = new ArrayList<Object>();
 			ResultSet rs = session.execute(cql, params);
 			ColumnDefinitions rscd = rs.getColumnDefinitions();
@@ -221,6 +286,56 @@ public class CassandraFactory {
 				list.add(object);
 			}
 			return list;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * @decription 查询数据表字段名(key:字段名,value:字段类型名)
+	 * @author yi.zhang
+	 * @time 2017年6月30日 下午2:16:02
+	 * @param table	表名
+	 * @return
+	 */
+	public Map<String,String> queryColumns(String table){
+		try {
+			String sql = "select * from "+table;
+			ResultSet rs = session.execute(sql);
+			ColumnDefinitions rscd = rs.getColumnDefinitions();
+			int count = rscd.size();
+			Map<String,String> reflect = new HashMap<String,String>();
+			for (int i = 0; i < count; i++) {
+				String column = rscd.getName(i);
+				String type = rscd.getType(i).getName().name().toLowerCase();
+				reflect.put(column, type);
+			}
+			return reflect;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	/**
+	 * @decription 查询数据库表名
+	 * @author yi.zhang
+	 * @time 2017年6月30日 下午2:16:02
+	 * @param table	表名
+	 * @return
+	 */
+	public List<String> queryTables(){
+		try {
+			List<String> tables = new ArrayList<String>();
+			String useQuery = "describe tables";
+			ResultSet rs = session.execute(useQuery);
+			for (Row row : rs.all()) {
+				String table = row.getString(1);
+				tables.add(table);
+			}
+			return tables;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

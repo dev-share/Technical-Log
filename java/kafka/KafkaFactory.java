@@ -1,4 +1,4 @@
-package com.ucloudlink.canal.common.kafka;
+package com.share.common.kafka;
 
 import java.util.Arrays;
 import java.util.Properties;
@@ -10,8 +10,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.ucloudlink.canal.common.CanalConfig;
 /**
  * @decription Kafka服务
  * @author yi.zhang
@@ -20,42 +18,54 @@ import com.ucloudlink.canal.common.CanalConfig;
  * @jdk 1.8
  */
 public class KafkaFactory {
-	private static Logger logger = LogManager.getLogger(KafkaFactory.class);
+	private static Logger logger = LogManager.getLogger();
 	private static String KAFKA_TOPIC = "KAFKA_CANAL";
 	public static int KAFKA_CONSUMER_BATCCH_SIZE = 100;
-	private static KafkaProducer<String, String> producer = null;
-	private static KafkaConsumer<String, String> consumer = null;
-	static {
-		try {
-			logger.info("-----------------Kafka 初始化-----------------");
-			init();
-			logger.info("-----------------Kafka Service启动成功-----------------");
-		} catch (Exception e) {
-			close();
-			logger.error("-----------------Kafka Service启动失败-----------------",e);
-			System.exit(1);
-		}
+	private KafkaProducer<String, String> producer = null;
+	private KafkaConsumer<String, String> consumer = null;
+	
+	private String servers;
+	private boolean isZookeeper;
+	private String zookeeper_servers;
+	private String acks;
+	
+	public String getServers() {
+		return servers;
 	}
-
+	public void setServers(String servers) {
+		this.servers = servers;
+	}
+	public boolean isZookeeper() {
+		return isZookeeper;
+	}
+	public void setZookeeper(boolean isZookeeper) {
+		this.isZookeeper = isZookeeper;
+	}
+	public String getZookeeper_servers() {
+		return zookeeper_servers;
+	}
+	public void setZookeeper_servers(String zookeeper_servers) {
+		this.zookeeper_servers = zookeeper_servers;
+	}
+	public String getAcks() {
+		return acks;
+	}
+	public void setAcks(String acks) {
+		this.acks = acks;
+	}
 	/**
 	 * @decription 初始化配置
 	 * @author yi.zhang
 	 * @time 2017年6月2日 下午2:15:57
 	 */
-	private static void init() {
+	public void init(String servers,boolean isZookeeper,String zookeeper_servers,String acks) {
 		try {
-			Properties config = new Properties();
-			config.load(ClassLoader.getSystemResourceAsStream("kafka.properties"));
-			String servers = config.getProperty("kafka.servers");// 127.0.0.1:9092
-			boolean isZookeeper = Boolean.valueOf(CanalConfig.getProperty("kafka.zookeeper.enabled"));
-			String zookeeper_servers = config.getProperty("kafka.zookeeper.servers");// 127.0.0.1:9092
 			Properties productor_config = new Properties();
 			if(isZookeeper&&zookeeper_servers!=null){
 				productor_config.put("zk.connect", zookeeper_servers);
 			}
 			productor_config.put("bootstrap.servers", servers);
 			// “所有”设置将导致记录的完整提交阻塞，最慢的，但最持久的设置。(The "all" setting we have specified will result in blocking on the full commit of the record, the slowest but most durable setting.)
-			String acks = config.getProperty("kafka.productor.acks");
 			productor_config.put("acks", acks);
 			// 如果请求失败，生产者也会自动重试，即使设置成０ the producer can automatically retry.
 			productor_config.put("retries", 0);
@@ -87,14 +97,13 @@ public class KafkaFactory {
 			// 订阅主题列表topic
 			consumer.subscribe(Arrays.asList(KAFKA_TOPIC));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("-----Kafka Config init Error-----", e);
 		}
 	}
 	/**
 	 * 关闭服务
 	 */
-	public static void close(){
+	public void close(){
 		if(producer!=null){
 			producer.close();
 		}
@@ -109,6 +118,9 @@ public class KafkaFactory {
 	 * @param data
 	 */
 	public void send(String data){
+		if(producer==null){
+			init(servers, isZookeeper, zookeeper_servers, acks);
+		}
 		producer.send(new ProducerRecord<String,String>(KAFKA_TOPIC,data));
 		producer.flush();
 	}
@@ -118,7 +130,10 @@ public class KafkaFactory {
 	 * @time 2017年6月8日 下午2:44:01
 	 * @return
 	 */
-	public static KafkaProducer<String, String> getProducer() {
+	public KafkaProducer<String, String> getProducer() {
+		if(producer==null){
+			init(servers, isZookeeper, zookeeper_servers, acks);
+		}
 		return producer;
 	}
 	/**
@@ -127,7 +142,10 @@ public class KafkaFactory {
 	 * @time 2017年6月8日 下午2:44:32
 	 * @return
 	 */
-	public static KafkaConsumer<String, String> getConsumer() {
+	public KafkaConsumer<String, String> getConsumer() {
+		if(consumer==null){
+			init(servers, isZookeeper, zookeeper_servers, acks);
+		}
 		return consumer;
 	}
 }

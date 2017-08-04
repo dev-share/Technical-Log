@@ -1,4 +1,4 @@
-package com.ucloudlink.canal.common.jdbc;
+package com.share.common.jdbc;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -12,10 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.alibaba.druid.pool.xa.DruidXADataSource;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.ucloudlink.canal.common.CanalConfig;
 /**
  * @decription 数据库(MySQL|SQL Server|Oracle|Postgresql)服务封装
  * @author yi.zhang
@@ -24,54 +26,86 @@ import com.ucloudlink.canal.common.CanalConfig;
  * @jdk 1.8
  */
 public class JDBCFactory {
-	private static Connection connect = null;
-	static{
-		init();
+	private static Logger logger = LogManager.getLogger();
+	protected Connection connect = null;
+	private String driverName;
+	private String url;
+	private String username;
+	private String password;
+	private boolean isDruid;
+	private int max_pool_size=10;
+	private int init_pool_size=2;
+	
+	public String getDriverName() {
+		return driverName;
 	}
-	/**
-	 * @decription 初始化配置
-	 * @author yi.zhang
-	 * @time 2017年6月2日 下午2:15:57
-	 */
-	private static void init(){
-		try {
-			String driverName = CanalConfig.getProperty("jdbc.driver");
-			String url = CanalConfig.getProperty("jdbc.url");
-			String username = CanalConfig.getProperty("jdbc.username");
-			String password = CanalConfig.getProperty("jdbc.password");
-			boolean isDruid = Boolean.valueOf(CanalConfig.getProperty("jdbc.druid.enabled"));
-			String max_pool_size = CanalConfig.getProperty("jdbc.druid.max_pool_size");
-			String init_pool_size = CanalConfig.getProperty("jdbc.druid.init_pool_size");
-			config(driverName, url, username, password, isDruid, Integer.valueOf(max_pool_size), Integer.valueOf(init_pool_size));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void setDriverName(String driverName) {
+		this.driverName = driverName;
+	}
+	public String getUrl() {
+		return url;
+	}
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public boolean isDruid() {
+		return isDruid;
+	}
+	public void setDruid(boolean isDruid) {
+		this.isDruid = isDruid;
+	}
+	public int getMax_pool_size() {
+		return max_pool_size;
+	}
+	public void setMax_pool_size(int max_pool_size) {
+		this.max_pool_size = max_pool_size;
+	}
+	public int getInit_pool_size() {
+		return init_pool_size;
+	}
+	public void setInit_pool_size(int init_pool_size) {
+		this.init_pool_size = init_pool_size;
 	}
 	/**
 	 * @decription 数据库或数据仓库配置
 	 * @author yi.zhang
 	 * @time 2017年6月2日 下午2:15:57
 	 */
-	public static void config(String driverName,String url,String username,String password,boolean isDruid,Integer max_pool_size,Integer init_pool_size) throws Exception{
-		if(isDruid){
-			@SuppressWarnings("resource")
-			DruidXADataSource dataSource = new DruidXADataSource();
-			dataSource.setDriverClassName(driverName);
-			dataSource.setUrl(url);
-			dataSource.setUsername(username);
-			dataSource.setPassword(password);
-			if(max_pool_size!=null&&max_pool_size>0){
-				dataSource.setMaxActive(max_pool_size);
+	public void init(String driverName,String url,String username,String password,boolean isDruid,Integer max_pool_size,Integer init_pool_size){
+		try {
+			if(isDruid){
+				@SuppressWarnings("resource")
+				DruidXADataSource dataSource = new DruidXADataSource();
+				dataSource.setDriverClassName(driverName);
+				dataSource.setUrl(url);
+				dataSource.setUsername(username);
+				dataSource.setPassword(password);
+				if(max_pool_size!=null&&max_pool_size>0){
+					dataSource.setMaxActive(max_pool_size);
+				}
+				if(init_pool_size!=null&&init_pool_size>0){
+					dataSource.setInitialSize(init_pool_size);
+				}
+				dataSource.init();
+				connect = dataSource.getConnection();
+			}else{
+				Class.forName(driverName);
+				connect = DriverManager.getConnection(url,username,password);
 			}
-			if(init_pool_size!=null&&init_pool_size>0){
-				dataSource.setInitialSize(init_pool_size);
-			}
-			dataSource.init();
-			connect = dataSource.getConnection();
-		}else{
-			Class.forName(driverName);
-			connect = DriverManager.getConnection(url,username,password);
+		} catch (Exception e) {
+			logger.error("-----SQL(MySQL|SQL Server|Oracle|Postgresql) Config init Error-----", e);
 		}
 	}
 	/**
@@ -84,6 +118,9 @@ public class JDBCFactory {
 	 */
 	public int excuteUpdate(String sql,Object...params ){
 		try {
+			if(connect==null){
+				init(driverName, url, username, password, isDruid, max_pool_size, init_pool_size);
+			}
 			PreparedStatement ps = connect.prepareStatement(sql);
 			if(params!=null&&params.length>0){
 				for(int i=1;i<=params.length;i++){
@@ -93,9 +130,8 @@ public class JDBCFactory {
 			}
 			int result = ps.executeUpdate();
 			return result;
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("-----SQL excute update Error-----", e);
 		}
 		return -1;
 	}
@@ -111,6 +147,9 @@ public class JDBCFactory {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<?> executeQuery(String sql,Class clazz,Object...params){
 		try {
+			if(connect==null){
+				init(driverName, url, username, password, isDruid, max_pool_size, init_pool_size);
+			}
 			List<Object> list=new ArrayList<Object>();
 			PreparedStatement ps = connect.prepareStatement(sql);
 			if(params!=null&&params.length>0){
@@ -155,9 +194,8 @@ public class JDBCFactory {
 			rs.close();
 			ps.close();
 			return list;
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("-----SQL excute query Error-----", e);
 		}
 		return null;
 	}
@@ -170,6 +208,9 @@ public class JDBCFactory {
 	 */
 	public Map<String,String> queryColumns(String table){
 		try {
+			if(connect==null){
+				init(driverName, url, username, password, isDruid, max_pool_size, init_pool_size);
+			}
 			String sql = "select * from "+table;
 			PreparedStatement ps = connect.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
@@ -184,9 +225,33 @@ public class JDBCFactory {
 			rs.close();
 			ps.close();
 			return reflect;
+		} catch (Exception e) {
+			logger.error("-----Columns excute query Error-----", e);
+		}
+		return null;
+	}
+	/**
+	 * @decription 查询数据库表名
+	 * @author yi.zhang
+	 * @time 2017年6月30日 下午2:16:02
+	 * @param table	表名
+	 * @return
+	 */
+	public List<String> queryTables(){
+		try {
+			String sql = "show tables";
+			PreparedStatement ps = connect.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+			List<String> tables = new ArrayList<String>();
+			while(rs.next()){
+				String table = rs.getString(1);
+				tables.add(table);
+			}
+			rs.close();
+			ps.close();
+			return tables;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("-----Tables excute query Error-----", e);
 		}
 		return null;
 	}

@@ -1,9 +1,14 @@
-package com.ucloudlink.canal.common.greenplum;
+package com.share.common.greenplum;
 
 import java.util.List;
+import java.util.Map;
 
-import com.ucloudlink.canal.common.CanalConfig;
-import com.ucloudlink.canal.common.jdbc.JDBCFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.share.common.jdbc.JDBCFactory;
+
+
 /**
  * @decription 数据仓库(Greenplum)服务封装
  * @author yi.zhang
@@ -12,30 +17,33 @@ import com.ucloudlink.canal.common.jdbc.JDBCFactory;
  * @jdk 1.8
  */
 public class GreenplumFactory extends JDBCFactory {
+	private static Logger logger = LogManager.getLogger();
 	public static String GREENPLUM_SCHEMA = null;
-	static{
-		init();
-	}
+	private String address;
+	private String database;
+	private String schema;
+	private String username;
+	private String password;
+	private boolean isDruid;
+	private int max_pool_size=100;
+	private int init_pool_size=10;
+	
 	/**
 	 * @decription 初始化配置
 	 * @author yi.zhang
 	 * @time 2017年6月2日 下午2:15:57
 	 */
-	private static void init(){
+	public void init(String address,String database,String schema,String username,String password,boolean isDruid,Integer max_pool_size,Integer init_pool_size){
 		try {
 			String driverName = "org.postgresql.Driver";
-			String address = CanalConfig.getProperty("greenplum.address");
-			String database = CanalConfig.getProperty("greenplum.database");
-			GREENPLUM_SCHEMA = CanalConfig.getProperty("greenplum.schema");
+			GREENPLUM_SCHEMA = schema;
 			String url = "jdbc:postgresql://"+address+"/"+database;
-			String username = CanalConfig.getProperty("greenplum.username");
-			String password = CanalConfig.getProperty("greenplum.password");
-			config(driverName, url, username, password, true, 100, 10);
+			super.init(driverName, url, username, password, isDruid, max_pool_size, init_pool_size);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("-----Greenplum Config init Error-----", e);
 		}
 	}
+	
 	/**
 	 * @decription 数据库操作(Insert|Update|Delete)
 	 * @author yi.zhang
@@ -45,7 +53,16 @@ public class GreenplumFactory extends JDBCFactory {
 	 * @return
 	 */
 	public int excuteUpdate(String sql,Object...params ){
-		return super.excuteUpdate(handleSQL(sql), params);
+		try {
+			if(connect==null){
+				this.init(address, database, schema, username, password, isDruid, max_pool_size, init_pool_size);
+			}
+			return super.excuteUpdate(handleSQL(sql), params);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		};
+		return -1;
 	}
 	/**
 	 * @decription 数据库查询(Select)
@@ -58,7 +75,38 @@ public class GreenplumFactory extends JDBCFactory {
 	 */
 	@SuppressWarnings("rawtypes")
 	public List<?> executeQuery(String sql,Class clazz,Object...params){
-		return super.executeQuery(handleSQL(sql),clazz, params);
+		try {
+			if(connect==null){
+				this.init(address, database, schema, username, password, isDruid, max_pool_size, init_pool_size);
+			}
+			return super.executeQuery(handleSQL(sql),clazz, params);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		};
+		return null;
+	}
+	/**
+	 * @decription 查询数据表字段名(key:字段名,value:字段类型名)
+	 * @author yi.zhang
+	 * @time 2017年6月30日 下午2:16:02
+	 * @param table	表名
+	 * @return
+	 */
+	public Map<String,String> queryColumns(String table){
+		try {
+			if(connect==null){
+				this.init(address, database, schema, username, password, isDruid, max_pool_size, init_pool_size);
+			}
+			if(GREENPLUM_SCHEMA!=null&&!table.contains(GREENPLUM_SCHEMA+".")){
+				table = GREENPLUM_SCHEMA+"."+table;
+			}
+			return super.queryColumns(table);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 	/**
 	 * @decription SQL语句处理
