@@ -1,8 +1,6 @@
 Druid与Spring集成并监控请求
-
 1.web.xml配置
-
-<!-- Druid数据源过滤器 -->
+  <!-- Druid数据源过滤器 -->
   <filter>
     <filter-name>DruidFilter</filter-name>
     <filter-class>com.alibaba.druid.support.http.WebStatFilter</filter-class>
