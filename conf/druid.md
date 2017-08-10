@@ -1,7 +1,49 @@
 Druid与Spring集成并监控请求
 1.web配置
-
-  
+	
+	
+	
+  <!-- Druid数据源过滤器
+  <filter>
+    <filter-name>DruidFilter</filter-name>
+    <filter-class>com.alibaba.druid.support.http.WebStatFilter</filter-class>
+    <async-supported>true</async-supported>
+    <init-param>
+      <param-name>exclusions</param-name>
+      <param-value>*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*</param-value>
+    </init-param>
+    <init-param>
+      <param-name>profileEnable</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>principalSessionName</param-name>
+      <param-value>principal</param-value>
+    </init-param>
+    <init-param>
+      <param-name>principalCookieName</param-name>
+      <param-value>principal</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>DruidFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <!-- Druid请求分发调度器 -->
+  <servlet>
+    <servlet-name>DruidStatView</servlet-name>
+    <servlet-class>com.alibaba.druid.support.http.StatViewServlet</servlet-class>
+    <init-param>
+      <param-name>resetEnable</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <async-supported>true</async-supported>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>DruidStatView</servlet-name>
+    <url-pattern>/druid/*</url-pattern>
+  </servlet-mapping>
+   -->
   
   2.Spring数据源配置及Druid事物
   
@@ -56,46 +98,4 @@ Druid与Spring集成并监控请求
 	<aop:config proxy-target-class="true">
 	    <aop:advisor advice-ref="druid-stat-interceptor" pointcut-ref="druid-stat-pointcut" />
 	</aop:config>
-	
-	
-	
-  <!-- Druid数据源过滤器 -->
-  <filter>
-    <filter-name>DruidFilter</filter-name>
-    <filter-class>com.alibaba.druid.support.http.WebStatFilter</filter-class>
-    <async-supported>true</async-supported>
-    <init-param>
-      <param-name>exclusions</param-name>
-      <param-value>*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*</param-value>
-    </init-param>
-    <init-param>
-      <param-name>profileEnable</param-name>
-      <param-value>true</param-value>
-    </init-param>
-    <init-param>
-      <param-name>principalSessionName</param-name>
-      <param-value>principal</param-value>
-    </init-param>
-    <init-param>
-      <param-name>principalCookieName</param-name>
-      <param-value>principal</param-value>
-    </init-param>
-  </filter>
-  <filter-mapping>
-    <filter-name>DruidFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
-  <!-- Druid请求分发调度器 -->
-  <servlet>
-    <servlet-name>DruidStatView</servlet-name>
-    <servlet-class>com.alibaba.druid.support.http.StatViewServlet</servlet-class>
-    <init-param>
-      <param-name>resetEnable</param-name>
-      <param-value>false</param-value>
-    </init-param>
-    <async-supported>true</async-supported>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>DruidStatView</servlet-name>
-    <url-pattern>/druid/*</url-pattern>
-  </servlet-mapping>
+
