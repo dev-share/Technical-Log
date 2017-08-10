@@ -1,10 +1,8 @@
 Druid与Spring集成并监控请求
 1.web配置
-	
-	
-	
-  <!-- Druid数据源过滤器
-  <filter>
+
+  <!-- Druid数据源过滤器 -->
+  <-filter>
     <filter-name>DruidFilter</filter-name>
     <filter-class>com.alibaba.druid.support.http.WebStatFilter</filter-class>
     <async-supported>true</async-supported>
@@ -24,13 +22,13 @@ Druid与Spring集成并监控请求
       <param-name>principalCookieName</param-name>
       <param-value>principal</param-value>
     </init-param>
-  </filter>
-  <filter-mapping>
+  <-/filter>
+  <-filter-mapping>
     <filter-name>DruidFilter</filter-name>
     <url-pattern>/*</url-pattern>
-  </filter-mapping>
+  <-/filter-mapping>
   <!-- Druid请求分发调度器 -->
-  <servlet>
+  <-servlet>
     <servlet-name>DruidStatView</servlet-name>
     <servlet-class>com.alibaba.druid.support.http.StatViewServlet</servlet-class>
     <init-param>
@@ -38,12 +36,12 @@ Druid与Spring集成并监控请求
       <param-value>false</param-value>
     </init-param>
     <async-supported>true</async-supported>
-  </servlet>
-  <servlet-mapping>
+  <-/servlet>
+  <-servlet-mapping>
     <servlet-name>DruidStatView</servlet-name>
     <url-pattern>/druid/*</url-pattern>
-  </servlet-mapping>
-   -->
+  <-/servlet-mapping>
+
   
   2.Spring数据源配置及Druid事物
   
