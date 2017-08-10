@@ -1,5 +1,6 @@
 Druid与Spring集成并监控请求
-1.web.xml配置
+1.web配置
+
   <!-- Druid数据源过滤器 -->
   <filter>
     <filter-name>DruidFilter</filter-name>
@@ -40,6 +41,7 @@ Druid与Spring集成并监控请求
     <servlet-name>DruidStatView</servlet-name>
     <url-pattern>/druid/*</url-pattern>
   </servlet-mapping>
+  
   
   2.Spring数据源配置及Druid事物
   
