@@ -12,3 +12,15 @@
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd"></settings>
           
 详细参考：http://maven.apache.org/xsd/
+
+3.maven命令
+
+1)下载源码
+
+mvn dependency:sources
+
+2)下载jar包或依赖包
+
+mvn clean install
+
+mvn help:system
