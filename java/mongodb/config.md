@@ -44,7 +44,7 @@ use admin
 
 db.createUser({user:"mongodb",pwd:"mongodb",roles:["userAdminAnyDatabase","dbAdminAnyDatabase","root"]})
 
-5.导入导出
+5.导入导出（参考地址： http://www.cnblogs.com/xiaotengyi/p/6393972.html ）
 
 1）mongodump导出（cd到安装目录bin下）
 
