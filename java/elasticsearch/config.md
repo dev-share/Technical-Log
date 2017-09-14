@@ -20,7 +20,7 @@ elasticsearch-plugin install file:///E:/x-pack-5.6.0.zip
 
 2）卸载
 
-elasticsearch-plugin remove x-pack
+elasticsearch-plugin remove x-pack --purge
 
 手动删除config/x-pack目录
 
