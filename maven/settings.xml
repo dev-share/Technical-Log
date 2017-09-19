@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
-	<localRepository>D:/Maven/Repository</localRepository>
+	<localRepository>\\10.100.90.42\\Share\\Repository</localRepository>
 
 	<pluginGroups>
 	</pluginGroups>
@@ -18,42 +18,30 @@
 
 	<mirrors>
 		<mirror>
-			<id>maven2</id>
+			<id>Central</id>
 			<mirrorOf>central</mirrorOf>
 			<url>http://central.maven.org/maven2/</url>
 		</mirror>
 		<mirror>
-			<id>sonatype</id>
+			<id>Sonatype</id>
 			<mirrorOf>central</mirrorOf>
 			<url>https://oss.sonatype.org/content/repositories/releases/</url>
 		</mirror>
 	</mirrors>
 
 	<profiles>
-		<profile>
-			<id>central</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<repositories>
-				<repository>
-					<id>central</id>
-					<url>http://central.maven.org/maven2/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-			</repositories>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>central</id>
-					<url>http://central.maven.org/maven2/</url>
-				</pluginRepository>
-			</pluginRepositories>
-		</profile>
+		<profile>  
+			<id>jdk18</id>  
+			<activation>  
+				<activeByDefault>true</activeByDefault>  
+				<jdk>1.8</jdk>  
+			</activation>  
+			<properties>  
+				<maven.compiler.source>1.8</maven.compiler.source>  
+				<maven.compiler.target>1.8</maven.compiler.target>  
+				<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>  
+			</properties>   
+		</profile>  
 		<profile>
 			<id>Sonatype</id>
 			<activation>
@@ -123,7 +111,40 @@
 				</pluginRepository>
 			</pluginRepositories>
 		</profile>
-		
+		<profile>
+			<id>Central</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<repositories>
+				<repository>
+					<id>central</id>
+					<url>http://central.maven.org/maven2/</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>Snapshots</id>
+					<url>http://repository.apache.org/content/groups/snapshots/</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>Central</id>
+					<url>http://central.maven.org/maven2/</url>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
 		<profile>
 			<id>releases</id>
 			<activation>
@@ -199,10 +220,6 @@
 					<url>http://repo.opennms.org/maven2/</url>
 				</repository>
 				<repository>
-					<id>Cloudsoftcorp</id>
-					<url>https://artifactory.cloudsoftcorp.com/artifactory/libs-release-local/</url>
-				</repository>
-				<repository>
 					<id>JBoss-3rd-party</id>
 					<url>https://repository.jboss.org/nexus/content/repositories/ea/</url>
 				</repository>
@@ -210,17 +227,9 @@
 					<id>UK</id>
 					<url>http://uk.maven.org/maven2/</url>
 				</repository>
-				<repository>
+				<!-- <repository>
 					<id>Maven-Net</id>
 					<url>http://maven.net.cn/content/groups/public/</url>
-				</repository>
-				<repository>
-					<id>elasticsearch</id>
-					<url>http://maven.elasticsearch.org/releases/</url>
-				</repository>
-				<repository>
-					<id>elasticsearch-releases</id>
-					<url>https://artifacts.elastic.co/maven/</url>
 				</repository>
 				<repository>
 					<id>entwinemedia</id>
@@ -229,10 +238,18 @@
 				<repository>
 					<id>jahia</id>
 					<url>http://maven.jahia.org/maven2/</url>
-				</repository>
+				</repository> -->
 				<repository>
 					<id>devtools</id>
 					<url>https://devtools.jahia.com/nexus/content/groups/maven-jahia-org/</url>
+				</repository>
+				<repository>
+					<id>elasticsearch</id>
+					<url>http://maven.elasticsearch.org/releases/</url>
+				</repository>
+				<repository>
+					<id>elastic-releases</id>
+					<url>https://artifacts.elastic.co/maven/</url>
 				</repository>
 			</repositories>
 		</profile>
