@@ -28,3 +28,9 @@ this project include java,javascript,java web,html5+css3,jsp and so on.
 9.支持Kafka消息队列服务
 
 10.支持MongoDB连接及其接口服务封装
+
+三.Linux命令
+1.创建目录
+sudo mkdir /home/test
+2.文件夹赋予读写执行权限
+chown -R user /home/elk
