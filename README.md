@@ -39,3 +39,7 @@ sudo mkdir /home/test
 
 chown -R user /home/elk
 
+3.解压文件
+
+sudo tar -zxvf /home/user/jdk-8u144-linux-x64.tar.gz -C /home
+
