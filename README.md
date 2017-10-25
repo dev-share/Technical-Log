@@ -43,3 +43,9 @@ chown -R user /home/elk
 
 sudo tar -zxvf /home/user/jdk-8u144-linux-x64.tar.gz -C /home
 
+4.跨服务器拷贝
+
+scp -r /home/elk root@192.168.1.2:/home
+
+根据提示输入密码
+
