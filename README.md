@@ -49,3 +49,6 @@ scp -r /home/elk root@192.168.1.2:/home
 
 根据提示输入密码
 
+5.tracert追踪
+
+tracert -d www.google.com
