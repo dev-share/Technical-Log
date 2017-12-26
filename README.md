@@ -37,7 +37,9 @@ sudo mkdir /home/test
 
 2.文件夹赋予读写执行权限
 
-chown -R user /home/elk
+chown -R user /home/elk //读写权
+
+chmod +x /home/elk //可执行权限
 
 3.解压文件
 
