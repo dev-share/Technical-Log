@@ -1,7 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
-	<localRepository>\\10.100.90.42\\Share\\Repository</localRepository>
 
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<!--
+ | This is the configuration file for Maven. It can be specified at two levels:
+ |
+ |  1. User Level. This settings.xml file provides configuration for a single user,
+ |                 and is normally provided in ${user.home}/.m2/settings.xml.
+ |
+ |                 NOTE: This location can be overridden with the CLI option:
+ |
+ |                 -s /path/to/user/settings.xml
+ |
+ |  2. Global Level. This settings.xml file provides configuration for all Maven
+ |                 users on a machine (assuming they're all using the same Maven
+ |                 installation). It's normally provided in
+ |                 ${maven.conf}/settings.xml.
+ |
+ |                 NOTE: This location can be overridden with the CLI option:
+ |
+ |                 -gs /path/to/global/settings.xml
+ |
+ | The sections in this sample file are intended to give you a running start at
+ | getting the most out of your Maven installation. Where appropriate, the default
+ | values (values used when the setting is not specified) are provided.
+ |
+ |-->
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+	<!-- <localRepository>\\10.100.90.42\\Share\\Repository</localRepository> -->
+	<localRepository>D:\\Maven\\Repository</localRepository>
 	<pluginGroups>
 	</pluginGroups>
 
@@ -10,9 +55,14 @@
 
 	<servers>
 		<server>   
-			<id>central</id>   
+			<id>central</id>
 			<username>admin</username>   
 			<password>admin123</password>   
+		</server>
+		<server>   
+			<id>Sonatype</id>
+			<username>ukelink</username>   
+			<password>Ukec1234!@#$</password>   
 		</server>
 	</servers>
 
@@ -26,6 +76,11 @@
 			<id>Sonatype</id>
 			<mirrorOf>central</mirrorOf>
 			<url>https://oss.sonatype.org/content/repositories/releases/</url>
+		</mirror>
+		<mirror>
+			<id>Sonatype</id>
+			<mirrorOf>central</mirrorOf>
+			<url>https://oss.sonatype.org/content/groups/public/</url>
 		</mirror>
 	</mirrors>
 
@@ -53,9 +108,11 @@
 					<url>https://oss.sonatype.org/content/repositories/releases/</url>
 					<releases>
 						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
 					</releases>
 					<snapshots>
 						<enabled>false</enabled>
+						<updatePolicy>always</updatePolicy>
 					</snapshots>
 				</repository>
 				<repository>
@@ -63,9 +120,11 @@
 					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 					<releases>
 						<enabled>false</enabled>
+						<updatePolicy>always</updatePolicy>
 					</releases>
 					<snapshots>
 						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
 					</snapshots>
 				</repository>
 			</repositories>
@@ -87,9 +146,11 @@
 					<url>http://maven.oschina.net/content/groups/public/</url>
 					<releases>
 						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
 					</releases>
 					<snapshots>
 						<enabled>false</enabled>
+						<updatePolicy>always</updatePolicy>
 					</snapshots>
 				</repository>
 				<repository>
@@ -98,9 +159,11 @@
 					</url>
 					<releases>
 						<enabled>false</enabled>
+						<updatePolicy>always</updatePolicy>
 					</releases>
 					<snapshots>
 						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
 					</snapshots>
 				</repository>
 			</repositories>
@@ -122,9 +185,11 @@
 					<url>http://central.maven.org/maven2/</url>
 					<releases>
 						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
 					</releases>
 					<snapshots>
 						<enabled>false</enabled>
+						<updatePolicy>always</updatePolicy>
 					</snapshots>
 				</repository>
 				<repository>
@@ -132,9 +197,11 @@
 					<url>http://repository.apache.org/content/groups/snapshots/</url>
 					<releases>
 						<enabled>false</enabled>
+						<updatePolicy>always</updatePolicy>
 					</releases>
 					<snapshots>
 						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
 					</snapshots>
 				</repository>
 			</repositories>
@@ -162,6 +229,10 @@
 				<repository>
 					<id>spring-libs</id>
 					<url>http://repo.spring.io/libs-milestone/</url>
+				</repository>
+				<repository>
+					<id>spring-milestone</id>
+					<url>http://repo.spring.io/milestone/</url>
 				</repository>
 				<repository>
 					<id>atlassian</id>
