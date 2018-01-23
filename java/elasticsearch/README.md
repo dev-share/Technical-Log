@@ -105,3 +105,7 @@ logstash-plugin remove x-pack
 
 默认用户密码：elastic/changeme(可以通过kibana改变密码)
 
+
+
+
+*_注：D:\WebServer\ELK\6.1.x>call elasticsearch-6.1.2/bin/elasticsearch-plugin install file:///D:/WebServer/ELK/6.1.x/x-pack-6.1.2.zip
