@@ -3,8 +3,10 @@
 ## 2. 解压安装
   安装成功使用gradle -v 验证
 ## 3. 配置环境变量
+```bash
   GRADLE_HOME=D:\Gradle
   GRADLE_USER_HOME=D:/Gradle/.gradle
+```
 ## 4. 配置jar包管理路径
 ```bash
 gradle -g D:/Gradle/.gradle build build
