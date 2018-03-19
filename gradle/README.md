@@ -1,5 +1,5 @@
 # Gradle配置
-## 1. 下载
+## 1. 下载[https://services.gradle.org/distributions/gradle-4.6-bin.zip]
 ## 2. 解压安装
   安装成功使用gradle -v 验证
 ## 3. 配置环境变量
