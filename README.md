@@ -54,3 +54,9 @@ scp -r /home/elk root@192.168.1.2:/home
 5.tracert追踪
 
 tracert -d www.google.com
+
+四. NodeJS配置
+1. grunt安装
+```bash
+npm install -g grunt-cli
+```
