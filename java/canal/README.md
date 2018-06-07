@@ -1,18 +1,35 @@
 # Canal安装与部署
-
-1. 开启MySQL的binlog功能并配置为row模式(my.ini)
-
+## 1. MySQL的row模式以及赋权
+- 开启MySQL的binlog功能并配置为row模式(my.ini)
 ```ini
   #log bin
   log-bin=mysql-bin
   #binlog mode: ROW mode
   binlog-format=ROW
+  #master/slave模式log_slave_update这个配置一定要打开
+  #log_slave_updates=true
   #config mysql replaction privileges，mustn't repeat with slaveId of canal
   server-id=1
 ```
-2. 下载Canal(下载地址:  https://github.com/alibaba/canal/releases/download/canal-1.0.25/canal.deployer-1.0.25.tar.gz   )并解压至指定路径
-
-3. 配置canal
+-- canal用户赋权
+```sql
+CREATE USER canal IDENTIFIED BY 'canal';    
+GRANT SELECT,SUPER, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'canal'@'%';  
+-- GRANT ALL PRIVILEGES ON *.* TO 'canal'@'%' ;  
+FLUSH PRIVILEGES;
+```
+-- 查看权限及模式
+```sql
+-- 查询canal权限
+show grants for 'canal';
+-- 查看binlog(log_bin必须为ON)
+show variables like 'log_%';
+-- canal用户查看状态（必须有解析点）
+show master status;
+```
+## 2. 下载Canal并解压至指定路径
+[下载地址](https://github.com/alibaba/canal/releases/download/canal-1.0.25/canal.deployer-1.0.25.tar.gz)
+## 3. 配置canal
 - canal.properties配置（以下可修改，其他默认）
 ```properties
 canal.id= 1
