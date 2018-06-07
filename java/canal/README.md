@@ -75,7 +75,7 @@ canal.instance.filter.black.regex=
 ```
 ## 4. 常见问题
 > 问题：**(at least one of)SUPER, REPLICATION SLAVE PRIVILEGES of this operation
-  解决办法：
+> 解决办法：
   - 检查canal用户权限（包括SELECT,SUPER, REPLICATION SLAVE, REPLICATION CLIENT）
     ```sql
       -- 查询canal权限
@@ -86,8 +86,8 @@ canal.instance.filter.black.regex=
       -- 查看binlog(log_bin必须为ON以及log_bin_basename)
       show variables like '%log_bin%';
     ```
-  > 问题：** server_id not set null
-  解决办法：
+> 问题：** server_id not set null
+> 解决办法：
   - 检查server_id
     ```sql
       -- 查看server_id
@@ -102,7 +102,7 @@ canal.instance.filter.black.regex=
     ```
   - 配置解析点
   canal.instance.master.journal.name=mysql-bin.000001 //其值show master status获得
- > zookeeper节点含义(./zkCli.sh)
+> zookeeper节点含义(./zkCli.sh)
  - 查看canal的server端集群信息
  ```bash
   ls /otter/canal/cluster
