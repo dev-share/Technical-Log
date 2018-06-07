@@ -28,8 +28,8 @@ FLUSH PRIVILEGES;
 ```sql
 -- 查询canal权限
 show grants for 'canal';
--- 查看binlog(log_bin必须为ON)
-show variables like 'log_%';
+-- 查看binlog(log_bin必须为ON以及log_bin_basename)
+show variables like '%log_bin%';
 -- canal用户查看状态（必须有解析点）
 show master status;
 ```
