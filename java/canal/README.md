@@ -11,6 +11,12 @@
   #config mysql replaction privileges，mustn't repeat with slaveId of canal
   server-id=1
 ```
+或
+```sql
+set global log_bin="mysql-bin";
+set global binlog_format = "ROW";
+set global server_id=1;
+```
 -- canal用户赋权
 ```sql
 CREATE USER canal IDENTIFIED BY 'canal';    
