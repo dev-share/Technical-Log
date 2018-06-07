@@ -29,6 +29,7 @@ show master status;
 ```
 ## 2. 下载Canal并解压至指定路径
 [Canal v1.0.25下载地址](https://github.com/alibaba/canal/releases/download/v1.0.25/canal.deployer-1.0.25.tar.gz)
+[Canal最新版下载地址](https://github.com/alibaba/canal/releases/download/canal-1.0.26-preview-3/canal.deployer-1.0.26-SNAPSHOT.tar.gz)
 ## 3. 配置canal
 - canal.properties配置（以下可修改，其他默认）
 ```properties
