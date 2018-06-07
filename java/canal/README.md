@@ -73,3 +73,61 @@ canal.instance.filter.regex=.*\\..*
 # table black regex
 canal.instance.filter.black.regex=
 ```
+## 4. 常见问题
+> 问题：**(at least one of)SUPER, REPLICATION SLAVE PRIVILEGES of this operation
+  解决办法：
+  - 检查canal用户权限（包括SELECT,SUPER, REPLICATION SLAVE, REPLICATION CLIENT）
+    ```sql
+      -- 查询canal权限
+      show grants for 'canal';
+    ```
+  - 检查数据库log-bin以及Row模式
+    ```sql
+      -- 查看binlog(log_bin必须为ON以及log_bin_basename)
+      show variables like '%log_bin%';
+    ```
+  > 问题：** server_id not set null
+  解决办法：
+  - 检查server_id
+    ```sql
+      -- 查看server_id
+      show variables like '%server_id%';
+    ```
+  > 问题：** CanalParseException: can't find start position for example
+  解决办法：
+  - 查看解析点
+      ```sql
+      -- canal用户查看状态（必须有解析点）
+      show master status;
+    ```
+  - 配置解析点
+  canal.instance.master.journal.name=mysql-bin.000001 //其值show master status获得
+ > zookeeper节点含义(./zkCli.sh)
+ - 查看canal的server端集群信息
+ ```bash
+  ls /otter/canal/cluster
+ ```
+ - 查看canal的server端example实例集群信息
+ ```bash
+  ls /otter/canal/destinations/example/cluster
+ ```
+ - 查看canal的server端example实例主节点信息
+ ```bash
+  get /otter/canal/destinations/example/running
+ ```
+ - 查看canal的server端example实例解析点信息
+ ```bash
+  get /otter/canal/destinations/example/parse
+ ```
+ - 查看canal的client端example实例集群信息
+ ```bash
+  ls /otter/canal/destinations/example/1001/cluster
+ ```
+ - 查看canal的client端example实例主节点信息
+ ```bash
+  get /otter/canal/destinations/example/1001/running
+ ```
+ - 查看canal的client端example实例解析位置信息
+ ```bash
+  get /otter/canal/destinations/example/1001/cursor
+ ``` 
