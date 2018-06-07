@@ -75,7 +75,7 @@ canal.instance.filter.black.regex=
 ```
 ## 4. 常见问题
 > 问题：**(at least one of)SUPER, REPLICATION SLAVE PRIVILEGES of this operation
-> 解决办法：
+>> 解决办法：
   - 检查canal用户权限（包括SELECT,SUPER, REPLICATION SLAVE, REPLICATION CLIENT）
     ```sql
       -- 查询canal权限
@@ -87,7 +87,7 @@ canal.instance.filter.black.regex=
       show variables like '%log_bin%';
     ```
 > 问题：** server_id not set null
-> 解决办法：
+>> 解决办法：
   - 检查server_id
     ```sql
       -- 查看server_id
