@@ -19,12 +19,12 @@ elasticsearch-plugin remove x-pack --purge
 默认用户密码：elastic/changeme(可以通过kibana改变密码)
 ## 二．管理工具及其插件
 ### 1. kibana安装配置
-1) 配置
+1)配置
 - (1)配置ES_HOME环境变量，例如:EK_HOME=C:\Java\kibana-5.6.0
 - (2)增加Path环境变量,例如：Path=...;%EK_HOME%\bin;
 - (3)启动 call kibana 或 call kibana -d
 - (4)http://localhost:5601
-2) 插件安装
+2)插件安装
 - (1) 插件安装（X-Pack为例）
 ```bash
 kibana-plugin install file:///E:/x-pack-5.6.0.zip
