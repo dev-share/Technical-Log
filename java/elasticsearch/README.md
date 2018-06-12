@@ -1,8 +1,8 @@
 # Elasticsearch及其管理工具或插件安装配置
 ## 一．Elasticsearch安装配置
 1. 安装配置
-1） 配置ES_HOME环境变量，例如:  ES_HOME=C:\Java\elasticsearch-5.6.0
-2） 增加Path环境变量，例如：Path=...;%ES_HOME%\bin;
+-1） 配置ES_HOME环境变量，例如:  ES_HOME=C:\Java\elasticsearch-5.6.0
+-2） 增加Path环境变量，例如：Path=...;%ES_HOME%\bin;
 3） 启动 call elasticsearch 或 call elasticsearch -d
 4） http://localhost:9200
 2. 插件配置(https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-5.6.0.zip)
@@ -64,5 +64,6 @@ logstash-plugin remove x-pack
 (3) 启动
 默认用户密码：elastic/changeme(可以通过kibana改变密码)
 
-
+>
+>
 >*注：D:\WebServer\ELK\6.1.x>call elasticsearch-6.1.2/bin/elasticsearch-plugin install file:///D:/WebServer/ELK/6.1.x/x-pack-6.1.2.zip*
