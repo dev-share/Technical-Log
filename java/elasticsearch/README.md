@@ -16,7 +16,7 @@ elasticsearch-plugin remove x-pack --purge
 ```
 > 手动删除config/x-pack目录
 - 3） 启动
-  默认用户密码：elastic/changeme(可以通过kibana改变密码)
+:  默认用户密码：elastic/changeme(可以通过kibana改变密码)
 ## 二．管理工具及其插件
 ### 1. kibana安装配置
 ##### 1) 配置
