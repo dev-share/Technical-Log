@@ -97,8 +97,14 @@ canal.instance.filter.black.regex=
   解决办法：
   - 查看解析点
       ```sql
-      -- canal用户查看状态（必须有解析点）
+      -- 查看binlog当前解析文件）
       show master status;
+      -- 查看binlong列表
+      show master logs;
+      -- 刷新binlog文件并以新编号记录
+      flush logs;
+      -- 重置（清除）binlog文件重新开始编号000001
+      reset master;
     ```
   - 配置解析点
   canal.instance.master.journal.name=mysql-bin.000001 //其值show master status获得
