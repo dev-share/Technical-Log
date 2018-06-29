@@ -1,4 +1,4 @@
-package com.ucloudlink.canal;
+package com.dev.share.canal;
 
 import java.net.InetSocketAddress;
 import java.util.Date;
@@ -17,16 +17,16 @@ import com.alibaba.otter.canal.protocol.CanalEntry.EventType;
 import com.alibaba.otter.canal.protocol.CanalEntry.RowChange;
 import com.alibaba.otter.canal.protocol.CanalEntry.RowData;
 import com.alibaba.otter.canal.protocol.Message;
-import com.ucloudlink.canal.common.CanalFactory;
-import com.ucloudlink.canal.common.DataSourceUtil;
-import com.ucloudlink.canal.common.cassandra.CassandraFactory;
-import com.ucloudlink.canal.common.elasticsearch.transport.ElasticsearchTransportFactory;
-import com.ucloudlink.canal.common.greenplum.GreenplumFactory;
-import com.ucloudlink.canal.common.jdbc.JDBCFactory;
-import com.ucloudlink.canal.common.mongodb.MongoDBFactory;
-import com.ucloudlink.canal.pojo.MonitorInfo;
-import com.ucloudlink.canal.pojo.MonitorInfo.RowInfo;
-import com.ucloudlink.canal.util.DateUtil;
+import com.dev.share.canal.common.CanalFactory;
+import com.dev.share.canal.common.DataSourceUtil;
+import com.dev.share.canal.common.cassandra.CassandraFactory;
+import com.dev.share.canal.common.elasticsearch.transport.ElasticsearchTransportFactory;
+import com.dev.share.canal.common.greenplum.GreenplumFactory;
+import com.dev.share.canal.common.jdbc.JDBCFactory;
+import com.dev.share.canal.common.mongodb.MongoDBFactory;
+import com.dev.share.canal.pojo.MonitorInfo;
+import com.dev.share.canal.pojo.MonitorInfo.RowInfo;
+import com.dev.share.canal.util.DateUtil;
 
 public class CanalFactoryTest {
 
