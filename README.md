@@ -39,6 +39,10 @@ scp -r /home/elk root@192.168.1.2:/home
 ```bash
 tracert -d www.google.com
 ```
+6. vim保存无权限处理
+```bash
+w !sudo tee %
+```
 ## 四. NodeJS配置
 1. grunt安装
 ```bash
