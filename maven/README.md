@@ -12,10 +12,10 @@
 ```        
 详细参考：http://maven.apache.org/xsd/
 
-3. maven命令
-
+3. maven命令<br>
 1)下载源码
-```bash
+```
+```mvn
 mvn dependency:sources -U -fae
 ```
 2)下载jar包或依赖包
