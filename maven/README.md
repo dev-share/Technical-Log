@@ -12,9 +12,9 @@
 ```        
 详细参考：http://maven.apache.org/xsd/
 
-3. maven命令<br>
+3. maven命令
 1)下载源码
-```
+---
 ```mvn
 mvn dependency:sources -U -fae
 ```
