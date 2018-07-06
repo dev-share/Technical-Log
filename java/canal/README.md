@@ -13,9 +13,10 @@
 ```
 或
 ```sql
-set global log_bin="mysql-bin";
 set global binlog_format = "ROW";
 set global server_id=1;
+set session binlog_format = "ROW";
+set session server_id=1;
 ```
 -- canal用户赋权
 ```sql
