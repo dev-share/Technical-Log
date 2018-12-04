@@ -1,6 +1,6 @@
 Druid与Spring集成并监控请求
-1.web配置
-
+1. web配置
+```xml
   <!-- Druid数据源过滤器 -->
   <filter>
     <filter-name>DruidFilter</filter-name>
@@ -41,10 +41,9 @@ Druid与Spring集成并监控请求
     <servlet-name>DruidStatView</servlet-name>
     <url-pattern>/druid/*</url-pattern>
   </servlet-mapping>
-
-  
-  2.Spring数据源配置及Druid事物
-  
+```
+2. Spring数据源配置及Druid事物
+```xml
   <!-- 目标数据源配置 -->
     <bean id="mainDataSource" class="com.alibaba.druid.pool.DruidDataSource"
         init-method="init" destroy-method="close">
@@ -87,7 +86,6 @@ Druid与Spring集成并监控请求
     	<property name="useGlobalDataSourceStat" value="true" />
     </bean>
 
-
 <!-- 配置Druid和Spring关联监控配置 -->
 	<bean id="druid-stat-interceptor" class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor"/>
 	<bean id="druid-stat-pointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut" scope="prototype">
@@ -96,4 +94,4 @@ Druid与Spring集成并监控请求
 	<aop:config proxy-target-class="true">
 	    <aop:advisor advice-ref="druid-stat-interceptor" pointcut-ref="druid-stat-pointcut" />
 	</aop:config>
-
+```
