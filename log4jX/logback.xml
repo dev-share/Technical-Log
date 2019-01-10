@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+	<property name="ctx" value="sys" />
+	<timestamp key="datetime" datePattern="yyyy-MM-dd'T'HH:mm:ss" />
+	<property name="LOG_FOLDER" value="target/logs" />
+	<property name="LOG_FILE" value="sys.log" />
+	<contextName>logback-${ctx}</contextName>
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss}|%thread|%-5level|%logger{35}-%L-- %msg%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="DEFAULT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_FOLDER}/${LOG_FILE}</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss}|%thread|%-5level|%logger{35}-%L-- %msg%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FOLDER}/%d{yyyy-MM-dd}/${LOG_FILE}-%i.tar.gz
+			</fileNamePattern>
+			<MaxHistory>15</MaxHistory>
+			<cleanHistoryOnStart>false</cleanHistoryOnStart>
+			<totalSizeCap>1GB</totalSizeCap>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>512MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+		<!-- <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy"> 
+			<maxFileSize>5MB</maxFileSize> </triggeringPolicy> -->
+	</appender>
+
+	<appender name="STDERR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${LOG_FOLDER}/error-${LOG_FILE}</File>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss}|%thread|%-5level|%logger{35}-%L-- %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter" level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/> 
+		<!-- <filters>
+			<filter class="ch.qos.logback.core.filter.EvaluatorFilter" level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>   
+		    <filter class="ch.qos.logback.classic.filter.ThresholdFilter" level="ERROR" /> 
+		</filters> -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FOLDER}/%d{yyyy-MM-dd}/${LOG_FILE}-error-%i.log.gz
+			</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>100MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<maxHistory>60</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<logger name="com" level="ERROR" additivity="false">
+		<appender-ref ref="STDERR" />
+	</logger>
+	<root level="INFO">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="DEFAULT" />
+	</root>
+</configuration>
