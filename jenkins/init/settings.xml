@@ -26,7 +26,7 @@
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
-	<localRepository>/home/atest/jenkins/init/Repository</localRepository>
+	<localRepository>E:\\Maven\\Repository</localRepository>
 	<!-- localRepository | The path to the local repository maven will use to 
 		store artifacts. | <localRepository>D:\MvnRep</localRepository> | Default: 
 		${user.home}/.m2/repository <localRepository>/path/to/local/repo</localRepository> -->
@@ -66,14 +66,9 @@
 		must make a connection to a remote server. | -->
 	<servers>
 		<server>
-			<id>kjcx-releases</id>
+			<id>releases</id>
 			<username>admin</username>
-			<password>kjcx@123</password>
-		</server>
-		<server>
-			<id>kjcx-snapshots</id>
-			<username>admin</username>
-			<password>kjcx@123</password>
+			<password>admin</password>
 		</server>
 
 		<!-- server | Specifies the authentication information to use when connecting 
@@ -98,19 +93,25 @@
 		| -->
 	<mirrors>
 		<mirror>
-			<id>kjcx-public</id>
-			<mirrorOf>*</mirrorOf>
-			<url>http://10.10.1.186:8081/repository/maven-public/</url>
+			<id>Central</id>
+			<mirrorOf>central</mirrorOf>
+			<url>http://central.maven.org/maven2/</url>
 		</mirror>
 		<mirror>
-			<id>kjcx-releases</id>
-			<mirrorOf>*</mirrorOf>
-			<url>http://10.10.1.186:8081/repository/maven-releases/</url>
+			<id>Sonatype</id>
+			<mirrorOf>central</mirrorOf>
+			<url>https://oss.sonatype.org/content/repositories/releases/</url>
 		</mirror>
 		<mirror>
-			<id>kjcx-snapshots</id>
-			<mirrorOf>*</mirrorOf>
-			<url>http://10.10.1.186:8081/repository/maven-snapshots/</url>
+			<id>Sonatype</id>
+			<mirrorOf>central</mirrorOf>
+			<url>https://oss.sonatype.org/content/groups/public/</url>
+		</mirror>
+		<mirror>
+			<id>alimaven</id>
+			<name>aliyun maven</name>
+			<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+			<mirrorOf>central</mirrorOf>
 		</mirror>
 	</mirrors>
 
@@ -147,11 +148,14 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>kjcx</id>
+			<id>Sonatype</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<repositories>
 				<repository>
-					<id>kjcx-releases</id>
-					<url>http://10.10.1.186:8081/repository/maven-releases/</url>
+					<id>oss_public</id>
+					<url>https://oss.sonatype.org/content/repositories/releases/</url>
 					<releases>
 						<enabled>true</enabled>
 					</releases>
@@ -160,8 +164,8 @@
 					</snapshots>
 				</repository>
 				<repository>
-					<id>kjcx-snapshots</id>
-					<url>http://10.10.1.186:8081/repository/maven-snapshots/</url>
+					<id>oss_snapshots</id>
+					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 					<releases>
 						<enabled>false</enabled>
 					</releases>
@@ -172,33 +176,203 @@
 			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
-					<id>kjcx-releases</id>
-					<url>http://10.10.1.186:8081/repository/maven-releases/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-				<pluginRepository>
-					<id>kjcx-snapshots</id>
-					<url>http://10.10.1.186:8081/repository/maven-snapshots/</url>
-					<releases>
-						<enabled>false</enabled>
-					</releases>
-					<snapshots>
-						<enabled>true</enabled>
-					</snapshots>
+					<id>Sonatype</id>
+					<url>https://oss.sonatype.org/content/repositories/releases/</url>
 				</pluginRepository>
 			</pluginRepositories>
+		</profile>
+		<profile>
+			<id>OSChina</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<repositories>
+				<repository>
+					<id>mon_public</id>
+					<url>http://maven.oschina.net/content/groups/public/</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>mon_thirdparty</id>
+					<url>http://maven.oschina.net/content/repositories/thirdparty/
+					</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>OSChina</id>
+					<url>http://maven.oschina.net/content/groups/public/</url>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
+		<profile>
+			<id>Central</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<repositories>
+				<repository>
+					<id>central</id>
+					<url>http://central.maven.org/maven2/</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>Snapshots</id>
+					<url>http://repository.apache.org/content/groups/snapshots/</url>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>Central</id>
+					<url>http://central.maven.org/maven2/</url>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
+		<profile>
+			<id>releases</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<repositories>
+				<repository>
+					<id>aliyun</id>
+					<url>http://maven.aliyun.com/nexus/content/repositories/central/</url>
+				</repository>
+				<repository>
+					<id>aliyun2</id>
+					<url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+				</repository>
+				<repository>
+					<id>clojars</id>
+					<url>http://clojars.org/repo/</url>
+				</repository>
+				<repository>
+					<id>spring-plugins</id>
+					<url>http://repo.spring.io/plugins-release/</url>
+				</repository>
+				<repository>
+					<id>spring-libs</id>
+					<url>http://repo.spring.io/libs-milestone/</url>
+				</repository>
+				<repository>
+					<id>spring-milestone</id>
+					<url>http://repo.spring.io/milestone/</url>
+				</repository>
+				<repository>
+					<id>atlassian</id>
+					<url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+				</repository>
+				<repository>
+					<id>3rdparty</id>
+					<url>https://maven.atlassian.com/3rdparty/</url>
+				</repository>
+				<repository>
+					<id>jboss</id>
+					<url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>maven-eu-nuxeo</id>
+					<url>https://maven-eu.nuxeo.org/nexus/content/repositories/public-releases/</url>
+				</repository>
+				<repository>
+					<id>xwiki</id>
+					<url>http://maven.xwiki.org/releases/</url>
+				</repository>
+				<repository>
+					<id>apache</id>
+					<url>https://repository.apache.org/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>Hortonworks</id>
+					<url>http://repo.hortonworks.com/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>Redhat</id>
+					<url>https://maven.repository.redhat.com/ga/</url>
+				</repository>
+				<repository>
+					<id>Cloudera</id>
+					<url>https://repository.cloudera.com/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>Alfresco</id>
+					<url>https://artifacts.alfresco.com/nexus/content/repositories/public/</url>
+				</repository>
+				<repository>
+					<id>WSO2</id>
+					<url>http://dist.wso2.org/maven2/</url>
+				</repository>
+				<repository>
+					<id>Java-Net</id>
+					<url>https://maven.java.net/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>Boundless</id>
+					<url>http://repo.boundlessgeo.com/main/</url>
+				</repository>
+				<repository>
+					<id>OpenNMS</id>
+					<url>http://repo.opennms.org/maven2/</url>
+				</repository>
+				<repository>
+					<id>JBoss-3rd-party</id>
+					<url>https://repository.jboss.org/nexus/content/repositories/ea/</url>
+				</repository>
+				<repository>
+					<id>UK</id>
+					<url>http://uk.maven.org/maven2/</url>
+				</repository>
+				<!-- <repository>
+					<id>Maven-Net</id>
+					<url>http://maven.net.cn/content/groups/public/</url>
+				</repository>
+				<repository>
+					<id>entwinemedia</id>
+					<url>http://maven.entwinemedia.com/content/repositories/releases/</url>
+				</repository>
+				<repository>
+					<id>jahia</id>
+					<url>http://maven.jahia.org/maven2/</url>
+				</repository> -->
+				<repository>
+					<id>devtools</id>
+					<url>https://devtools.jahia.com/nexus/content/groups/maven-jahia-org/</url>
+				</repository>
+				<repository>
+					<id>elasticsearch</id>
+					<url>http://maven.elasticsearch.org/releases/</url>
+				</repository>
+				<repository>
+					<id>elastic-releases</id>
+					<url>https://artifacts.elastic.co/maven/</url>
+				</repository>
+			</repositories>
 		</profile>
 	</profiles>
 
 	<!-- activeProfiles | List of profiles that are active for all builds. | 
 		<activeProfiles> <activeProfile>alwaysActiveProfile</activeProfile> <activeProfile>anotherAlwaysActiveProfile</activeProfile> 
 		</activeProfiles> -->
-	<activeProfiles>
-		<activeProfile>kjcx</activeProfile>
-	</activeProfiles>
 </settings>
