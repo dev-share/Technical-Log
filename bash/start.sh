@@ -37,7 +37,7 @@ fi
 
 if [ -n "$kid" ] ; then
 	echo [`hostname -i`|`uname`] ${APP_NAME} process [$kid] is Running!
-	kill -9 $kid;
+	exit 1;
 fi
 
 if [ ! -d ${BASE_PATH}/logs ] ; then

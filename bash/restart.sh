@@ -29,8 +29,16 @@ if [ -n "${APP_NAME}" ] ; then
 fi
 
 if [ -n "$kid" ] ; then
-	echo [`hostname -i`|`uname`] ${APP_NAME} process [$kid] is Running!
+	echo [${SERVER_IP}] ${APP_NAME} process [$kid] is Running!
 	kill -9 $kid;
+fi
+
+if [ -n "${HTTP_PORT}" -a ! -z "${HTTP_PORT}" ] ; then
+	occupy=`netstat -ano|grep -v grep|grep ${HTTP_PORT}`
+	if [ -n "$occupy" ] ; then
+		echo [${SERVER_IP}] Port[${HTTP_PORT}] is occupied!
+		exit 1
+	fi
 fi
 
 if [ ! -d ${BASE_PATH}/logs ] ; then
