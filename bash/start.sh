@@ -14,7 +14,6 @@ case "`uname`" in
 		linux=false
 		;;
 esac
-
 APP_NAME=test
 CONF=${BASE_PATH}/config/application.properties
 LOG_CONF=${BASE_PATH}/config/log4j2.properties
@@ -22,6 +21,14 @@ ENV_ACTIVE=`sed '/spring.profiles.active/!d;s/.*=//' $CONF | tr -d '\r'`
 CONF=${BASE_PATH}/config/application-${ENV_ACTIVE}.properties
 HTTP_PORT=`sed '/server.port/!d;s/.*=//' $CONF | tr -d '\r'`
 SERVER_IP=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v 192.168|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
+
+if [ -n "${HTTP_PORT}" -a ! -z "${HTTP_PORT}" ] ; then
+	occupy=`netstat -ano|grep -v grep|grep ${HTTP_PORT}`
+	if [ -n "$occupy" ] ; then
+		echo [${SERVER_IP}] Port[${HTTP_PORT}] is occupied!
+		exit 1
+	fi
+fi
 
 if [ -n "${APP_NAME}" ] ; then
 	kid=`ps -ef |grep ${APP_NAME}|grep -v grep|awk '{print $2}'`
@@ -35,8 +42,6 @@ fi
 
 if [ ! -d ${BASE_PATH}/logs ] ; then
 	mkdir -p ${BASE_PATH}/logs
-else
-	rm -rf ${BASE_PATH}/logs/*
 fi
 
 if [ ! -d ${BASE_PATH}/data ] ; then
@@ -48,8 +53,8 @@ if [ "$JAVA_HOME" != "" ]; then
 else
   JAVA=java
 fi
-JAVA_ENV="-server -Xms512M -Xmx512M -Xss1m "
-JAVA_OPTS="$JAVA_ENV -DAPP_NAME=${APP_NAME} -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+AlwaysPreTouch -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -Djdk.io.permissionsUseCanonicalPath=true -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j.skipJansi=true -XX:+HeapDumpOnOutOfMemoryError "
+JAVA_ENV="-server -Xms2g -Xmx2g -Xss1m "
+JAVA_OPTS="$JAVA_ENV -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+AlwaysPreTouch -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -Djdk.io.permissionsUseCanonicalPath=true -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j.skipJansi=true -XX:+HeapDumpOnOutOfMemoryError "
 
 eval A='('$*')'
 for i in ${!A[*]}
@@ -59,7 +64,7 @@ do
 		JAVA_OPTS=" $JAVA_OPTS $OPT"
 		unset A[$i]
 	fi
-done 
+done
 
 for i in "${BASE_PATH}"/lib/*.jar
 do
@@ -71,6 +76,7 @@ then
 	set timeout 60
 	echo -------------------------------------------------------------------------------------------
 	cd ${BASE_PATH}
+	chmod +x */*
 	for file in "${BASE_PATH}"/*.jar
 	do
 	    file=${file##*/}
@@ -85,6 +91,7 @@ then
 	
 	echo ${APP_NAME} Starting ...
 	$JAVA $JAVA_OPTS -Dapp.name=${APP_NAME} -Dbase.path=${BASE_PATH} -jar $app ${A[*]} --spring.config.location=$CONF --logging.config=$LOG_CONF >/dev/null 2>&1 &
+	echo $! > $PID
 	echo ${APP_NAME} Finish ...
 	DEV_LOOPS=0;
 	while(true);
