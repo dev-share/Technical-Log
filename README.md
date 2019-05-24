@@ -43,6 +43,12 @@ tracert -d www.google.com
 ```bash
 w !sudo tee %
 ```
+7.Windows修复
+```cmd
+dism/Online /Cleanup-Image /CheckHealth
+dism/Online /Cleanup-Image /RestoreHealth
+sfc /scannow
+```
 ## 四. NodeJS配置
 1. grunt安装
 ```bash
