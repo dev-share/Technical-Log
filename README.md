@@ -2,7 +2,9 @@
 this project include java,javascript,java web,html5+css3,jsp and so on.
 ## 一、JS插件
 1. JS日历插件包含中国农历以及二十四节气
-
+  - [x] 公历日期及节日
+  - [x] 农历日期及节日
+  - [ ] 农历二十四节气
 ## 二.Java技术
 1. 共享工具
 - 日期格式化
