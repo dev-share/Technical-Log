@@ -15,34 +15,26 @@ case "`uname`" in
 esac
 
 function ipconf() {
-    case "`uname`" in
-        Darwin)
+  case "`uname`" in
+       Darwin)
          server_ip=`echo "show State:/Network/Global/IPv4" | scutil | grep PrimaryInterface | awk '{print $3}' | xargs ifconfig | grep inet | grep -v inet6 | awk '{print $2}'`
-         ;;
-        *)
-         server_ip=`ip route get 1 | awk '{print $NF;exit}'`
-         ;;
+       ;;
+       *)
+	if [[ $(lsb_release -i) == *Ubuntu ]] ; then
+		server_ip=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v 192.168|grep -v inet6|grep -v 0.1|awk '{print $2}'`
+	else
+		server_ip=`ip route get 1 | awk '{print $NF;exit}'`
+	fi
+       ;;
   esac
   echo ${server_ip}
 }
 
-function jenv(){
-	eval A='('$*')'
-	for i in ${!A[*]}
-	do
-		OPT=${A[$i]}
-		if [[ $OPT == -D* ]];then
-			JAVA_OPTS=" $JAVA_OPTS $OPT"
-			unset A[$i]
-		fi
-	done
-	echo ${JAVA_OPTS}
-}
-
 CONF=${BASE_PATH}/conf/config.properties
 SPRING_BOOT=jenkins
+JENKINS_HOME=${BASE_PATH}/home
 APP_NAME=${SPRING_BOOT}-docker
-HTTP_PORT=`sed '/server.port/!d;s/.*=//' $CONF | tr -d '\r'`
+HTTP_PORT=`sed '/http.port/!d;s/.*=//' $CONF | tr -d '\r'`
 SERVER_IP=`ipconf`
 
 if [ -n "${APP_NAME}" ] ; then
@@ -74,8 +66,8 @@ if [ ! -d ${BASE_PATH}/data ] ; then
 	mkdir -p ${BASE_PATH}/data
 fi
 
-if [ ! -d ${BASE_PATH}/deploy ] ; then
-	mkdir -p ${BASE_PATH}/deploy
+if [ ! -d ${JENKINS_HOME} ] ; then
+	mkdir -p ${JENKINS_HOME}
 fi
 
 if [ "$JAVA_HOME" != "" ]; then
@@ -83,17 +75,9 @@ if [ "$JAVA_HOME" != "" ]; then
 else
   JAVA=java
 fi
-JAVA_ENV="`jenv $*` -server -Xms512M -Xmx512M -Xss1m"
-JAVA_OPTS="$JAVA_ENV -DJENKINS_HOME=${BASE_PATH}/deploy -DAPP_NAME=${APP_NAME} -Dbase.path=${BASE_PATH} -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+AlwaysPreTouch -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -Djdk.io.permissionsUseCanonicalPath=true -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j.skipJansi=true -XX:+HeapDumpOnOutOfMemoryError "
-eval A='('$*')'
-for i in ${!A[*]}
-do
-	OPT=${A[$i]}
-	if [[ $OPT == -D* ]];then
-		JAVA_OPTS=" $JAVA_OPTS $OPT"
-		unset A[$i]
-	fi
-done 
+
+JAVA_ENV=" $* -server -Xms512M -Xmx512M -Xss1m"
+JAVA_OPTS="$JAVA_ENV -DJENKINS_HOME=${JENKINS_HOME} -DAPP_NAME=${APP_NAME} -Dbase.path=${BASE_PATH} -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly -XX:+AlwaysPreTouch -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -Djdk.io.permissionsUseCanonicalPath=true -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Dlog4j.skipJansi=true -XX:+HeapDumpOnOutOfMemoryError "
 
 if [ -e $CONF -a -d ${BASE_PATH}/logs ]
 then
@@ -105,7 +89,7 @@ then
 	CLASSPATH="${BASE_PATH}:${BASE_PATH}/config:$CLASSPATH";
 	
 	echo ${APP_NAME} Starting ...
-	$JAVA $JAVA_OPTS -classpath .:$CLASSPATH -jar jenkins*.war ${A[*]} --httpPort=${HTTP_PORT} >/dev/null 2>${BASE_PATH}/logs/error.log &
+	$JAVA $JAVA_OPTS -classpath .:$CLASSPATH -jar jenkins.war ${A[*]} --httpPort=${HTTP_PORT} >/dev/null 2>${BASE_PATH}/logs/error.log &
 	echo ${APP_NAME} Finish ...
 	DEV_LOOPS=0;
 	while(true);
@@ -131,9 +115,9 @@ then
 	done;
 	
   	if [ "${kpid}" != "" ] ; then
-		echo "=========>`hostname`(${SERVER_IP}):${APP_NAME}[pid:${kpid}]STARTUP SUCCESS!"
+		echo "=========>`hostname`(${SERVER_IP}:${HTTP_PORT}):${APP_NAME}[pid:${kpid}]STARTUP SUCCESS!"
 	else
-		echo "=========>`hostname`(${SERVER_IP}):${APP_NAME}[pid:${kpid}]STARTUP FAIL!"
+		echo "=========>`hostname`(${SERVER_IP}:${HTTP_PORT}):${APP_NAME}[pid:${kpid}]STARTUP FAIL!"
 		exit 1
 	fi
 	echo -------------------------------------------------------------------------------------------
