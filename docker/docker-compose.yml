@@ -1,0 +1,138 @@
+version: '3.7'
+services:
+  mon:
+    image: ceph/daemon
+    container_name: mon
+    command: mon
+    network_mode: host
+    environment:
+      - CEPH_DAEMON=mon
+      - NETWORK_AUTO_DETECT=1
+      - MON_IP=172.21.32.104,172.21.32.106,172.21.32.110
+      - CEPH_PUBLIC_NETWORK=172.21.32.0/24,172.18.0.0/16
+      - CEPH_CLUSTER_NETWORK=172.21.32.0/24,172.18.0.0/16
+    networks:
+      - ingress
+      - default
+      - hostnet
+    volumes:
+      - /etc/ceph:/etc/ceph
+      - /var/lib/ceph:/var/lib/ceph
+    deploy:
+      replicas: 2
+      mode: replicated
+      endpoint_mode: dnsrr
+
+  rgw:
+    image: ceph/daemon
+    container_name: rgw
+    command: rgw
+    restart: always
+    privileged: true
+    network_mode: host
+    environment:
+      - CEPH_DAEMON=rgw
+      - NETWORK_AUTO_DETECT=1
+      - MON_IP=172.21.32.104,172.21.32.106,172.21.32.110
+      - CEPH_PUBLIC_NETWORK=172.21.32.0/24,172.18.0.0/16
+      - CEPH_CLUSTER_NETWORK=172.21.32.0/24,172.18.0.0/16
+    networks:
+      - ingress
+      - default
+      - hostnet
+    volumes:
+      - /etc/ceph:/etc/ceph
+      - /var/lib/ceph:/var/lib/ceph
+    deploy:
+      replicas: 2
+      mode: replicated
+      endpoint_mode: dnsrr
+      
+  mgr:
+    image: ceph/daemon
+    container_name: mgr
+    command: mgr
+    restart: always
+    privileged: true
+    network_mode: host
+    environment:
+      - CEPH_DAEMON=mgr
+      - NETWORK_AUTO_DETECT=1
+      - MON_IP=172.21.32.104,172.21.32.106,172.21.32.110
+      - CEPH_PUBLIC_NETWORK=172.21.32.0/24,172.18.0.0/16
+      - CEPH_CLUSTER_NETWORK=172.21.32.0/24,172.18.0.0/16
+    networks:
+      - ingress
+      - default
+      - hostnet
+    volumes:
+      - /etc/ceph:/etc/ceph
+      - /var/lib/ceph:/var/lib/ceph
+    deploy:
+      replicas: 2
+      mode: replicated
+      endpoint_mode: dnsrr
+      
+  osd:
+    image: ceph/daemon
+    container_name: osd
+    command: osd
+    restart: always
+    privileged: true
+    network_mode: host
+    environment:
+      - CEPH_DAEMON=osd
+      - NETWORK_AUTO_DETECT=1
+      - MON_IP=172.21.32.104,172.21.32.106,172.21.32.110
+      - CEPH_PUBLIC_NETWORK=172.21.32.0/24,172.18.0.0/16
+      - CEPH_CLUSTER_NETWORK=172.21.32.0/24,172.18.0.0/16
+    volumes:
+      - /etc/ceph:/etc/ceph
+      - /var/lib/ceph:/var/lib/ceph
+      - /dev:/dev
+      - /opt/ceph/rbd:/var/lib/ceph/osd
+    deploy:
+      replicas: 2
+      mode: replicated
+      endpoint_mode: dnsrr
+
+  mysql:
+    image: 172.21.32.31:5000/mysql-canal:5.7.22
+    container_name: mysql
+    restart: always
+    privileged: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=SqlPwd1@
+    volumes:
+      - /home/deploy/config/mysql/data:/var/lib/mysql
+      - /home/deploy/config/mysql/conf/docker.cnf:/etc/mysql/conf.d/docker.cnf
+    ports:
+      - 3306:3306
+    deploy:
+      replicas: 2
+
+  mysql3307:
+    image: 172.21.32.31:5000/mysql:5.7.22
+    container_name: mysql3307
+    restart: always
+    privileged: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=MysqlPwd1@
+    volumes:
+      - /home/deploy/config/mysql3307/data:/var/lib/mysql
+      - /home/deploy/config/mysql3307/conf/docker.cnf:/etc/mysql/conf.d/docker.cnf
+    ports:
+      - 3307:3306
+    deploy:
+      replicas: 2
+
+networks:
+   hostnet:
+      external: true
+      name: host
+   ingress:
+     driver: overlay
+     attachable: true
+   nonet:
+     external: true
+     name: none
