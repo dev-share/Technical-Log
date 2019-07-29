@@ -1,0 +1,129 @@
+version: '3.7'
+services:
+  mon:
+    image: ceph/daemon:latest-nautilus-devel
+    container_name: mon
+    restart: always
+    command: mon
+    environment:
+      - MON_IP=172.21.32.104,172.21.32.106,172.21.32.110
+      - CEPH_PUBLIC_NETWORK=172.21.32.0/24
+    volumes:
+      - /etc/ceph:/etc/ceph
+      - /var/lib/ceph:/var/lib/ceph
+    deploy:
+      replicas: 1
+      mode: replicated
+      endpoint_mode: dnsrr
+
+  mon2:
+    image: ceph/daemon:latest-nautilus-devel
+    container_name: mon2
+    restart: always
+    command: mon
+    environment:
+      - MON_IP=172.21.32.104,172.21.32.106,172.21.32.110
+      - CEPH_PUBLIC_NETWORK=172.21.32.0/24
+    volumes:
+      - /etc/ceph:/etc/ceph
+      - /var/lib/ceph:/var/lib/ceph
+    depends_on:
+      - mon
+    deploy:
+      replicas: 2
+      mode: replicated
+      endpoint_mode: dnsrr
+      
+  rgw:
+    image: ceph/daemon:latest-nautilus-devel
+    command: rgw
+    restart: always
+    volumes:
+      - /etc/ceph:/etc/ceph
+      - /var/lib/ceph:/var/lib/ceph
+    depends_on:
+      - mon
+    links:
+      - mon2
+    deploy:
+      replicas: 1
+      mode: replicated
+      endpoint_mode: dnsrr
+      
+  osd:
+    image: ceph/daemon:latest-nautilus-devel
+    command: osd
+    restart: always
+    privileged: true
+    volumes:
+      - /etc/ceph:/etc/ceph
+      - /var/lib/ceph/:/var/lib/ceph/
+      - /dev/:/dev/
+      - /opt/ceph/rbd:/var/lib/ceph/osd
+    depends_on:
+      - mon
+    links:
+      - mon2
+      - rgw
+    deploy:
+      replicas: 2
+      mode: replicated
+      endpoint_mode: dnsrr 
+      
+  mgr:
+    image: ceph/daemon:latest-nautilus-devel
+    command: mgr
+    restart: always
+    volumes:
+      - /etc/ceph:/etc/ceph
+      - /var/lib/ceph:/var/lib/ceph
+    depends_on:
+      - mon
+    links:
+      - mon2
+      - rgw
+    deploy:
+      replicas: 1
+      mode: replicated
+      endpoint_mode: dnsrr
+ 
+  mysql:
+    image: 172.21.32.31:5000/mysql-canal:5.7.22
+    container_name: mysql
+    restart: always
+    privileged: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=SqlPwd1@
+    volumes:
+      - /home/deploy/config/mysql/data:/var/lib/mysql
+      - /home/deploy/config/mysql/conf/docker.cnf:/etc/mysql/conf.d/docker.cnf
+    ports:
+      - 3306:3306
+    deploy:
+      replicas: 2
+
+  mysql3307:
+    image: 172.21.32.31:5000/mysql:5.7.22
+    container_name: mysql3307
+    restart: always
+    privileged: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=MysqlPwd1@
+    volumes:
+      - /home/deploy/config/mysql3307/data:/var/lib/mysql
+      - /home/deploy/config/mysql3307/conf/docker.cnf:/etc/mysql/conf.d/docker.cnf
+    ports:
+      - 3307:3306
+    deploy:
+      replicas: 2
+
+networks:
+   hostnet:
+      external: true
+      name: host
+   ingress:
+     driver: overlay
+     attachable: true
+   nonet:
+     external: true
+     name: none

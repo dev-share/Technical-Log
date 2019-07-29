@@ -1,0 +1,86 @@
+opt/ceph-container/bin/osd_disk_prepare.sh: line 46: ceph-disk: command not found
+
+
+2019-07-26 09:00:48  /opt/ceph-container/bin/entrypoint.sh: static: does not generate config
+
+
+2019-07-26 09:00:48  /opt/ceph-container/bin/entrypoint.sh: Device detected, assuming ceph-disk scenario is desired
+
+
+2019-07-26 09:00:48  /opt/ceph-container/bin/entrypoint.sh: Preparing and activating /dev/sdb
+
+
+docker run -d \
+--name mon \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--env MON_IP=172.21.32.104 \
+--env CEPH_PUBLIC_NETWORK=172.21.32.0/24 \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon mon
+
+docker run -d \
+--name rgw \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon rgw
+
+docker run -d \
+--name mgr \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon mgr
+
+docker run -d \
+--name rbd \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon rbd_target_gw
+
+docker run -d \
+--name osd \
+--privileged=true \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--mount type=bind,src=//dev,dst=/dev \
+--mount type=bind,src=//var/lib/ceph/osd,dst=/opt/ceph/rbd \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon osd
+
+docker exec mon ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/ceph.keyring 
+docker exec mon ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/ceph.keyring 
+docker exec mon ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring 
+docker exec mon ceph auth get client.bootstrap-rbd-mirror -o /var/lib/ceph/bootstrap-rbd-mirror/ceph.keyring 
+
+rsync -a /etc/ceph/* zhangkun@172.21.32.104:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.104:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.106:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.106:/home/zhangkun/ceph-var
+
+
+rm -rf /etc/ceph
+rm -rf /var/lib/ceph
+rm -rf /var/lib/ceph
+rm -rf /opt/ceph/rbd
+rm -rf /var/log/ceph
+mkdir -p /etc/ceph /var/lib/ceph /var/lib/ceph/osd /opt/ceph/rbd /var/log/ceph
+mv /home/zhangkun/ceph/* /etc/ceph
+mv /home/zhangkun/ceph-var/* /var/lib/ceph
+rm -rf /var/lib/ceph/osd
+chown -R 167:167 /etc/ceph
+chown -R 167:167 /var/lib/ceph
+chown -R root:root /etc/ceph/ceph.conf
+
+
+
+

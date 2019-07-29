@@ -1,0 +1,139 @@
+// 删除安装包
+$ ceph-deploy purge dbs-server03 dbs-server04 dbs-server10
+
+// 清除配置
+$ ceph-deploy purgedata dbs-server03 dbs-server04 dbs-server10
+$ ceph-deploy forgetkeys
+
+ceph-deploy --overwrite-conf new dbs-server03 dbs-server04 dbs-server10
+
+sed -i "s#^auth_cluster_required = .*#auth_cluster_required = cephx #g" ceph.conf
+sed -i "s#^auth_service_required = .*#auth_service_required = cephx #g" ceph.conf
+sed -i "s#^auth_client_required = .*#auth_client_required = cephx #g" ceph.conf
+
+sed -i "s#^mon_initial_members = .*#mon_initial_members = dbs-server03,dbs-server04,dbs-server10 #g" ceph.conf
+sed -i "s#^mon_host = .*#mon_host = 172.21.32.104,172.21.32.106,172.21.32.110 #g" ceph.conf
+
+
+public network = 172.18.0.0/16,172.21.32.0/24
+cluster network = 172.21.32.0/24
+
+sed -i '$a\osd pool default size = 2' ceph.conf
+sed -i '$a\mon_addr = 172.21.32.106:6789,172.21.32.110:6789,172.21.32.104:6789' ceph.conf
+
+ceph-deploy --overwrite-conf mon create-initial
+
+sed -i '$a\[mon]' ceph.conf
+sed -i '$a\mon_allow_pool_delete = true' ceph.conf
+
+ceph-deploy --overwrite-conf osd create dbs-server03:/var/local/osd0
+ceph-deploy --overwrite-conf osd create dbs-server04:/var/local/osd1
+ceph-deploy --overwrite-conf osd create dbs-server10:/var/local/osd2
+
+ceph-deploy osd activate dbs-server03:/var/local/osd0
+ceph-deploy osd activate dbs-server04:/var/local/osd1
+ceph-deploy osd activate dbs-server10:/var/local/osd2
+
+
+mkdir -p /home/ceph/.ssh
+touch /home/ceph/.ssh/config
+gedit /home/ceph/.ssh/config
+
+Host dbs-server03
+  Hostname dbs-server03
+  User ceph
+Host dbs-server04
+   Hostname dbs-server04
+  User ceph
+Host dbs-server10
+  Hostname dbs-server10
+  User ceph
+
+ceph-deploy purge dbs-server03
+ceph-deploy purgedata dbs-server03
+ceph-deploy forgetkeys
+
+ceph-deploy purge dbs-server04
+ceph-deploy purgedata dbs-server04
+ceph-deploy forgetkeys
+
+ceph-deploy purge dbs-server10
+ceph-deploy purgedata dbs-server10
+ceph-deploy forgetkeys
+
+ceph-deploy --overwrite-conf new dbs-server03
+ceph-deploy --overwrite-conf new dbs-server04
+ceph-deploy --overwrite-conf new dbs-server10
+
+ceph-deploy install dbs-server03
+ceph-deploy install dbs-server04
+ceph-deploy install dbs-server10
+
+ceph-deploy mon create-initial
+
+ceph-deploy mon add dbs-server03
+ceph-deploy mon add dbs-server04
+ceph-deploy mon add dbs-server10
+
+
+
+rm -rf /etc/ceph
+rm -rf /var/lib/ceph
+rm -rf /var/lib/ceph
+rm -rf /opt/ceph/rbd
+rm -rf /var/log/ceph
+mkdir -p /etc/ceph /var/lib/ceph /var/lib/ceph/osd /opt/ceph/rbd /var/log/ceph
+chown -R 1000:1000 /etc/ceph
+chown -R 1000:1000 /var/lib/ceph
+chown -R 1000:1000 /var/log/ceph
+chown -R 1000:1000 /opt/ceph/rbd
+chown -R root:root /etc/ceph/ceph.conf
+mkfs.xfs /dev/sdb -f
+mount /dev/sdb /opt/ceph/rbd
+
+
+chown -R 64045:64045 /etc/ceph
+chown -R 64045:64045 /var/lib/ceph
+chown -R 64045:64045 /var/log/ceph
+chown -R 64045:64045 /opt/ceph/rbd
+
+sudo -s
+cd /opt/ceph/
+ls -lrt /etc/ceph
+cat /etc/ceph/ceph.conf
+
+ - NETWORK_AUTO_DETECT=1
+chown -R ceph /var/lib/ceph
+chown -R ceph /etc/ceph
+
+/opt/ceph-container/bin/entrypoint.sh
+
+      
+
+dbs_mgr.2.7c465ijjw8rcmwljfdxrvqvsd
+dbs_mon.1.5ap9tr4b61bm4i5h7kjtsy7jd
+
+dbs_mon.2.uubi3ormcpgf7gydlghbqtfn1
+dbs_mgr.1.o5v43uepdiyctdovch39c092h
+
+docker exec dbs_mon.1.5ap9tr4b61bm4i5h7kjtsy7jd ceph mgr dump
+docker exec dbs_mgr.2.7c465ijjw8rcmwljfdxrvqvsd ceph mgr module enable dashboard
+docker exec dbs_mgr.2.7c465ijjw8rcmwljfdxrvqvsd ceph dashboard create-self-signed-cert
+docker exec dbs_mgr.2.7c465ijjw8rcmwljfdxrvqvsd ceph dashboard set-login-credentials ceph ceph
+docker exec dbs_mgr.2.7c465ijjw8rcmwljfdxrvqvsdceph config set mgr mgr/dashboard/server_addr 172.21.32.106
+docker exec dbs_mgr.2.7c465ijjw8rcmwljfdxrvqvsdceph config set mgr mgr/dashboard/server_port 7000
+docker exec dbs_mgr.2.7c465ijjw8rcmwljfdxrvqvsd ceph config set mgr mgr/dashboard/ssl false
+docker restart dbs_mgr.2.7c465ijjw8rcmwljfdxrvqvsd
+docker exec dbs_mgr.2.7c465ijjw8rcmwljfdxrvqvsd ceph mgr services
+
+docker exec dbs_mon.2.uubi3ormcpgf7gydlghbqtfn1 ceph mgr dump
+docker exec dbs_mgr.1.o5v43uepdiyctdovch39c092h ceph mgr module enable dashboard
+docker exec dbs_mgr.1.o5v43uepdiyctdovch39c092h ceph dashboard create-self-signed-cert
+docker exec dbs_mgr.1.o5v43uepdiyctdovch39c092h ceph dashboard set-login-credentials ceph ceph
+docker exec dbs_mgr.1.o5v43uepdiyctdovch39c092hceph config set mgr mgr/dashboard/server_addr 172.21.32.110
+docker exec dbs_mgr.1.o5v43uepdiyctdovch39c092hceph config set mgr mgr/dashboard/server_port 7000
+docker exec dbs_mgr.1.o5v43uepdiyctdovch39c092h ceph config set mgr mgr/dashboard/ssl false
+docker restart dbs_mgr.1.o5v43uepdiyctdovch39c092h
+docker exec dbs_mgr.1.o5v43uepdiyctdovch39c092h ceph mgr services
+
+docker exec dbs_mon.1.ri36gcd2v9qxn1j9wap1euypb ceph -s
