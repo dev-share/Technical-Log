@@ -1,91 +1,72 @@
 version: '3.7'
 services:
   mon:
-    image: ceph/daemon:latest-nautilus-devel
+    image: ceph/daemon:latest-devel
     container_name: mon
-    restart: always
     command: mon
     environment:
       - MON_IP=172.21.32.104,172.21.32.106,172.21.32.110
       - CEPH_PUBLIC_NETWORK=172.21.32.0/24
+      - CEPH_CLUSTER_NETWORK=172.21.32.0/24
     volumes:
       - /etc/ceph:/etc/ceph
       - /var/lib/ceph:/var/lib/ceph
+      - /var/log/ceph/:/var/log/ceph
     deploy:
       replicas: 1
-      mode: replicated
-      endpoint_mode: dnsrr
-
-  mon2:
-    image: ceph/daemon:latest-nautilus-devel
-    container_name: mon2
-    restart: always
-    command: mon
-    environment:
-      - MON_IP=172.21.32.104,172.21.32.106,172.21.32.110
-      - CEPH_PUBLIC_NETWORK=172.21.32.0/24
-    volumes:
-      - /etc/ceph:/etc/ceph
-      - /var/lib/ceph:/var/lib/ceph
-    depends_on:
-      - mon
-    deploy:
-      replicas: 2
-      mode: replicated
-      endpoint_mode: dnsrr
+    networks:
+      - hostnet
       
   rgw:
-    image: ceph/daemon:latest-nautilus-devel
+    image: ceph/daemon:latest-devel
+    container_name: rgw
     command: rgw
     restart: always
     volumes:
       - /etc/ceph:/etc/ceph
       - /var/lib/ceph:/var/lib/ceph
+      - /var/log/ceph/:/var/log/ceph
     depends_on:
       - mon
-    links:
-      - mon2
     deploy:
       replicas: 1
-      mode: replicated
-      endpoint_mode: dnsrr
+    networks:
+      - hostnet 
       
   osd:
-    image: ceph/daemon:latest-nautilus-devel
+    image: ceph/daemon:latest-devel
+    container_name: osd
     command: osd
     restart: always
     privileged: true
     volumes:
       - /etc/ceph:/etc/ceph
-      - /var/lib/ceph/:/var/lib/ceph/
-      - /dev/:/dev/
+      - /var/lib/ceph:/var/lib/ceph
+      - /dev:/dev
       - /opt/ceph/rbd:/var/lib/ceph/osd
+      - /var/log/ceph/:/var/log/ceph
     depends_on:
       - mon
-    links:
-      - mon2
-      - rgw
     deploy:
-      replicas: 2
-      mode: replicated
-      endpoint_mode: dnsrr 
+      replicas: 1
+    networks:
+      - hostnet 
       
   mgr:
-    image: ceph/daemon:latest-nautilus-devel
+    image: ceph/daemon:latest-devel
+    container_name: mgr
     command: mgr
     restart: always
     volumes:
       - /etc/ceph:/etc/ceph
       - /var/lib/ceph:/var/lib/ceph
+      - /var/log/ceph/:/var/log/ceph
     depends_on:
       - mon
-    links:
-      - mon2
-      - rgw
     deploy:
       replicas: 1
-      mode: replicated
-      endpoint_mode: dnsrr
+    networks:
+      - hostnet 
 
 networks:
    hostnet:

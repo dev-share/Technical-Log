@@ -1,10 +1,18 @@
 rm -rf /etc/ceph
 rm -rf /var/lib/ceph
-rm -rf /var/lib/ceph
 rm -rf /opt/ceph/rbd
 rm -rf /var/log/ceph
 mkdir -p /etc/ceph /var/lib/ceph /var/lib/ceph/osd /opt/ceph/rbd /var/log/ceph
+chown -R 167:167 /etc/ceph
+chown -R 167:167 /var/lib/ceph
+chown -R root:root /etc/ceph/ceph.conf
 
+mkfs.xfs /dev/sdb -f
+mount /dev/sdb /opt/ceph/rbd
+
+ceph-deploy purge dbs-server10
+ceph-deploy purgedata dbs-server10
+ceph-deploy forgetkeys
 
 
 docker run -d \
@@ -18,29 +26,6 @@ docker run -d \
 --network=host \
 --label com.docker.stack.namespace=dbs \
 ceph/daemon:latest-devel mon
-
-docker run -d \
---name rgw \
---restart=always \
---mount type=bind,src=//etc/ceph,dst=/etc/ceph \
---mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
---network=host \
---label com.docker.stack.namespace=dbs \
---label node.type=ceph \
---label node.role=rgw \
-ceph/daemon:latest-devel rgw
-
-docker run -d \
---name mds \
---restart=always \
---mount type=bind,src=//etc/ceph,dst=/etc/ceph \
---mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
---network=host \
---env CEPHFSCREATE=1 \
---label com.docker.stack.namespace=dbs \
---label node.type=ceph \
---label node.role=mds \
-ceph/daemon:latest-devel mds
 
 docker run -d \
 --name mgr \
@@ -77,34 +62,40 @@ docker exec mgr ceph config set mgr mgr/dashboard/ssl false
 docker restart mgr
 docker exec mgr ceph mgr services
 
-docker plugin disable 172.21.32.31:5000/rexray/rbd
-docker plugin rm 172.21.32.31:5000/rexray/rbd
+
+rexray uninstall
+rm -rf $(find / -name rexray)
+rm -rf $(find / -name libstorage)
+curl -sSL https://rexray.io/install | sh -s -- stable 0.9.2
+
 docker plugin disable rexray/rbd
 docker plugin rm rexray/rbd
 
-
-docker plugin install rexray/rbd RBD_DEFAULTPOOL=rbd LINUX_VOLUME_FILEMODE=0777
+docker plugin install rexray/rbd RBD_DEFAULTPOOL=rbd LINUX_VOLUME_FILEMODE=0777 LINUX_VOLUME_ROOTPATH=/opt/ceph/rbd RBD_CEPHARGS="--cluster 7904351f-7413-4e00-800e-a73ee7c969eb" RBD_TESTMODULE=true 
 docker plugin ls
+docker plugin inspect rexray/rbd 
+
 apt-get install -y ceph-common
 apt-get install -y rbd-nbd
 
-rsync -a /etc/ceph/* zhangkun@172.21.32.104:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.104:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.106:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.106:/home/zhangkun/ceph-var
 
-rsync -a /etc/ceph/* zhangkun@172.21.32.110:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.110:/home/zhangkun/ceph-var
+rm -rf /etc/rexray/config.yml
+mv /home/zhangkun/config.yml /etc/rexray
+chown -R root:root /etc/rexray/config.yml
 
-rm -rf /etc/ceph
-rm -rf /var/lib/ceph
-rm -rf /opt/ceph/rbd
-rm -rf /var/log/ceph
-mkdir -p /etc/ceph /var/lib/ceph /var/lib/ceph/osd /opt/ceph/rbd /var/log/ceph
-mv /home/zhangkun/ceph/* /etc/ceph
-mv /home/zhangkun/ceph-var/* /var/lib/ceph
-chown -R 167:167 /etc/ceph
-chown -R 167:167 /var/lib/ceph
-chown -R root:root /etc/ceph/ceph.conf
+systemctl enable rexray;
+systemctl start rexray;
+systemctl status rexray;
+
+rexray volume ls
+docker volume create --driver=rexray/rbd:latest --name=test
 
 
 
-
+cd /var/lib/dpkg
+rm -rf info
+mkdir info 
+apt-get upgrade
+cd /opt/ceph
 
 
