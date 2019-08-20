@@ -1,0 +1,134 @@
+rm -rf /etc/ceph
+rm -rf /var/lib/ceph
+rm -rf /opt/ceph/rbd/*
+rm -rf /var/log/ceph
+mkdir -p /etc/ceph /var/lib/ceph /var/lib/ceph/osd /opt/ceph/rbd /opt/ceph/data /var/log/ceph
+chown -R 167:167 /etc/ceph
+chown -R 167:167 /var/lib/ceph
+chown -R root:root /etc/ceph/ceph.conf
+
+mkfs.xfs /dev/sdb -f
+mount /dev/sdb /opt/ceph/rbd
+
+docker pull ceph/daemon:latest-devel
+
+docker run -d \
+--name mon \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--env MON_IP=172.21.32.110,172.21.32.114,172.21.32.106 \
+--env DEBUG=stayalive \
+--env CEPH_PUBLIC_NETWORK=172.21.32.0/24 \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon:latest-devel mon
+
+docker run -d \
+--name osd \
+--privileged=true \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--mount type=bind,src=//dev,dst=/dev \
+--mount type=bind,src=//opt/ceph/rbd,dst=/var/lib/ceph/osd \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon:latest-devel osd
+
+docker run -d \
+--name mds \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon:latest-devel mds
+
+docker run -d \
+--name mgr \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon:latest-devel mgr
+
+
+docker exec mon ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/ceph.keyring 
+docker exec mon ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/ceph.keyring 
+docker exec mon ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring
+docker exec mon ceph auth get client.bootstrap-rbd-mirror -o /var/lib/ceph/bootstrap-rbd-mirror/ceph.keyring
+
+
+docker exec mgr ceph mgr module enable rbd_support
+docker exec mgr ceph mgr module enable dashboard
+docker exec mgr ceph dashboard create-self-signed-cert
+docker exec mgr ceph dashboard set-login-credentials ceph ceph
+docker exec mgr ceph config set mgr mgr/dashboard/server_port 7000
+docker exec mgr ceph config set mgr mgr/dashboard/ssl false
+docker restart mgr
+docker exec mgr ceph mgr services
+
+
+rsync -a /etc/ceph/* zhangkun@172.21.32.114:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.114:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.106:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.106:/home/zhangkun/ceph-var
+
+mv /home/zhangkun/ceph/* /etc/ceph
+mv /home/zhangkun/ceph-var/* /var/lib/ceph
+chown -R 167:167 /etc/ceph
+chown -R 167:167 /var/lib/ceph
+chown -R root:root /etc/ceph/ceph.conf
+
+
+
+rexray uninstall
+rm -rf $(find / -name rexray)
+rm -rf $(find / -name libstorage)
+curl -sSL https://rexray.io/install | sh -s -- stable 0.9.2
+
+docker plugin disable rexray/rbd
+docker plugin rm rexray/rbd
+
+docker plugin install rexray/rbd RBD_DEFAULTPOOL=rbd LINUX_VOLUME_FILEMODE=0777
+docker plugin ls
+docker plugin inspect rexray/rbd 
+
+docker plugin disable rexray/rbd
+docker plugin upgrade  rexray/rbd
+
+rm -rf /etc/rexray/config.yml
+mv /home/zhangkun/config.yml /etc/rexray
+chown -R root:root /etc/rexray/config.yml
+
+systemctl enable rexray;
+systemctl stop rexray;
+systemctl start rexray;
+systemctl status rexray;
+
+rexray volume ls
+
+docker service create \
+--name portainer \
+--publish 9000:9000 \
+--replicas=1 \
+--constraint 'node.role == manager' \
+--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
+--container-label com.docker.stack.namespace=swarm \
+--label com.docker.stack.namespace=swarm \
+172.21.32.31:5000/portainer/portainer  \
+-H unix:///var/run/docker.sock
+
+docker service create \
+--name nginx \
+--publish 8000:80 \
+--replicas=1 \
+--constraint 'node.role == manager' \
+--mount type=bind,src=/opt/nginx/default.conf,dst=/etc/nginx/conf.d/default.conf \
+--mount type=bind,src=/opt/nginx/nginx.conf,dst=/etc/nginx/nginx.conf \
+--container-label com.docker.stack.namespace=swarm \
+--label com.docker.stack.namespace=swarm \
+172.21.32.31:5000/nginx:1.17.3
+
+
+
+rsync -a //home/deploy/config/* zhangkun@172.21.32.114:/home/zhangkun/opt/data && rsync -a //home/deploy/config/* zhangkun@172.21.32.110:/home/zhangkun/opt/data && rsync -a //home/deploy/config/* zhangkun@172.21.32.106:/home/zhangkun/opt/data

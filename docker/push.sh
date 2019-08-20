@@ -19,8 +19,8 @@ if [ -n "$(docker ps -a|grep -v grep|grep ${docker_register}/${docker_name}|awk 
 	docker stop $(docker ps -a|grep -v grep|grep ${docker_register}/${docker_name}|awk '{print $1}')
 	docker rm -f $(docker ps -a|grep -v grep|grep ${docker_register}/${docker_name}|awk '{print $1}')
 fi
-if [ -n "$(docker images -a|grep -v grep|grep ${docker_register}/$name|awk '{print $3}')" ] ; then
-	docker rmi -f $(docker images -a|grep -v grep|grep ${docker_register}/$name|awk '{print $3}')
+if [ -n "$(docker images -a|grep -v grep|grep ${docker_register}/$name|grep $version|awk '{print $3}')" ] ; then
+	docker rmi -f $(docker images -a|grep -v grep|grep ${docker_register}/$name|grep $version|awk '{print $3}')
 fi
 
 docker build -t ${docker_register}/${docker_name} --rm .

@@ -1,8 +1,8 @@
 rm -rf /etc/ceph
 rm -rf /var/lib/ceph
-rm -rf /opt/ceph/rbd
+rm -rf /opt/ceph/rbd/*
 rm -rf /var/log/ceph
-mkdir -p /etc/ceph /var/lib/ceph /var/lib/ceph/osd /opt/ceph/rbd /var/log/ceph
+mkdir -p /etc/ceph /var/lib/ceph /var/lib/ceph/osd /opt/ceph/rbd /opt/ceph/data /var/log/ceph
 chown -R 167:167 /etc/ceph
 chown -R 167:167 /var/lib/ceph
 chown -R root:root /etc/ceph/ceph.conf
@@ -10,8 +10,13 @@ chown -R root:root /etc/ceph/ceph.conf
 mkfs.xfs /dev/sdb -f
 mount /dev/sdb /opt/ceph/rbd
 
-ceph-deploy purge dbs-server10
-ceph-deploy purgedata dbs-server10
+rm -rf /opt/ceph/data/*
+mkdir -p /opt/ceph/data
+mkfs.xfs /dev/sdc -f
+mount /dev/sdc /opt/ceph/data
+
+ceph-deploy purge dbs-server11
+ceph-deploy purgedata dbs-server11
 ceph-deploy forgetkeys
 
 
@@ -20,12 +25,42 @@ docker run -d \
 --restart=always \
 --mount type=bind,src=//etc/ceph,dst=/etc/ceph \
 --mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
---env MON_IP=172.21.32.110 \
+--env MON_IP=172.21.32.112 \
 --env DEBUG=stayalive \
 --env CEPH_PUBLIC_NETWORK=172.21.32.0/24 \
 --network=host \
 --label com.docker.stack.namespace=dbs \
 ceph/daemon:latest-devel mon
+
+docker run -d \
+--name osd \
+--privileged=true \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--mount type=bind,src=//dev,dst=/dev \
+--mount type=bind,src=//opt/ceph/rbd,dst=/var/lib/ceph/osd \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon:latest-devel osd
+
+docker run -d \
+--name rgw \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon:latest-devel rgw
+
+docker run -d \
+--name mds \
+--restart=always \
+--mount type=bind,src=//etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon:latest-devel mds
 
 docker run -d \
 --name mgr \
@@ -37,31 +72,38 @@ docker run -d \
 ceph/daemon:latest-devel mgr
 
 docker run -d \
---name osd \
---privileged=true \
---restart=always \
---mount type=bind,src=//etc/ceph,dst=/etc/ceph \
---mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
---mount type=bind,src=//dev,dst=/dev \
---mount type=bind,src=//var/lib/ceph/osd,dst=/opt/ceph/rbd \
+--name demo \
+--env CEPH_PUBLIC_NETWORK=1 \
+--env DEMO_DAEMONS=osd \
 --network=host \
---label com.docker.stack.namespace=dbs \
-ceph/daemon:latest-devel osd
+ceph/daemon:latest-devel demo
+
+
 
 docker exec mon ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/ceph.keyring 
 docker exec mon ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/ceph.keyring 
-docker exec mon ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring 
+docker exec mon ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring
+docker exec mon ceph auth get client.bootstrap-rbd-mirror -o /var/lib/ceph/bootstrap-rbd-mirror/ceph.keyring
+
 
 docker exec mgr ceph mgr module enable rbd_support
 docker exec mgr ceph mgr module enable dashboard
 docker exec mgr ceph dashboard create-self-signed-cert
 docker exec mgr ceph dashboard set-login-credentials ceph ceph
-docker exec mgr ceph config set mgr mgr/dashboard/server_addr 172.21.32.110
 docker exec mgr ceph config set mgr mgr/dashboard/server_port 7000
 docker exec mgr ceph config set mgr mgr/dashboard/ssl false
 docker restart mgr
 docker exec mgr ceph mgr services
 
+
+docker restart mon
+docker restart mgr
+docker restart osd
+
+docker exec mon ceph -s
+
+docker exec osd ceph osd pool create rbd 0 replicated 1 cephfs rbd rgw
+docker exec osd ceph osd pool rm rbd rbd --yes-i-really-really-mean-it
 
 rexray uninstall
 rm -rf $(find / -name rexray)
@@ -71,9 +113,12 @@ curl -sSL https://rexray.io/install | sh -s -- stable 0.9.2
 docker plugin disable rexray/rbd
 docker plugin rm rexray/rbd
 
-docker plugin install rexray/rbd RBD_DEFAULTPOOL=rbd LINUX_VOLUME_FILEMODE=0777 LINUX_VOLUME_ROOTPATH=/opt/ceph/rbd RBD_CEPHARGS="--cluster 7904351f-7413-4e00-800e-a73ee7c969eb" RBD_TESTMODULE=true 
+docker plugin install rexray/rbd RBD_DEFAULTPOOL=rbd LINUX_VOLUME_FILEMODE=0777
 docker plugin ls
 docker plugin inspect rexray/rbd 
+
+docker plugin disable rexray/rbd
+docker plugin upgrade  rexray/rbd
 
 apt-get install -y ceph-common
 apt-get install -y rbd-nbd
@@ -84,13 +129,75 @@ mv /home/zhangkun/config.yml /etc/rexray
 chown -R root:root /etc/rexray/config.yml
 
 systemctl enable rexray;
+systemctl stop rexray;
 systemctl start rexray;
 systemctl status rexray;
 
 rexray volume ls
-docker volume create --driver=rexray/rbd:latest --name=test
+docker volume create --driver=rexray/rbd:latest --name=portainer --label com.docker.stack.namespace=dbs
+
+docker volume create --driver=rexray/rbd:latest --label com.docker.stack.namespace=dbs --opt type=xfs --opt device=/opt/ceph/rbd2 --name=data1
+docker volume create --driver=rexray/rbd:latest --label com.docker.stack.namespace=dbs --opt type=tmpfs --opt device=/opt/ceph/rbd2 --name=data2
+docker volume create --driver=rexray/rbd:latest --label com.docker.stack.namespace=dbs --opt type=nfs --opt device=/opt/ceph/rbd2 --name=data3
+
+docker run -d \
+--name mysql1 \
+--publish 3306:3306 \
+--env MYSQL_ROOT_PASSWORD=SqlPwd1@ \
+--mount type=volume,src=data2,dst=/var/lib/mysql \
+--network=host \
+172.21.32.31:5000/mysql:5.7.22
+docker run -d \
+--name mysql2 \
+--publish 3307:3306 \
+--env MYSQL_ROOT_PASSWORD=SqlPwd1@ \
+--mount type=volume,src=data2,dst=/var/lib/mysql,volume-driver=rexray/rbd:latest \
+--network=host \
+172.21.32.31:5000/mysql:5.7.22
+docker run -d \
+--name mysql3 \
+--publish 3308:3306 \
+--env MYSQL_ROOT_PASSWORD=SqlPwd1@ \
+--mount type=volume,src=data3,dst=/var/lib/mysql,volume-driver=rexray/rbd:latest \
+--network=host \
+172.21.32.31:5000/mysql:5.7.22
+
+docker service create \
+--name mysql \
+--publish 3306:3306 \
+--replicas=1 \
+--env MYSQL_ROOT_PASSWORD=SqlPwd1@ \
+--constraint 'node.role == manager' \
+--mount type=volume,src=mysql_data,dst=/var/lib/mysql,volume-driver=rexray/rbd:latest \
+--label com.docker.stack.namespace=dbs \
+--container-label com.docker.stack.namespace=dbs \
+mysql:5.7.22
 
 
+mkdir /opt/portainer
+docker service create \
+--name portainer \
+--publish 9000:9000 \
+--replicas=1 \
+--constraint 'node.role == manager' \
+--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
+--mount type=volume,src=portainer,dst=/data,volume-driver=rexray/rbd:latest \
+--label com.docker.stack.namespace=docker \
+--container-label com.docker.stack.namespace=docker \
+172.21.32.31:5000/portainer/portainer  \
+-H unix:///var/run/docker.sock
+
+mkdir /opt/portainer
+docker service create \
+--name Portainer_Cluster \
+--publish 9000:9000 \
+--replicas=1 \
+--constraint 'node.role == manager' \
+--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
+--mount type=bind,src=//opt/portainer,dst=/data \
+--label com.docker.stack.namespace=dbs \
+172.21.32.31:5000/portainer/portainer  \
+-H unix:///var/run/docker.sock
 
 cd /var/lib/dpkg
 rm -rf info
@@ -99,3 +206,16 @@ apt-get upgrade
 cd /opt/ceph
 
 
+docker run -d \
+--name mysql \
+--publish 3306:3306 \
+--env MYSQL_ROOT_PASSWORD=SqlPwd1@ \
+--label com.docker.stack.namespace=dbs \
+--mount type=volume,src=mysql_data,dst=/var/lib/mysql,volume-driver=rexray/rbd:latest \
+--network=host \
+172.21.32.31:5000/mysql:5.7.22
+
+
+wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.10.1/linux-headers-4.10.1-041001_4.10.1-041001.201702260735_all.deb
+wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.10.1/linux-headers-4.10.1-041001-generic_4.10.1-041001.201702260735_amd64.deb
+wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.10.1/linux-image-4.10.1-041001-generic_4.10.1-041001.201702260735_amd64.deb
