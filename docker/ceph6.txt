@@ -17,7 +17,7 @@ docker run -d \
 --restart=always \
 --mount type=bind,src=//etc/ceph,dst=/etc/ceph \
 --mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
---env MON_IP=172.21.32.110,172.21.32.114,172.21.32.106 \
+--env MON_IP=172.21.32.118,172.21.32.116,172.21.32.114,172.21.32.110,172.21.32.106,172.21.32.104  \
 --env DEBUG=stayalive \
 --env CEPH_PUBLIC_NETWORK=172.21.32.0/24 \
 --network=host \
@@ -59,19 +59,23 @@ docker exec mon ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-os
 docker exec mon ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/ceph.keyring 
 docker exec mon ceph auth get client.bootstrap-rgw -o /var/lib/ceph/bootstrap-rgw/ceph.keyring
 docker exec mon ceph auth get client.bootstrap-rbd-mirror -o /var/lib/ceph/bootstrap-rbd-mirror/ceph.keyring
-
+docker restart osd
+docker exec mgr ceph -s
 
 docker exec mgr ceph mgr module enable rbd_support
+
 docker exec mgr ceph mgr module enable dashboard
 docker exec mgr ceph dashboard create-self-signed-cert
 docker exec mgr ceph dashboard set-login-credentials ceph ceph
 docker exec mgr ceph config set mgr mgr/dashboard/server_port 7000
 docker exec mgr ceph config set mgr mgr/dashboard/ssl false
+docker exec mgr ceph config set mgr mgr/dashboard/`hostname`/server_addr `ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v inet6|grep 172.21.32|awk '{print $2}'|tr -d "addr:"`
 docker restart mgr
 docker exec mgr ceph mgr services
 
+docker restart mon && docker restart mgr && docker restart osd && docker restart mds
 
-rsync -a /etc/ceph/* zhangkun@172.21.32.114:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.114:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.106:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.106:/home/zhangkun/ceph-var
+rsync -a /etc/ceph/* zhangkun@172.21.32.114:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.114:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.106:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.106:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.104:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.104:/home/zhangkun/ceph-var
 
 mv /home/zhangkun/ceph/* /etc/ceph
 mv /home/zhangkun/ceph-var/* /var/lib/ceph
@@ -79,7 +83,10 @@ chown -R 167:167 /etc/ceph
 chown -R 167:167 /var/lib/ceph
 chown -R root:root /etc/ceph/ceph.conf
 
-
+docker container prune
+docker images prune
+docker volume prune
+docker network prune
 
 rexray uninstall
 rm -rf $(find / -name rexray)
@@ -110,12 +117,14 @@ rexray volume ls
 docker service rm portainer
 docker pull 172.21.32.31:5000/portainer/portainer:1.22.0
 
+docker service rm portainer
 docker service create \
 --name portainer \
 --publish 9000:9000 \
 --replicas=1 \
 --constraint 'node.role == manager' \
 --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
+--mount type=bind,src=//opt/portainer,dst=/data \
 --container-label com.docker.stack.namespace=swarm \
 --label com.docker.stack.namespace=swarm \
 172.21.32.31:5000/portainer/portainer:1.22.0  \
@@ -123,7 +132,7 @@ docker service create \
 
 docker service create \
 --name nginx \
---publish 80:80 \
+--publish 8552:8552 \
 --replicas=1 \
 --constraint 'node.role == manager' \
 --mount type=bind,src=/opt/nginx/nginx.conf,dst=/etc/nginx/nginx.conf \
