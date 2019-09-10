@@ -45,15 +45,6 @@ docker run -d \
 ceph/daemon:latest-devel osd
 
 docker run -d \
---name rgw \
---restart=always \
---mount type=bind,src=//etc/ceph,dst=/etc/ceph \
---mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
---network=host \
---label com.docker.stack.namespace=dbs \
-ceph/daemon:latest-devel rgw
-
-docker run -d \
 --name mds \
 --restart=always \
 --mount type=bind,src=//etc/ceph,dst=/etc/ceph \
@@ -70,14 +61,6 @@ docker run -d \
 --network=host \
 --label com.docker.stack.namespace=dbs \
 ceph/daemon:latest-devel mgr
-
-docker run -d \
---name demo \
---env CEPH_PUBLIC_NETWORK=1 \
---env DEMO_DAEMONS=osd \
---network=host \
-ceph/daemon:latest-devel demo
-
 
 
 docker exec mon ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/ceph.keyring 
@@ -105,6 +88,8 @@ docker exec mon ceph -s
 docker exec osd ceph osd pool create rbd 0 replicated 1 cephfs rbd rgw
 docker exec osd ceph osd pool rm rbd rbd --yes-i-really-really-mean-it
 
+rbd map data1  --name client.admin -m dbs-server11 -k /etc/ceph/ceph.client.admin.keyring
+
 rexray uninstall
 rm -rf $(find / -name rexray)
 rm -rf $(find / -name libstorage)
@@ -112,7 +97,7 @@ curl -sSL https://rexray.io/install | sh -s -- stable 0.9.2
 
 docker plugin disable rexray/rbd
 docker plugin rm rexray/rbd
-
+docker plugin install 172.21.32.31:5000/rexray/rbd RBD_DEFAULTPOOL=rbd LINUX_VOLUME_FILEMODE=0777
 docker plugin install rexray/rbd RBD_DEFAULTPOOL=rbd LINUX_VOLUME_FILEMODE=0777
 docker plugin ls
 docker plugin inspect rexray/rbd 
@@ -134,19 +119,20 @@ systemctl start rexray;
 systemctl status rexray;
 
 rexray volume ls
-docker volume create --driver=rexray/rbd:latest --name=portainer --label com.docker.stack.namespace=dbs
+docker volume create --driver=rexray/rbd:latest --name=dbs1_mysql --label com.docker.stack.namespace=dbs1
 
 docker volume create --driver=rexray/rbd:latest --label com.docker.stack.namespace=dbs --opt type=xfs --opt device=/opt/ceph/rbd2 --name=data1
 docker volume create --driver=rexray/rbd:latest --label com.docker.stack.namespace=dbs --opt type=tmpfs --opt device=/opt/ceph/rbd2 --name=data2
 docker volume create --driver=rexray/rbd:latest --label com.docker.stack.namespace=dbs --opt type=nfs --opt device=/opt/ceph/rbd2 --name=data3
 
 docker run -d \
---name mysql1 \
+--name mysql \
 --publish 3306:3306 \
 --env MYSQL_ROOT_PASSWORD=SqlPwd1@ \
---mount type=volume,src=data2,dst=/var/lib/mysql \
+--mount type=bind,src=/opt/data/mysql,dst=/var/lib/mysql \
 --network=host \
 172.21.32.31:5000/mysql:5.7.22
+
 docker run -d \
 --name mysql2 \
 --publish 3307:3306 \
@@ -154,6 +140,7 @@ docker run -d \
 --mount type=volume,src=data2,dst=/var/lib/mysql,volume-driver=rexray/rbd:latest \
 --network=host \
 172.21.32.31:5000/mysql:5.7.22
+
 docker run -d \
 --name mysql3 \
 --publish 3308:3306 \
@@ -204,7 +191,8 @@ rm -rf info
 mkdir info 
 apt-get upgrade
 cd /opt/ceph
-
+cd /home/zhangkun
+dpkg -i rexray_0.9.2-1_amd64.deb
 
 docker run -d \
 --name mysql \

@@ -1,0 +1,72 @@
+num=2
+for port in `seq 7010 7015`; do \
+  docker run -d -p ${port}:${port} -p 1${port}:1${port} \
+  --ip 172.19.0.${num} \
+  --privileged=true -v /opt/deploy/data/redis/${port}/conf/redis.conf:/usr/local/etc/redis/redis.conf \
+  --privileged=true -v /opt/deploy/data/redis/${port}/data:/data \
+  --restart always --name redis-${port} --network net2 \
+  --sysctl net.core.somaxconn=1024 172.21.32.31:5000/redis:5.0.5 redis-server /usr/local/etc/redis/redis.conf; \
+  num=$[num+1]
+done
+
+
+redis-cli --cluster create 172.19.0.2:7010 172.19.0.3:7011 172.19.0.4:7012 172.19.0.5:7013 172.19.0.6:7014 172.19.0.7:7015  --cluster-replicas 1
+
+redis-cli --cluster create 172.19.0.2:6379 172.19.0.3:6379 172.19.0.4:6379 172.19.0.5:6379 172.19.0.6:6379 172.19.0.7:6379  --cluster-replicas 1
+
+for port in `seq 9001 9006`; do \
+  mkdir -p ./${port}/conf \
+  && PORT=${port} envsubst < ./redis-cluster.tmpl > ./${port}/conf/redis.conf \
+  && mkdir -p ./${port}/data; \
+done
+
+
+for port in `seq 9001 9006`; do \
+  docker run -d -ti -p ${port}:${port} -p 1${port}:1${port} \
+  -v /opt/deploy/data/redis/${port}/conf/redis.conf:/usr/local/etc/redis/redis.conf:rw \
+  -v /opt/deploy/data/redis/${port}/data:/data:rw \
+  --restart always --name redis-${port} --net net2 \
+  --sysctl net.core.somaxconn=1024 172.21.32.31:5000/redis:5.0.5 redis-server /usr/local/etc/redis/redis.conf; \
+done
+
+for port in `seq 9001 9003`; do \
+  docker run -d -ti -p ${port}:${port} -p 1${port}:1${port} \
+  -v /opt/deploy/data/redis/${port}/conf/redis.conf:/usr/local/etc/redis/redis.conf:rw \
+  -v /opt/deploy/data/redis/${port}/data:/data:rw \
+  --restart always --name redis-${port} --net net2 \
+  --sysctl net.core.somaxconn=1024 172.21.32.31:5000/redis:5.0.5 redis-server /usr/local/etc/redis/redis.conf; \
+done
+
+redis-cli --cluster create 172.19.0.8:9001 172.19.0.9:9002 172.19.0.10:9003 --cluster-replicas 1
+
+redis-cli --cluster create 172.21.32.112:9001 172.21.32.112:9002 172.21.32.112:9003 --cluster-replicas 0
+
+redis-cli --cluster create 172.21.32.112:9001 172.21.32.112:9002 172.21.32.112:9003 172.21.32.112:9004 172.21.32.112:9005 172.21.32.112:9006 --cluster-replicas 1
+
+
+for port in `seq 6179 100 6279`; do \
+  mkdir -p ./${port}/conf \
+  && PORT=${port} envsubst < ./redis-cluster.tmpl > ./${port}/conf/redis.conf \
+  && mkdir -p ./${port}/data; \
+done
+
+for port in `seq 6179 100 6279`; do \
+  docker run -d -ti -p ${port}:${port} -p 1${port}:1${port} \
+  -v /opt/deploy/data/redis/${port}/conf/redis.conf:/usr/local/etc/redis/redis.conf:rw \
+  -v /opt/deploy/data/redis/${port}/data:/data:rw \
+  --restart always --name redis-${port} \
+  --sysctl net.core.somaxconn=1024 172.21.32.31:5000/redis:5.0.5-alpine redis-server /usr/local/etc/redis/redis.conf; \
+done
+
+redis-cli --cluster create 172.21.32.130:6179 172.21.32.130:6279 172.21.32.131:6179 172.21.32.131:6279 172.21.32.132:6179 172.21.32.132:6279 --cluster-replicas 1
+
+for port in `seq 6179 100 6279`; do \
+  docker run -d -ti -p ${port}:${port} -p 1${port}:1${port} \
+  -v /opt/deploy/data/redis/${port}/conf/redis.conf:/usr/local/etc/redis/redis.conf:rw \
+  -v /opt/deploy/data/redis/${port}/data:/data:rw \
+  --label com.docker.stack.namespace=redis \
+  --restart always --name redis-${port} \
+  --sysctl net.core.somaxconn=1024 172.21.32.31:5000/redis:5.0.5-alpine redis-server /usr/local/etc/redis/redis.conf; \
+done
+
+redis-cli --cluster create 172.21.32.112:6179 172.21.32.112:6279 172.21.32.112:6379 --cluster-replicas 0

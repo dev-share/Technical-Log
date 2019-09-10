@@ -1,0 +1,31 @@
+
+
+
+rm -rf /opt/deploy/data/zookeeper && mkdir -p /opt/deploy/data/zookeeper/data /opt/deploy/data/zookeeper/datalog /opt/deploy/data/zookeeper/conf /opt/deploy/data/zookeeper/logs
+
+cd /opt/deploy/data/zookeeper
+
+zookeeper-cluster.tmpl
+
+dataDir=/data
+dataLogDir=/datalog
+tickTime=2000
+initLimit=5
+syncLimit=2
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=0
+maxClientCnxns=100
+standaloneEnabled=true
+admin.enableServer=true
+server.1=zookeeper-1:2888:3888;2181
+server.2=zookeeper-2:2888:3888;2181
+server.3=zookeeper-3:2888:3888;2181
+
+
+mkdir -p ./conf \
+  && PORT=2181 envsubst < ./zookeeper-cluster.tmpl > ./conf/zoo.cfg \
+  && mkdir -p ./data \
+  && mkdir -p ./datalog \
+  && mkdir -p ./logs; 
+
+

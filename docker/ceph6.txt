@@ -6,20 +6,24 @@ mkdir -p /etc/ceph /var/lib/ceph /var/lib/ceph/osd /opt/ceph/rbd /opt/ceph/data 
 chown -R 167:167 /etc/ceph
 chown -R 167:167 /var/lib/ceph
 chown -R root:root /etc/ceph/ceph.conf
+chown -R 64045:64045 /var/lib/ceph/osd/
 
 mkfs.xfs /dev/sdb -f
 mount /dev/sdb /opt/ceph/rbd
 
 docker pull ceph/daemon:latest-devel
 
+172.21.32.118,172.21.32.116,172.21.32.114,172.21.32.110,172.21.32.106
+
 docker run -d \
 --name mon \
 --restart=always \
---mount type=bind,src=//etc/ceph,dst=/etc/ceph \
---mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
---env MON_IP=172.21.32.118,172.21.32.116,172.21.32.114,172.21.32.110,172.21.32.106,172.21.32.104  \
+--mount type=bind,src=/etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=/var/lib/ceph,dst=/var/lib/ceph \
+--env MON_IP=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v inet6|grep 172.21.32|awk '{print $2}'|tr -d "addr:"`  \
 --env DEBUG=stayalive \
 --env CEPH_PUBLIC_NETWORK=172.21.32.0/24 \
+--env CEPH_CLUSTER_NETWORK=172.21.32.0/24 \
 --network=host \
 --label com.docker.stack.namespace=dbs \
 ceph/daemon:latest-devel mon
@@ -28,32 +32,46 @@ docker run -d \
 --name osd \
 --privileged=true \
 --restart=always \
---mount type=bind,src=//etc/ceph,dst=/etc/ceph \
---mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
---mount type=bind,src=//dev,dst=/dev \
---mount type=bind,src=//opt/ceph/rbd,dst=/var/lib/ceph/osd \
+--mount type=bind,src=/etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=/var/lib/ceph,dst=/var/lib/ceph \
+--mount type=bind,src=/dev,dst=/dev \
+--mount type=bind,src=/opt/ceph/rbd,dst=/var/lib/ceph/osd \
 --network=host \
 --label com.docker.stack.namespace=dbs \
 ceph/daemon:latest-devel osd
 
 docker run -d \
---name mds \
---restart=always \
---mount type=bind,src=//etc/ceph,dst=/etc/ceph \
---mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
---network=host \
---label com.docker.stack.namespace=dbs \
-ceph/daemon:latest-devel mds
-
-docker run -d \
 --name mgr \
 --restart=always \
---mount type=bind,src=//etc/ceph,dst=/etc/ceph \
---mount type=bind,src=//var/lib/ceph,dst=/var/lib/ceph \
+--mount type=bind,src=/etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=/var/lib/ceph,dst=/var/lib/ceph \
 --network=host \
 --label com.docker.stack.namespace=dbs \
 ceph/daemon:latest-devel mgr
 
+docker run -d \
+--name mds \
+--restart=always \
+--mount type=bind,src=/etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=/var/lib/ceph,dst=/var/lib/ceph \
+-e CEPHFS_CREATE=1 \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon:latest-devel mds
+
+
+docker run -d \
+--name rgw \
+--restart=always \
+--mount type=bind,src=/etc/ceph,dst=/etc/ceph \
+--mount type=bind,src=/var/lib/ceph,dst=/var/lib/ceph \
+--env RGW_CIVETWEB_PORT=24313 \
+--env RGW_ZONEGROUP=rgw \
+--env RGW_ZONE=rgw \
+--env RGW_NAME=`hostname` \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+ceph/daemon:latest-devel rgw
 
 docker exec mon ceph auth get client.bootstrap-osd -o /var/lib/ceph/bootstrap-osd/ceph.keyring 
 docker exec mon ceph auth get client.bootstrap-mds -o /var/lib/ceph/bootstrap-mds/ceph.keyring 
@@ -75,7 +93,7 @@ docker exec mgr ceph mgr services
 
 docker restart mon && docker restart mgr && docker restart osd && docker restart mds
 
-rsync -a /etc/ceph/* zhangkun@172.21.32.114:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.114:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.106:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.106:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.104:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.104:/home/zhangkun/ceph-var
+rsync -a /etc/ceph/* zhangkun@172.21.32.114:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.114:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.106:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.106:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.116:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.116:/home/zhangkun/ceph-var && rsync -a /etc/ceph/* zhangkun@172.21.32.118:/home/zhangkun/ceph && rsync -a /var/lib/ceph/bootstrap-* zhangkun@172.21.32.118:/home/zhangkun/ceph-var
 
 mv /home/zhangkun/ceph/* /etc/ceph
 mv /home/zhangkun/ceph-var/* /var/lib/ceph
@@ -93,6 +111,7 @@ rm -rf $(find / -name rexray)
 rm -rf $(find / -name libstorage)
 curl -sSL https://rexray.io/install | sh -s -- stable 0.9.2
 
+docker plugin enable rexray/rbd
 docker plugin disable rexray/rbd
 docker plugin rm rexray/rbd
 
@@ -103,20 +122,26 @@ docker plugin inspect rexray/rbd
 docker plugin disable rexray/rbd
 docker plugin upgrade  rexray/rbd
 
+docker plugin install --alias rexray/rbd 172.21.32.102:5000/rexray/rbd RBD_DEFAULTPOOL=rbd LINUX_VOLUME_FILEMODE=0777
+docker plugin install --alias 172.21.32.102:5000/rexray/rbd rexray/rbd RBD_DEFAULTPOOL=rbd LINUX_VOLUME_FILEMODE=0777
+docker plugin push 172.21.32.102:5000/rexray/rbd
+
 rm -rf /etc/rexray/config.yml
 mv /home/zhangkun/config.yml /etc/rexray
 chown -R root:root /etc/rexray/config.yml
 
-systemctl enable rexray;
-systemctl stop rexray;
-systemctl start rexray;
-systemctl status rexray;
+systemctl enable rexray
+systemctl stop rexray
+systemctl start rexray
+systemctl status rexray
 
 rexray volume ls
 
 docker service rm portainer
 docker pull 172.21.32.31:5000/portainer/portainer:1.22.0
 
+rm -rf/opt/portainer
+mkdir -p /opt/portainer
 docker service rm portainer
 docker service create \
 --name portainer \
@@ -140,8 +165,47 @@ docker service create \
 --label com.docker.stack.namespace=swarm \
 172.21.32.31:5000/nginx:1.17.3
 
-    server 172.21.32.106  weight=1 max_fails=2  fail_timeout=60s;
-    server 172.21.32.110  weight=1 max_fails=2  fail_timeout=60s;
-    server 172.21.32.114  weight=1 max_fails=2  fail_timeout=60s;
+
+
+rm -rf/opt/portainer
+mkdir -p /opt/portainer
+docker run -d -p 9000:9000 \
+    --restart=always \
+    --name prtainer \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /opt/portainer:/data \
+    --label com.docker.stack.namespace=swarm \
+    172.21.32.31:5000/portainer/portainer:1.22.0 \
+    -H unix:///var/run/docker.sock
+
 
 rsync -a //home/deploy/config/* zhangkun@172.21.32.114:/home/zhangkun/opt/data && rsync -a //home/deploy/config/* zhangkun@172.21.32.110:/home/zhangkun/opt/data && rsync -a //home/deploy/config/* zhangkun@172.21.32.106:/home/zhangkun/opt/data
+
+rsync -a /opt/deploy/conf zhangkun@172.21.32.118:/home/zhangkun && rsync -a /opt/deploy/conf zhangkun@172.21.32.116:/home/zhangkun && rsync -a /opt/deploy/conf zhangkun@172.21.32.114:/home/zhangkun &&  rsync -a /opt/deploy/conf zhangkun@172.21.32.106:/home/zhangkun
+
+sudo rsync -a /opt/deploy/conf zhangkun@172.21.32.118:/home/zhangkun && sudo rsync -a /opt/deploy/conf zhangkun@172.21.32.116:/home/zhangkun && sudo rsync -a /opt/deploy/conf zhangkun@172.21.32.114:/home/zhangkun &&  sudo rsync -a /opt/deploy/conf zhangkun@172.21.32.106:/home/zhangkun
+
+rm -rf /opt/deploy/conf
+cp -vr /home/zhangkun/deploy/conf /opt/deploy
+
+docker node demote dbs-server13
+docker node rm dbs-server13
+docker node demote dbs-server14
+docker node rm dbs-server14
+
+mkdir -p /home/deploy/bak
+mount 172.21.32.120:/data/dbs /home/deploy/bak
+echo '172.21.32.120:/data/dbs  /home/deploy/bak  nfs    defaults 0      0' >> /etc/fstab
+
+mount 172.21.32.120:/data/images /home/deploy/sync
+echo '172.21.32.120:/data/images  /home/deploy/sync  nfs    defaults 0      0' >> /etc/fstab
+
+rm -rf /opt/deploy/conf/*
+cp -r /home/deploy/bak/data_backup_conf/* /opt/deploy/conf/
+
+
+
+sysctl kernel.hostname=dbs-server200
+echo 'dbs-server200' > /etc/hostname
+vim /etc/netplan/50-cloud-init.yaml
+

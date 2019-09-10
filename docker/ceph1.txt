@@ -104,7 +104,23 @@ chown -R root:root /etc/ceph/ceph.conf
 
 
 
-
+ceph osd pool set .rgw.root size 1
 ceph osd pool set .rgw.root pg_num 128
 ceph osd pool set .rgw.root pgp_num 128
 
+ceph osd pool set default.rgw.control size 1
+ceph osd pool set default.rgw.control pg_num 128
+ceph osd pool set default.rgw.control pgp_num 128
+
+ceph osd pool set default.rgw.log size 1
+ceph osd pool set default.rgw.log pg_num 128
+ceph osd pool set default.rgw.log pgp_num 128
+
+ceph osd pool set default.rgw.meta size 1
+ceph osd pool set default.rgw.meta pg_num 128
+ceph osd pool set default.rgw.meta pgp_num 128
+
+size|min_size|pg_num|pgp_num|pgp_num_actual|crush_rule|hashpspool|nodelete|nopgchange|nosizechange|write_fadvise_dontneed|noscrub|nodeep-scrub|hit_set_type|hit_set_period|hit_set_count|hit_set_fpp|use_gmt_hitset|target_max_bytes|target_max_objects|cache_target_dirty_ratio|cache_target_dirty_high_ratio|cache_target_full_ratio|cache_min_flush_age|cache_min_evict_age|min_read_recency_for_promote|min_write_recency_for_promote|fast_read|hit_set_grade_decay_rate|hit_set_search_last_n|scrub_min_interval|scrub_max_interval|deep_scrub_interval|recovery_priority|recovery_op_priority|scrub_priority|compression_mode|compression_algorithm|compression_required_ratio|compression_max_blob_size|compression_min_blob_size|csum_type|csum_min_block|csum_max_block|allow_ec_overwrites|fingerprint_algorithm|pg_autoscale_mode|pg_autoscale_bias|pg_num_min|target_size_bytes|target_size_ratio 
+
+
+rsync -av deploy zhangkun@172.21.32.114:/home/zhangkun && rsync -av deploy zhangkun@172.21.32.110:/home/zhangkun && rsync -av deploy zhangkun@172.21.32.106:/home/zhangkun 
