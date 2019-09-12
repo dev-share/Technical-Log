@@ -2,10 +2,8 @@
 
 
 rm -rf /opt/deploy/data/zookeeper && mkdir -p /opt/deploy/data/zookeeper/data /opt/deploy/data/zookeeper/datalog /opt/deploy/data/zookeeper/conf /opt/deploy/data/zookeeper/logs
-
 cd /opt/deploy/data/zookeeper
-
-zookeeper-cluster.tmpl
+vim zookeeper-cluster.tmpl
 
 dataDir=/data
 dataLogDir=/datalog
@@ -29,3 +27,44 @@ mkdir -p ./conf \
   && mkdir -p ./logs; 
 
 
+rm -rf /opt/deploy/data/kafka && mkdir -p /opt/deploy/data/kafka/data /opt/deploy/data/kafka/conf /opt/deploy/data/kafka/logs
+cd /opt/deploy/data/kafka
+vim kafka-cluster.tmpl
+
+broker.id=${ID}
+port=${PORT}
+listeners=PLAINTEXT://:${PORT}
+#advertised.listeners=PLAINTEXT://${IP}:${PORT}
+#advertised.host.name=${IP}
+#listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+num.network.threads=3
+num.io.threads=8
+socket.send.buffer.bytes=104857600
+socket.receive.buffer.bytes=104857600
+socket.request.max.bytes=104857600
+replica.fetch.max.bytes=104857600
+quota.producer.default=104857600
+quota.consumer.default=104857600
+log.dirs=/kafka/kafka-logs
+num.partitions=1
+num.recovery.threads.per.data.dir=1
+offsets.topic.replication.factor=1
+transaction.state.log.replication.factor=1
+transaction.state.log.min.isr=1
+#log.flush.interval.messages=10000
+#log.flush.interval.ms=1000
+log.retention.hours=168
+#log.retention.bytes=1073741824
+log.segment.bytes=1073741824
+log.retention.check.interval.ms=300000
+zookeeper.connect=${ZK_HOSTS}
+zookeeper.connection.timeout.ms=6000
+group.initial.rebalance.delay.ms=0
+
+
+mkdir -p ./conf \
+  && PORT=9092 ID=`date '+%S'` ZK_HOSTS=zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181 IP=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v inet6|grep 172.21.32|awk '{print $2}'|tr -d 'addr:'` envsubst < ./kafka-cluster.tmpl > ./conf/server.properties \
+  && rm -rf data* \
+  && mkdir -p ./data \
+  && rm -rf logs \
+  && mkdir -p ./logs; 
