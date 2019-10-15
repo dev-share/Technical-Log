@@ -7,6 +7,7 @@ vim zookeeper-cluster.tmpl
 
 dataDir=/data
 dataLogDir=/datalog
+clientPort=${PORT}
 tickTime=2000
 initLimit=5
 syncLimit=2
@@ -19,11 +20,14 @@ server.1=zookeeper-1:2888:3888;2181
 server.2=zookeeper-2:2888:3888;2181
 server.3=zookeeper-3:2888:3888;2181
 
-
+cd /opt/deploy/data/zookeeper
 mkdir -p ./conf \
   && PORT=2181 envsubst < ./zookeeper-cluster.tmpl > ./conf/zoo.cfg \
+  && rm -rf data \
   && mkdir -p ./data \
+  && rm -rf datalog \
   && mkdir -p ./datalog \
+  && rm -rf logs \
   && mkdir -p ./logs; 
 
 
@@ -61,10 +65,66 @@ zookeeper.connect=${ZK_HOSTS}
 zookeeper.connection.timeout.ms=6000
 group.initial.rebalance.delay.ms=0
 
-
+cd /opt/deploy/data/kafka
 mkdir -p ./conf \
   && PORT=9092 ID=`date '+%S'` ZK_HOSTS=zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181 IP=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v inet6|grep 172.21.32|awk '{print $2}'|tr -d 'addr:'` envsubst < ./kafka-cluster.tmpl > ./conf/server.properties \
-  && rm -rf data* \
+  && rm -rf data \
   && mkdir -p ./data \
   && rm -rf logs \
   && mkdir -p ./logs; 
+
+
+docker node update --label-add hostname=`hostname -s` `hostname -s`
+docker node update --label-add kafka=`hostname -s` `hostname -s`
+docker node inspect `hostname -s`
+"route -n | awk '/UG[ \t]/{print $$2}'"
+
+
+cd /opt/deploy/data/zookeeper
+mkdir -p ./conf \
+  && PORT=2181 envsubst < ./zookeeper-cluster.tmpl > ./conf/zoo.cfg \
+  && rm -rf data \
+  && mkdir -p ./data \
+  && rm -rf datalog \
+  && mkdir -p ./datalog \
+  && rm -rf logs \
+  && mkdir -p ./logs; 
+cd /opt/deploy/data/kafka
+mkdir -p ./conf \
+  && PORT=9092 ID=`date '+%S'` ZK_HOSTS=zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181 IP=`ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v inet6|grep 172.21.32|awk '{print $2}'|tr -d 'addr:'` envsubst < ./kafka-cluster.tmpl > ./conf/server.properties \
+  && rm -rf data \
+  && mkdir -p ./data \
+  && rm -rf logs \
+  && mkdir -p ./logs; 
+
+cd /home/zhangkun
+docker stack deploy --compose-file kafka-stack3.yml kz
+
+docker stack deploy --compose-file docker-compose2.yml dbsznjc
+
+docker run -d \
+--name zkui \
+--restart=always \
+--mount type=bind,src=/etc/localtime,dst=/etc/localtime \
+-e ZK_HOSTS=zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181 \
+--network=host \
+--label com.docker.stack.namespace=dbs \
+kervin521/zkui:2.1.0 zkui
+
+
+cd /home/zhangkun/test
+docker load -i zookeeper.tar
+
+
+
+
+for port in `seq 2181 1 2184`; do \
+  mkdir -p ./${port}/conf \
+  && PORT=${port} envsubst < ./zookeeper-cluster.tmpl > ./${port}/conf/zoo.cfg \
+  && rm -rf ./${port}/data \
+  && mkdir -p ./${port}/data \
+  && rm -rf ./${port}/datalog \
+  && mkdir -p ./${port}/datalog \
+  && rm -rf ./${port}/logs \
+  && mkdir -p ./${port}/logs; 
+done

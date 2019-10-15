@@ -138,9 +138,9 @@ systemctl status rexray
 rexray volume ls
 
 docker service rm portainer
-docker pull 172.21.32.31:5000/portainer/portainer:1.22.0
+docker pull 172.21.32.31:5000/portainer/portainer:1.22.1
 
-rm -rf/opt/portainer
+rm -rf /opt/portainer
 mkdir -p /opt/portainer
 docker service rm portainer
 docker service create \
@@ -148,13 +148,14 @@ docker service create \
 --publish 9000:9000 \
 --replicas=1 \
 --constraint 'node.role == manager' \
---mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
---mount type=bind,src=//opt/portainer,dst=/data \
+--mount type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock \
+--mount type=bind,src=/opt/portainer,dst=/data \
 --container-label com.docker.stack.namespace=swarm \
 --label com.docker.stack.namespace=swarm \
-172.21.32.31:5000/portainer/portainer:1.22.0  \
+172.21.32.31:5000/portainer/portainer:1.22.1  \
 -H unix:///var/run/docker.sock
 
+docker service rm nginx
 docker service create \
 --name nginx \
 --publish 8552:8552 \
@@ -167,7 +168,7 @@ docker service create \
 
 
 
-rm -rf/opt/portainer
+rm -rf /opt/portainer
 mkdir -p /opt/portainer
 docker run -d -p 9000:9000 \
     --restart=always \
@@ -175,7 +176,7 @@ docker run -d -p 9000:9000 \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /opt/portainer:/data \
     --label com.docker.stack.namespace=swarm \
-    172.21.32.31:5000/portainer/portainer:1.22.0 \
+    172.21.32.31:5000/portainer/portainer:1.22.1 \
     -H unix:///var/run/docker.sock
 
 
@@ -202,6 +203,55 @@ echo '172.21.32.120:/data/images  /home/deploy/sync  nfs    defaults 0      0' >
 
 rm -rf /opt/deploy/conf/*
 cp -r /home/deploy/bak/data_backup_conf/* /opt/deploy/conf/
+docker system prune -a -f
+
+
+rm -rf /opt/deploy/conf/sf-realtime*
+cp -r /home/deploy/bak/data_backup_conf/sf-realtime* /opt/deploy/conf/
+
+rm -rf /opt/registry/docker
+mkdir -p /opt/registry
+docker service rm registry
+docker service create \
+--name registry \
+--publish 5000:5000 \
+--replicas=1 \
+--env REGISTRY_STORAGE_DELETE_ENABLED=true \
+--constraint 'node.role == manager' \
+--mount type=bind,src=/opt/registry,dst=/var/lib/registry \
+--mount type=bind,src=/opt/registry/config.yml,dst=/etc/docker/registry/config.yml \
+--container-label com.docker.stack.namespace=swarm \
+--label com.docker.stack.namespace=swarm \
+172.21.32.31:5000/registry:2.7.1
+
+docker service rm registry-ui
+docker service create \
+--name registry-ui \
+--publish 15000:80 \
+--replicas=1 \
+--constraint 'node.role == manager' \
+--env URL=http://172.21.32.102:5000 \
+--env REGISTRY_URL=http://172.21.32.102:5000 \
+--env DELETE_IMAGES=true \
+--env REGISTRY_TITLE="Docker Registry" \
+--container-label com.docker.stack.namespace=swarm \
+--label com.docker.stack.namespace=swarm \
+joxit/docker-registry-ui:1.3
+
+docker service rm registry-ui2
+docker service create \
+--name registry-ui2 \
+--publish 25000:80 \
+--replicas=1 \
+--constraint 'node.role == manager' \
+--env NODE_ENV=production \
+--env REGISTRY_DOMAIN=172.21.32.102:5000 \
+--env REGISTRY_HOST=172.21.32.102:5000 \
+--env REGISTRY_STORAGE_DELETE_ENABLED=true \
+--env REGISTRY_SSL=false \
+--container-label com.docker.stack.namespace=swarm \
+--label com.docker.stack.namespace=swarm \
+jc21/registry-ui:2.0.2
 
 
 
@@ -209,3 +259,49 @@ sysctl kernel.hostname=dbs-server200
 echo 'dbs-server200' > /etc/hostname
 vim /etc/netplan/50-cloud-init.yaml
 
+docker run -d -p 15000:80 \
+    --restart=always \
+    --name registry-ui \
+    --env REGISTRY_URL=http://172.21.32.31:5000 \
+    --env DELETE_IMAGES=true \
+    --env REGISTRY_TITLE="Docker Registry" \
+    --label com.docker.stack.namespace=swarm \
+    joxit/docker-registry-ui:static
+
+
+
+docker service create \
+--name node-red-03 \
+--publish 18802:1880 \
+--replicas=1 \
+--constraint 'node.role == manager' \
+--constraint 'node.labels.hostname==dbs-server106' \
+--mount type=bind,src=/opt/deploy/data/node-red-data-03,dst=/data \
+--container-label com.docker.stack.namespace=dbsznjc \
+--label com.docker.stack.namespace=dbsznjc \
+172.21.32.31:5000/hollysys-node-red:1.0.0
+
+
+docker service create \
+--name mysql \
+--publish 3306:3306 \
+--replicas=1 \
+--constraint 'node.role == manager' \
+--constraint 'node.labels.hostname==dbs-server106' \
+--env MYSQL_ROOT_PASSWORD=SqlPwd1@ \
+--mount type=bind,src=/opt/deploy/data/mysql/data,dst=/var/lib/mysql \
+--container-label com.docker.stack.namespace=dbsznjc \
+--label com.docker.stack.namespace=dbsznjc \
+172.21.32.31:5000/mysql-canal:5.7.27
+
+
+docker service rm nginx
+docker service create \
+--name nginx \
+--publish 8000:80 \
+--replicas=1 \
+--constraint 'node.role == manager' \
+--mount type=bind,src=/opt/nginx/nginx.conf,dst=/etc/nginx/nginx.conf \
+--container-label com.docker.stack.namespace=swarm \
+--label com.docker.stack.namespace=swarm \
+172.21.32.31:5000/nginx:1.17.3
