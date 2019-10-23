@@ -113,6 +113,7 @@ kervin521/zkui:2.1.0 zkui
 
 
 cd /home/zhangkun/test
+docker load -i kafka-manager.tar
 docker load -i zookeeper.tar
 
 
