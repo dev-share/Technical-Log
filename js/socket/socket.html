@@ -1,8 +1,9 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" /> 
+<link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABmJLR0T///////8JWPfcAAAACXBIWXMAAABIAAAASABGyWs+AAAAF0lEQVRIx2NgGAWjYBSMglEwCkbBSAcACBAAAeaR9cIAAAAASUVORK5CYII=" rel="icon" type="image/x-icon" /> 
+
 <title>WebSocket/SockJS</title>
     <style type="text/css">
         #connect-container {
@@ -37,8 +38,9 @@
             margin: 0;
         }
     </style>
-    <script src="http://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/sockjs/1.1.1/sockjs.min.js"></script> -->
+    <!-- <script src="http://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script> -->
+    <script src="https://cdn.bootcss.com/sockjs-client/1.4.0/sockjs.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script> -->
     <!-- <script src="https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script> -->
     <!-- <script src="https://cdn.jsdelivr.net/socket.io-client/1.3.2/socket.io.js"></script> -->
 	<!-- <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script> -->
@@ -56,19 +58,22 @@
         }
 
         function connect() {
+			log("--服务开始-----");
+			var address = "172.21.12.6:8631";
         	var token = "C16CEF0180A1BAA8F2CB1DEAAB002DD103225C579CD29B620E92666E3D62F69FF4D5F52E69FB4083378EB2F7092DEBD1";
             var protocol= document.getElementById("WebSocket").checked?document.getElementById("WebSocket").value:document.getElementById("SockJS").value;
             if(protocol&&protocol=="websocket"){
-            	if (window.location.protocol == 'http:') {  
-            		url = "ws://192.168.0.193:8081/notice/websocket?token="+token;  
-//             		url = "ws://192.168.202.136:8088/smartmeeting/smart/websocket?token="+token; 
+            	if (window.location.protocol == 'https:') {  
+//             		url = "wss://"+address+"/notice/websocket?token="+token;  
+            		url = "wss://"+address+"/dbsznjc/realtime/thing/EnvironmentalManagement?date=201911&token="token; 
             	} else {  
-            		url = "wss://192.168.0.193:8081/notice/websocket?token="+token;  
+            		url = "ws://"+address+"/dbsznjc/realtime/thing/EnvironmentalManagement?date=201911&token="token;  
             	}
-            	websocket = new WebSocket(url,[],{devel: true, debug: true,server:"token="+token,transports: transports});
+            	websocket = new WebSocket(url,[],{devel: true, debug: "*",server:"date="+201911});
             }else{
-            	url= "http://192.168.0.193:8081/notice/socketjs?token="+token;
-                websocket = new SockJS(url,transports,{devel: true, debug: true,server:"token="+token,transports: transports});
+            	url= "http://"+address+"/dbsznjc/realtime/thing/EnvironmentalManagement?date=201911&token="token; 
+                websocket = new SockJS(url,transports,{devel: true, debug: "*",server:"token="+token,timeout:60*1000,transports: transports});
+				//websocket = new SockJS(url,transports,{devel: true, debug: "*",server:"date="+201911,timeout:60*1000});
             }
             websocket.onopen = function () {
             	common(true);
@@ -82,10 +87,12 @@
             };
             websocket.onclose = function (event) {
             	common(false);
-                log("--关闭连接连接-----" + JSON.stringify(event));
+                log("--关闭连接连接-----"+ transports +"-----\n"+ JSON.stringify(event));
             };
         }
-
+        function updateTransport(transport) {
+            transports = (!transport||transport == 'all') ?  ['xdr-streaming','xhr-streaming','eventsource','iframe-eventsource','htmlfile','iframe-htmlfile','xdr-polling','xhr-polling','iframe-xhr-polling','jsonp-polling'] : [transport];
+        }
         function disconnect() {
             if (websocket != null) {
             	websocket.close();
@@ -104,11 +111,6 @@
                 websocket.send(message);
             }
         }
-
-        function updateTransport(transport) {
-          transports = (transport == 'all') ?  null : [transport];
-        }
-        
         function log(message) {
             var console = document.getElementById('console');
             var p = document.createElement('p');
@@ -120,6 +122,9 @@
             }
             console.scrollTop = console.scrollHeight;
         }
+		function sys(event){
+			console.info(event);
+		}
     </script>
 </head>
 <body>
@@ -136,7 +141,7 @@
         <div id="transport">
             <span>SockJS transport:</span>
             <select id="protocol" onchange="updateTransport(this.value)">
-              <option value="">all</option>
+              <option value="all">all</option>
               <option value="websocket">websocket</option>
               <option value="xdr-streaming">xdr-streaming</option>
               <option value="xhr-streaming">xhr-streaming</option>

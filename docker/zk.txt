@@ -129,3 +129,19 @@ for port in `seq 2181 1 2184`; do \
   && rm -rf ./${port}/logs \
   && mkdir -p ./${port}/logs; 
 done
+
+
+
+cd /opt/deploy/data/zookeeper
+rm -rf data && mkdir -p ./data && rm -rf datalog && mkdir -p ./datalog && rm -rf logs && mkdir -p ./logs; 
+
+cd /opt/deploy/data/kafka
+rm -rf data && mkdir -p ./data && rm -rf logs && mkdir -p ./logs;
+
+
+cd /opt/deploy/data/zookeeper
+./zookeeper.sh
+
+cd /opt/deploy/data/kafka
+./kafka.sh
+

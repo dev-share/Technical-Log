@@ -262,8 +262,8 @@ jc21/registry-ui:2.0.2
 
 
 
-sysctl kernel.hostname=dbs-server135
-echo 'dbs-server135' > /etc/hostname
+sysctl kernel.hostname=dbs-server132
+echo 'dbs-server132' > /etc/hostname
 vim /etc/netplan/50-cloud-init.yaml
 
 docker node demote dbs-server108
@@ -353,7 +353,7 @@ rm -rf /opt/deploy/conf && mkdir -p /opt/deploy/conf
 mount -t nfs 172.21.32.130:/data/conf /opt/deploy/conf
 echo '172.21.32.130:/data/conf  /opt/deploy/conf  nfs    defaults 0      0' >> /etc/fstab
 
-
+mount -t nfs 172.21.32.130:/data/tmp /home/zhangkun/tmp
 
 docker run -d -p 1883:1883 \
     --restart=always \
@@ -362,3 +362,9 @@ docker run -d -p 1883:1883 \
     -v /etc/timezone:/etc/timezone \
     --label com.docker.stack.namespace=swarm \
     172.21.32.31:5000/eclipse-mosquitto:1.6.7
+
+
+    docker rmi -f $(docker images -a|grep -v grep|grep eclipse-mosquitto|awk '{print $3}')
+
+
+RUN set -ex &&  apk add --no-cache  bash  curl &&  true
