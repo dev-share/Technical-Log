@@ -1,9 +1,9 @@
-package com.wafersystems.websocket;
+package com.hollysys.smartfactory.test.websocket;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -24,8 +24,8 @@ import com.alibaba.fastjson.support.spring.FastjsonSockJsMessageCodec;
 @Configuration
 @EnableWebMvc
 @EnableWebSocket
-public class WebSocketAdapter extends WebMvcConfigurerAdapter implements WebSocketConfigurer {
-	private static Logger	logger	= Logger.getLogger(WebSocketAdapter.class);
+public class WebSocketAdapter implements WebSocketConfigurer {
+	private static Logger logger = LoggerFactory.getLogger(WebSocketAdapter.class);
 
 	/**
 	 * <pre>
@@ -41,12 +41,12 @@ public class WebSocketAdapter extends WebMvcConfigurerAdapter implements WebSock
 		WebSocketHandler handler = new WebSocketBaseHandler();
 		logger.info("--------------Spring Web Socket注册[开始]--------------");
 		// 1.注册WebSocket方式
-//		registry.addHandler(handler, "/websocket").setAllowedOrigins("*");
-		registry.addHandler(handler, "/websocket").setAllowedOrigins("*").addInterceptors(new WebSocketInterceptor());
+//		registry.addHandler(handler, "/dbsznjc/realtime/thing").setAllowedOrigins("*");
+		registry.addHandler(handler, "/dbsznjc/realtime/thing").setAllowedOrigins("*").addInterceptors(new WebSocketInterceptor("*"));
 		logger.info("--------------注册WebSocket方式[OK]--------------");
 		// 2.注册SocketJS方式
-//		registry.addHandler(handler, "/websocket").setAllowedOrigins("*").withSockJS().setWebSocketEnabled(true).setDisconnectDelay(10 * 60 * 1000).setHeartbeatTime(10 * 60 * 1000);
-		registry.addHandler(handler, "/websocket").setAllowedOrigins("*").addInterceptors(new SocketJSInterceptor()).withSockJS().setMessageCodec(new FastjsonSockJsMessageCodec());
+//		registry.addHandler(handler, "/dbsznjc/realtime/thing").setAllowedOrigins("*").withSockJS().setWebSocketEnabled(true).setDisconnectDelay(10 * 60 * 1000).setHeartbeatTime(10 * 60 * 1000);
+		registry.addHandler(handler, "/dbsznjc/realtime/thing").setAllowedOrigins("*").addInterceptors(new SocketJSInterceptor()).withSockJS().setDisconnectDelay(10 * 60 * 1000).setHeartbeatTime(10 * 60 * 1000).setMessageCodec(new FastjsonSockJsMessageCodec());
 		logger.info("--------------注册SocketJS方式[OK]--------------");
 		logger.info("--------------Spring Web Socket注册[完成]--------------");
 	}

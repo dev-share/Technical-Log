@@ -1,9 +1,12 @@
-package com.wafersystems.websocket;
+package com.hollysys.smartfactory.test.websocket;
 
 import java.net.InetSocketAddress;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
@@ -11,7 +14,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 import com.alibaba.fastjson.JSON;
-import com.wafersystems.util.DateUtil;
+import com.dev.share.util.DateUtils;
 
 /**
  * <pre>
@@ -24,7 +27,7 @@ import com.wafersystems.util.DateUtil;
  * </pre>
  */
 public class WebSocketBaseHandler extends AbstractWebSocketHandler {
-	private static Logger	logger	= Logger.getLogger(WebSocketBaseHandler.class);
+	private static Logger logger = LoggerFactory.getLogger(WebSocketBaseHandler.class);
 
 	/**
 	 * <pre>
@@ -42,7 +45,7 @@ public class WebSocketBaseHandler extends AbstractWebSocketHandler {
 		InetSocketAddress address = session.getRemoteAddress();
 		logger.info("--客户端[" + (address != null ? address.getHostString() : "") + "]端口[" + (address != null ? address.getPort() : "") + "]{sessionId:" + session.getId() + "}建立连接!-------" + token);
 		logger.info("--客户端[" + token + "]参数{sessionId:" + session.getId() + ",Protocol:" + session.getAcceptedProtocol() + ",Protocol:" + session.getPrincipal() + ",Headers:" + JSON.toJSONString(session.getHandshakeHeaders()) + ",Attributes:" + JSON.toJSONString(session.getAttributes()) + ",Extensions:" + JSON.toJSONString(session.getExtensions()) + "}");
-		session.sendMessage(new TextMessage("[" + DateUtil.formatDateTimeStr(new Date()) + "]连接成功!"));
+		session.sendMessage(new TextMessage("[" + DateUtils.formatDateTime(new Date()) + "]连接成功!"));
 	}
 
 	/**
@@ -63,7 +66,8 @@ public class WebSocketBaseHandler extends AbstractWebSocketHandler {
 		if (message != null) {
 			result = message instanceof TextMessage && message.getPayload() != null ? (String) message.getPayload() : message.toString();
 		}
-		logger.info("--客户端[" + (address != null ? address.getHostString() : "") + "]端口[" + (address != null ? address.getPort() : "") + "]处理消息:" + result);
+		WebSocketHolder.test(session);
+		logger.info("--客户端[" + (address != null ? address.getHostString() : "") + "]端口[" + (address != null ? address.getPort() : "") + "]接收消息:" + result);
 	}
 
 	/**

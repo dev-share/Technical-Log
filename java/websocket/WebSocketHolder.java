@@ -1,15 +1,14 @@
-package com.wafersystems.websocket;
+package com.hollysys.smartfactory.test.websocket;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
-
-import com.wafersystems.util.AccessTokenUtils;
-import com.wafersystems.util.StringUtil;
 
 /**
  * <pre>
@@ -22,8 +21,8 @@ import com.wafersystems.util.StringUtil;
  * </pre>
  */
 public class WebSocketHolder {
-	private static Logger							logger		= Logger.getLogger(WebSocketHolder.class);
-	private static Map<String, WebSocketSession>	sessions	= new HashMap<String, WebSocketSession>();
+	private static Logger logger = LoggerFactory.getLogger(WebSocketHolder.class);
+	private static Map<String, WebSocketSession>	sessions	= new ConcurrentHashMap<String, WebSocketSession>();
 
 	/**
 	 * <pre>
@@ -35,12 +34,13 @@ public class WebSocketHolder {
 	 * @param content	消息内容
 	 * </pre>
 	 */
-	public static void sendMessage(String userId, String content) {
+	public static void sendMessage(String token, String content) {
 		logger.info("-----------------------------------发送socket消息[开始]-----------------------------------------------");
 		try {
-			if (sessions.containsKey(userId)) {
-				WebSocketSession session = sessions.get(userId);
+			if (sessions.containsKey(token)) {
+				WebSocketSession session = sessions.get(token);
 				session.sendMessage(new TextMessage(content));
+				logger.info("--[服务端]发送消息:" + content);
 			}
 		} catch (IOException e) {
 			logger.error("--发送socket消息失败!", e);
@@ -63,12 +63,12 @@ public class WebSocketHolder {
 			String token = "";
 			String url = session.getUri().getPath();
 			String param = session.getUri().getQuery();
-			if (!StringUtil.isEmptyStr(url) && url.contains("token") || !StringUtil.isEmptyStr(param) && param.contains("token")) {
-				token = !StringUtil.isEmptyStr(url) && url.contains("token") ? url.substring(url.indexOf("token=") + "token=".length()) : param.substring(param.indexOf("token=") + "token=".length());
-				if (!StringUtil.isEmptyStr(token) && token.contains("&")) {
+			if (!StringUtils.isEmpty(url) && url.contains("token") || !StringUtils.isEmpty(param) && param.contains("token")) {
+				token = !StringUtils.isEmpty(url) && url.contains("token") ? url.substring(url.indexOf("token=") + "token=".length()) : param.substring(param.indexOf("token=") + "token=".length());
+				if (!StringUtils.isEmpty(token) && token.contains("&")) {
 					token = token.substring(0, token.indexOf("&"));
 				} else {
-					if (!StringUtil.isEmptyStr(token) && token.contains("/" + session.getId())) {
+					if (!StringUtils.isEmpty(token) && token.contains("/" + session.getId())) {
 						token = token.substring(0, token.indexOf("/" + session.getId()));
 					}
 				}
@@ -77,10 +77,11 @@ public class WebSocketHolder {
 					token = session.getAttributes().get("token").toString();
 				}
 			}
-			if (!StringUtil.isEmptyStr(token)) {
-				String userId = AccessTokenUtils.decryptToken(token);
-				sessions.put(userId, session);
-				return userId;
+			sessions.put(session.getId(), session);
+			if (!StringUtils.isEmpty(token)) {
+				session.getAttributes().put("token", token);
+				sessions.put(token, session);
+				return token;
 			}
 		}
 		return null;
@@ -100,12 +101,12 @@ public class WebSocketHolder {
 			String token = "";
 			String url = session.getUri().getPath();
 			String param = session.getUri().getQuery();
-			if (!StringUtil.isEmptyStr(url) && url.contains("token") || !StringUtil.isEmptyStr(param) && param.contains("token")) {
-				token = !StringUtil.isEmptyStr(url) && url.contains("token") ? url.substring(url.indexOf("token=") + "token=".length()) : param.substring(param.indexOf("token=") + "token=".length());
-				if (!StringUtil.isEmptyStr(token) && token.contains("&")) {
+			if (!StringUtils.isEmpty(url) && url.contains("token") || !StringUtils.isEmpty(param) && param.contains("token")) {
+				token = !StringUtils.isEmpty(url) && url.contains("token") ? url.substring(url.indexOf("token=") + "token=".length()) : param.substring(param.indexOf("token=") + "token=".length());
+				if (!StringUtils.isEmpty(token) && token.contains("&")) {
 					token = token.substring(0, token.indexOf("&"));
 				} else {
-					if (!StringUtil.isEmptyStr(token) && token.contains("/" + session.getId())) {
+					if (!StringUtils.isEmpty(token) && token.contains("/" + session.getId())) {
 						token = token.substring(0, token.indexOf("/" + session.getId()));
 					}
 				}
@@ -114,9 +115,9 @@ public class WebSocketHolder {
 					token = session.getAttributes().get("token").toString();
 				}
 			}
-			if (!StringUtil.isEmptyStr(token)) {
-				String userId = AccessTokenUtils.decryptToken(token);
-				sessions.remove(userId);
+			sessions.remove(session.getId());
+			if (!StringUtils.isEmpty(token)) {
+				sessions.remove(token);
 			}
 		}
 	}

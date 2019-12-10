@@ -1,31 +1,38 @@
-package com.wafersystems.websocket;
+package com.hollysys.smartfactory.test.websocket;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 
 /**
- * <pre>
- * 项目:ReserveMeeting
- * 描述:Web Socket拦截器
- * 作者:ZhangYi
- * 时间:2016年8月4日 下午3:25:24
- * 版本:wrm_v4.0
- * JDK:1.7.80
- * </pre>
+ * 
+     *   项目: zdev-maven-test
+     *   描述: Web Socket拦截器
+  * @author ZhangYi
+  * @date 2019-12-09 20:53:13
+     *   版本: v1.0
+  * JDK: 1.8
  */
 public class WebSocketInterceptor extends OriginHandshakeInterceptor {
-	private static Logger	logger	= Logger.getLogger(WebSocketInterceptor.class);
-
+	private static Logger logger = LoggerFactory.getLogger(WebSocketInterceptor.class);
+	
+	public WebSocketInterceptor(String... allowedOrigins) {
+		if (!ObjectUtils.isEmpty(allowedOrigins)) {
+			setAllowedOrigins(Arrays.asList(allowedOrigins));
+		}
+	}
 	/**
-	 * <pre>
 	 * 描述:消息握手前
 	 * 作者:ZhangYi
 	 * 时间:2016年8月1日 下午1:56:17
@@ -36,7 +43,6 @@ public class WebSocketInterceptor extends OriginHandshakeInterceptor {
 	 * @param attributes
 	 * @return
 	 * @throws Exception
-	 * </pre>
 	 */
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler, Map<String, Object> attributes) throws Exception {
@@ -54,7 +60,6 @@ public class WebSocketInterceptor extends OriginHandshakeInterceptor {
 	}
 
 	/**
-	 * <pre>
 	 * 描述:消息握手后
 	 * 作者:ZhangYi
 	 * 时间:2016年8月1日 下午1:56:17
@@ -63,11 +68,15 @@ public class WebSocketInterceptor extends OriginHandshakeInterceptor {
 	 * @param response
 	 * @param wsHandler
 	 * @param exception
-	 * </pre>
 	 */
 	@Override
 	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler, Exception e) {
 		logger.info("--WebSocket消息握手后........");
 		super.afterHandshake(request, response, handler, e);
+	}
+	
+	@Override
+	public Collection<String> getAllowedOrigins() {
+		return super.getAllowedOrigins();
 	}
 }

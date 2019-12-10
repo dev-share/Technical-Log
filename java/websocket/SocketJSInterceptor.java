@@ -1,10 +1,12 @@
-package com.wafersystems.websocket;
+package com.hollysys.smartfactory.test.websocket;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -22,7 +24,7 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
  * </pre>
  */
 public class SocketJSInterceptor extends HttpSessionHandshakeInterceptor {
-	private static Logger	logger	= Logger.getLogger(SocketJSInterceptor.class);
+	private static Logger logger = LoggerFactory.getLogger(SocketJSInterceptor.class);
 
 	/**
 	 * <pre>
@@ -42,12 +44,13 @@ public class SocketJSInterceptor extends HttpSessionHandshakeInterceptor {
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler handler, Map<String, Object> attributes) throws Exception {
 		if (request instanceof ServletServerHttpRequest) {
 			ServletServerHttpRequest servlet = (ServletServerHttpRequest) request;
-			HttpSession session = servlet.getServletRequest().getSession(false);
+			HttpServletRequest req = servlet.getServletRequest();
+			HttpSession session = servlet.getServletRequest().getSession();
 			if (session != null) {
 				// 使用userName区分WebSocketHandler，以便定向发送消息
-				String token = (String) session.getAttribute("token");
+				String date = (String) session.getAttribute("date");
 //				attributes.put("token", token);
-				logger.info("--SocketJS消息握手前Token:" + token);
+				logger.info("--SocketJS消息握手前date:" + date);
 			}
 		}
 		logger.info("--SocketJS消息握手前........");
