@@ -1,1 +1,1 @@
-./push.sh data/redis 5.0.5-alpine
+./push.sh data/redis 5.0.7-alpine
