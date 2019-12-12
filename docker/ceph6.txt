@@ -368,3 +368,8 @@ docker run -d -p 1883:1883 \
 
 
 RUN set -ex &&  apk add --no-cache  bash  curl &&  true
+
+
+rm -rf /opt/deploy/logs && mkdir -p /opt/deploy/logs
+mount -t nfs 172.21.32.130:/data/logs /opt/deploy/logs
+echo '172.21.32.130:/data/logs  /opt/deploy/logs  nfs    defaults 0      0' >> /etc/fstab
