@@ -128,7 +128,7 @@ spring.datasource.druid.remove-abandoned-timeout=1800
 spring.datasource.druid.use-global-data-source-stat=true
 spring.datasource.druid.log-abandoned=true
 #配置监控统计拦截的filters(多个英文逗号分隔)
-spring.datasource.druid.filters=stat,log4j
+spring.datasource.druid.filters=log4j2,wall,stat
 
 #是否启用StatFilter默认值false
 spring.datasource.druid.web-stat-filter.enabled=true
@@ -150,5 +150,42 @@ spring.datasource.druid.stat-view-servlet.allow=
 spring.datasource.druid.stat-view-servlet.deny=
 
 #Spring监控AOP切入点，如x.y.z.service.*,配置多个英文逗号分隔
+spring.datasource.druid.aop-patterns=.*service.*
+```
+> 简化配置
+```properties
+spring.datasource.druid.initial-size=2
+spring.datasource.druid.max-active=10
+spring.datasource.druid.min-idle=5
+spring.datasource.druid.max-wait=600000
+spring.datasource.druid.keep-alive=true
+spring.datasource.druid.pool-prepared-statements=false
+spring.datasource.druid.max-pool-prepared-statement-per-connection-size=20
+spring.datasource.druid.max-open-prepared-statements=20
+spring.datasource.druid.validation-query=SELECT 'x'
+spring.datasource.druid.validation-query-timeout=600000
+spring.datasource.druid.test-on-borrow=false
+spring.datasource.druid.test-on-return=false
+spring.datasource.druid.test-while-idle=true
+spring.datasource.druid.time-between-eviction-runs-millis=600000
+spring.datasource.druid.min-evictable-idle-time-millis=600000
+spring.datasource.druid.max-evictable-idle-time-millis=600000
+spring.datasource.druid.remove-abandoned=true
+spring.datasource.druid.remove-abandoned-timeout=1800
+spring.datasource.druid.use-global-data-source-stat=true
+spring.datasource.druid.log-abandoned=true
+spring.datasource.druid.filters=log4j2,wall,stat
+spring.datasource.druid.web-stat-filter.enabled=true
+spring.datasource.druid.web-stat-filter.url-pattern=/*
+spring.datasource.druid.web-stat-filter.exclusions=*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*
+spring.datasource.druid.web-stat-filter.session-stat-enable=false
+spring.datasource.druid.web-stat-filter.session-stat-max-count=1000
+spring.datasource.druid.web-stat-filter.principal-session-name=principal
+spring.datasource.druid.web-stat-filter.principal-cookie-name=principal
+spring.datasource.druid.web-stat-filter.profile-enable=true
+spring.datasource.druid.stat-view-servlet.enabled=true
+spring.datasource.druid.stat-view-servlet.allow=
+spring.datasource.druid.stat-view-servlet.url-pattern=/druid/*
+spring.datasource.druid.stat-view-servlet.reset-enable=false
 spring.datasource.druid.aop-patterns=.*service.*
 ```
