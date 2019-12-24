@@ -1,13 +1,11 @@
 #!/bin/expect
-set timeout 30
+set timeout 10
 set server $env(server)
 set username $env(username)
 set password $env(password)
-set tag [lindex $argv 0]
-set slave [lindex $argv 1]
-set master [lindex $argv 2]
-spawn git merge $slave --ff -m $tag
-spawn git push origin $master
+set msg [lindex $argv 0]
+spawn git commit -a -m $msg
+spawn git push origin
 expect {
  "Username for 'http://$server':"
   {

@@ -1,5 +1,6 @@
+server=172.21.32.31
 username=zhangyi
 password=hls123!@#
 export username
 export password
-
+export server

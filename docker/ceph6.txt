@@ -152,7 +152,7 @@ docker service create \
 --mount type=bind,src=//opt/portainer,dst=/data \
 --container-label com.docker.stack.namespace=swarm \
 --label com.docker.stack.namespace=swarm \
-172.21.32.102:5000/portainer/portainer:1.22.2  \
+portainer/portainer:1.23.0  \
 -H unix:///var/run/docker.sock
 
 docker service rm nginx
@@ -196,7 +196,7 @@ docker node rm dbs-server14
 
 mkdir -p /home/deploy/bak
 mount 172.21.32.120:/data/dbs /home/deploy/bak
-echo '172.21.32.120:/data/dbs  /home/deploy/bak  nfs    defaults 0      0' >> /etc/fstab
+echo '10.67.117.150:/home/deploy/bak  /home/deploy/bak  nfs    defaults 0      0' >> /etc/fstab
 
 rm -rf /opt/deploy/conf && mkdir -p /opt/deploy/conf
 mount 172.21.32.120:/data/conf /opt/deploy/conf

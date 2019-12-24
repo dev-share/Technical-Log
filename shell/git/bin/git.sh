@@ -1,11 +1,15 @@
 
 #!/bin/bash
-BASE_PATH=/home/gitlab
+path="${BASH_SOURCE-$0}"
+path="$(dirname "${path}")"
+path="$(cd "${path}";pwd)"
+base=${path}/..
+BASE_PATH="$(cd "${base}";pwd)"
 WS_PATH=${BASE_PATH}/workspace
 BIN_PATH=${BASE_PATH}/bin
 
 if [ -z $1 ] ; then
-   echo " no git dir"
+   echo " no project"
    exit 1
 fi
 
@@ -38,4 +42,7 @@ if [ -n "$tmp" ] ; then
 	master="master_dbs"
 fi
 git checkout $master
+echo "--->>project:$project,master:$master,slave:$slave,version:$version,msg:$msg---"
 ${BIN_PATH}/merge.sh $tag $slave $master
+git checkout $slave
+${BIN_PATH}/pom.sh $project $version
