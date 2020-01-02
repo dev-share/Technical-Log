@@ -1,0 +1,235 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>HTTP</title>
+    <style type="text/css">
+        #connect-container {
+            float: left;
+            width: 400px
+        }
+
+        #connect-container div {
+            padding: 5px;
+        }
+
+        #console-container {
+            float: left;
+            margin-left: 5px;
+            width: 800px;
+        }
+
+        #console {
+        	background: black;
+            color : yellow;
+            border: 1px solid #03A9F4;
+            border-right-color: #777878;
+            border-bottom-color: #777878;
+            height: 600px;
+            overflow-y: scroll;
+            padding: 5px;
+            width: 100%;
+        }
+
+        #console p {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/core.js"></script> -->
+	
+    <script type="text/javascript">
+        function ajax(url,method,data,dataType,contentType) {
+            $.ajax({
+                url: url,
+                type: method,
+                data: $.param(data),
+                dataType: dataType?dataType:null,
+				contentType: contentType,
+                async: false,
+				dataFilter: function (data,type){
+					sys(type,"filter");
+					result = data?data.substr(0,20):null
+					log(type+"-------"+result,"blue");
+				},
+				beforeSend: function (event) {
+                    sys(event,"before");
+					log("--打开连接-----","#00FF00");
+                },
+                success: function (data) {
+                    sys(event,"success");
+					result = data?data.substr(0,20):null
+					log("---接收收据: " + result,"#00FF00");
+                },
+                error: function (event, errorType, error) {
+                    sys(event,"error");
+					log("---异常收据: " + errorType+","+error,"red");
+                },
+				complete: function (event,status) {
+					sys(event,"complete");
+                    log("--complete-----"+status,"#00FF00");
+                }
+            });
+        }
+		function hnative(url,method,data,dataType,contentType) {
+			var xhr=new XMLHttpRequest();
+			if (window.ActiveXObject){// code for IE5 and IE6
+				xhr=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			xhr.onprogress = function (event) {
+				sys(event,"progress");
+			};
+			xhr.onload = function (event) {
+				sys(event,"load");
+				log("--打开连接-----","#00FF00");
+			};
+			xhr.onerror = function (event) {
+				sys(event,"error");
+				log("---异常收据: " + JSON.stringify(event),"red");
+			};
+			xhr.onreadystatechange = function (event) {
+				if (xhr.readyState == 4 && xhr.status == 200) {
+					sys(event,"success");
+					sys(xhr.responseType,"responseType");
+					var headers = xhr.getAllResponseHeaders();
+					var filename = "";
+					if(headers){
+						if(headers.indexOf("content-filename")!=-1){
+							filename = xhr.getResponseHeader("Content-Filename");
+						}if(headers.indexOf("filename=")!=-1){
+							var start = headers.indexOf("filename=")+("filename=").length;
+							var end = headers.indexOf(";",start);
+							filename = headers.substring(start,end);
+						}else if(headers.indexOf("filename:")!=-1){
+							var start = headers.indexOf("filename:")+("filename:").length;
+							var end = headers.indexOf(";",start);
+							filename = headers.substring(start,end);
+						}
+						if(filename&&headers.indexOf("\"")!=-1){
+							filename = filename.replace(/\"/g,"");
+						}
+					}
+					sys(xhr.getAllResponseHeaders(),"rheaders");
+					sys(xhr.getResponseHeader("content-type"),"content-type");
+					data = xhr.responseType;
+					result = data?data.substr(0,20):null
+					log("---接收收据: " + data,"#00FF00");
+				}
+			};
+			//xhr.overrideMimeType('text/plain; charset=utf-8');
+			xhr.open(method,url,true);
+			xhr.setRequestHeader("Content-Type",contentType);
+			xhr.send(data?data:null);
+        }
+
+		function clean(){
+			document.getElementById('console').innerHTML="";
+		}
+        function send() {
+			console.log(document.getElementById("Native"));
+            var protocol= document.getElementById("Native").checked?document.getElementById("Native").value:document.getElementById("Ajax").value;
+			var url = document.getElementById("url").value;
+			var method = document.getElementById("method").value;
+			var data = document.getElementById("data").value;
+			var dataType = document.getElementById("dataType").value;
+			var contentType = document.getElementById("contentType").value;
+			if(protocol == "ajax"){
+				ajax(url,method,data,dataType,contentType);
+			}else{
+				hnative(url,method,data,dataType,contentType);
+			}
+        }
+
+        function log(message,color) {
+            var console = document.getElementById('console');
+            var p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+			var span = document.createElement("span");
+			span.style.color=color?color:"yellow";
+            span.appendChild(document.createTextNode(message));
+			p.appendChild(span);
+            console.appendChild(p);
+            while (console.childNodes.length > 20) {
+                console.removeChild(console.firstChild);
+            }
+            console.scrollTop = console.scrollHeight;
+        }
+		function sys(event,mark){
+			if(mark){
+				console.warn(mark);
+			}
+			console.info(event);
+		}
+    </script>
+</head>
+<body>
+<noscript>
+	<h2 style="color: #ff0000">Seems your browser doesn't support Javascript! HTTP 
+    rely on Javascript being enabled. Please enable
+    Javascript and reload this page!</h2>
+</noscript>
+<div>
+    <div id="connect-container">
+		<label for="url" class="label label-primary">URL</label><input id="url" class="form-control" type="text" name="type" value="http://172.21.12.6:8140/dbsznjc/history/export?thing=StateGridIndex&code=QKJGDDL&startTime=2019-12-25&endTime=2019-12-25 "/>
+		<br>
+        <input id="Native" type="radio" name="protocol" checked="checked" value="native"><label for="Native">XMLHttpRequest</label>
+        <input id="Ajax" type="radio" name="protocol" value="ajax"><label for="Ajax">Ajax</label>
+		<br>
+		<div id="transport" class="well well-lg">
+			<label for="method">Http Method</label>
+            <select id="method">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="CONNECT">CONNECT</option>
+              <option value="HEAD">HEAD</option>
+              <option value="OPTIONS">OPTIONS</option>
+              <option value="PATCH">PATCH</option>
+              <option value="TRACE">TRACE</option>
+            </select>
+        </div>
+		<div id="transport" class="well well-lg">
+			<label for="dataType">Response Data Type</label>
+            <select id="dataType">
+              <option value="json">json</option>
+              <option value="text">text</option>
+              <option value="html">html</option>
+              <option value="script">script</option>
+              <option value="xml">xml</option>
+              <option value="jsonp">jsonp</option>
+              <option value="" selected="selected">file</option>
+            </select>
+        </div>
+		<div id="transport" class="well well-lg">
+			<label for="contentType">Request Data Type</label>
+            <select id="contentType">
+              <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+			  <option value="application/json">application/json</option>
+			  <option value="text/plain">text/plain</option>
+              <option value="text/xml">text/xml</option>
+			  <option value="text/html">text/html</option>
+			  <option value="multipart/form-data">multipart/form-data</option>
+			  <option value="application/octet-stream">application/octet-stream</option>
+			  <option value="application/xml">application/xml</option>
+            </select>
+        </div>
+        <div class="btn-group">
+            <textarea id="data" style="width: 350px;resize: none;height:200px;"></textarea>
+        </div>
+        <div class="">
+            <button id="send" onclick="send();" class="btn btn-info">发送</button>
+			<button id="clear" onclick="clean();" class="btn btn-primary">清除</button>
+        </div>
+    </div>
+    <div id="console-container" class="panel panel-primary">
+		<div class="panel-heading">
+			<h3 class="panel-title">HTTP控制台</h3>
+		 </div>
+        <div id="console" class="panel-body"></div>
+    </div>
+</div>
+</body>
+</html>
