@@ -130,14 +130,16 @@ for port in `seq 2181 1 2184`; do \
   && mkdir -p ./${port}/logs; 
 done
 
+kill -9 $(ps -ef|grep -v grep|grep QuorumPeerMain|awk '{print $2}')
+kill -9 $(ps -ef|grep -v grep|grep Kafka|awk '{print $2}')
+jps
 
-
-cd /opt/deploy/data/zookeeper
-rm -rf data && mkdir -p ./data && rm -rf datalog && mkdir -p ./datalog && rm -rf logs && mkdir -p ./logs; 
-
-cd /opt/deploy/data/kafka
-rm -rf data && mkdir -p ./data && rm -rf logs && mkdir -p ./logs;
-
+mkdir -p /opt/deploy/data/zookeeper && cd /opt/deploy/data/zookeeper && rm -rf data && mkdir -p ./data && rm -rf datalog && mkdir -p ./datalog && rm -rf logs && mkdir -p ./logs; 
+rm -rf conf/zoo.cfg && rm -rf conf/zoo.cfg.dynamic.* && mv conf/zoo.cfg.bak conf/zoo.cfg;
+mkdir -p /opt/deploy/data/zookeeper && cd /opt/deploy/data/zookeeper && rm -rf logs/* && rm -rf datalog/* && rm -rf data/version* && rm -rf data/zookeeper_server*;
+./zookeeper.sh
+mkdir -p /opt/deploy/data/kafka && cd /opt/deploy/data/kafka && rm -rf data && mkdir -p ./data && rm -rf logs && mkdir -p ./logs;
+./kafka.sh
 
 cd /opt/deploy/data/zookeeper
 ./zookeeper.sh
@@ -145,3 +147,46 @@ cd /opt/deploy/data/zookeeper
 cd /opt/deploy/data/kafka
 ./kafka.sh
 
+killall -9 java
+cd /opt/deploy/data/zookeeper
+rm -rf logs/*
+rm -rf datalog/*
+rm -rf data/version*
+rm -rf data/zookeeper_server*
+./bin/zkServer.sh start
+./bin/zkServer.sh status
+
+sysctl kernel.hostname=ics-server100
+echo 'ics-server100' > /etc/hostname
+echo '100' > data/myid
+
+echo '#ics-server' >> /etc/hosts
+echo '172.21.32.58 ics-server102' >> /etc/hosts
+echo '172.21.32.59 ics-server101' >> /etc/hosts
+echo '172.21.32.85 ics-server100' >> /etc/hosts
+
+cat /etc/hosts
+
+
+echo 'export http_proxy=http://proxynet:123456@172.21.32.13:3128' >> /etc/profile
+echo 'export https_proxy=http://proxynet:123456@172.21.32.13:3128' >> /etc/profile
+source /etc/profile
+
+systemctl restart squid
+systemctl enable squid
+systemctl status squid
+
+scp -r /opt/deploy/data/kafka root@172.21.32.59:/opt/deploy/data && scp -r /opt/deploy/data/kafka root@172.21.32.85:/opt/deploy/data
+
+scp -r /etc/mosquitto/mosquitto.conf root@172.21.32.59:/etc/mosquitto && scp -r /etc/mosquitto/mosquitto.conf root@172.21.32.85:/etc/mosquitto
+
+systemctl stop mosquitto
+rm -rf /var/lib/mosquitto/*
+rm -rf /var/log/mosquitto.log
+rm -rf /var/log/messages
+systemctl restart mosquitto
+systemctl status mosquitto
+
+scp -r /opt/deploy/data/mosquitto/conf/mosquitto.conf root@172.21.32.59:/opt/deploy/data/mosquitto/conf && scp -r /opt/deploy/data/mosquitto/conf/mosquitto.conf root@172.21.32.85:/opt/deploy/data/mosquitto/conf
+
+scp -r /opt/deploy/data/mosquitto root@172.21.32.59:/opt/deploy/data && scp -r /opt/deploy/data/mosquitto root@172.21.32.85:/opt/deploy/data

@@ -1,0 +1,122 @@
+cd /usr/local/mysql
+cp -vr bin/ndb* /usr/local/bin/
+
+chmod +x /usr/local/bin/ndb*
+
+apt-get autoremove --purge mysql-router -y
+apt-get autoremove --purge mysql-shell -y
+
+apt-get autoremove --purge mysql-server -y
+apt-get autoremove --purge mysql-server-*
+apt-get autoremove --purge mysql-client -y
+apt-get autoremove --purge mysql-client-*
+apt-get remove mysql-common
+dpkg -l |grep ^rc|awk '{print $2}' |sudo xargs dpkg -P 
+rm -rf /etc/mysql
+rm -rf /var/lib/mysql
+apt autoremove
+apt autoclean
+
+rm -rf /var/lib/dpkg/info
+mkdir /var/lib/dpkg/info 
+apt-get upgrade
+
+server-id       = 101
+log-bin = mysql-bin
+binlog-format   = ROW
+max_connections = 1000
+connect_timeout = 30
+default-time-zone       = '+8:00'
+max_binlog_size = 100M
+sync_binlog     = 500
+innodb_flush_log_at_trx_commit  = 2
+
+log_timestamps                 = SYSTEM
+binlog_expire_logs_seconds = 259200
+
+skip-host-cache
+skip-name-resolve
+
+
+
+ndb-connectstring=192.168.137.47,192.168.137.11,192.168.137.152
+default-storage-engine=ndbcluster
+datadir=/data/mysql
+[ndbd]
+connect-string=192.168.137.47,192.168.137.11,192.168.137.152
+[ndb_mgm]
+connect-string=192.168.137.47,192.168.137.11,192.168.137.152
+[ndb_mgmd]
+config-file=/usr/local/mysql/config.ini
+
+
+
+mysqld --defaults-file=/etc/mysql/my.cnf --initialize lower_case_table_names=1 --user=mysql --datadir=/usr/local/mysql
+
+ndb_mgmd -f /usr/local/mysql/config.ini --ndb-nodeid=1 --reload –initial
+
+ndb_mgmd -f /usr/local/mysql/config.ini --initial 
+
+
+mysqld  --initialize lower_case_table_names=1  --user=root --defaults-file=/etc/mysql/my.cnf --datadir=/var/lib/mysql –console
+mysqld --defaults-file=/etc/mysql/my.cnf --datadir=/var/lib/mysql –console
+
+
+[logger]
+level = INFO
+
+[routing:secondary]
+bind_address = localhost
+bind_port = 7001
+destinations = ics-server100:3306,ics-server101:3306,ics-server102:3306
+routing_strategy = round-robin
+
+[routing:primary]
+bind_address = localhost
+bind_port = 7002
+destinations = ics-server100:3306,ics-server101:3306,ics-server102:3306
+routing_strategy = first-available
+
+mysqlsh root@ics-server102:33060/world_x
+
+cd /usr/local/mysql
+rm -rf data/*
+bin/mysqld --initialize-insecure
+
+/etc/my.cnf
+
+bin/mysqld --user=root --defaults-file=/etc/my.cnf –console
+
+mkdir /var/lib/mysql-cluster
+
+/etc/init.d/
+
+
+
+
+[ndbd default]
+NoOfReplicas=2
+DataMemory=98M
+
+[ndb_mgmd]
+HostName=ics-server100
+DataDir=/var/lib/mysql-cluster
+
+[ndbd]
+HostName=ics-server101
+NodeId=2
+DataDir=/usr/local/mysql/data
+
+[ndbd]
+HostName=ics-server102
+NodeId=3
+DataDir=/usr/local/mysql/data
+
+[mysqld]
+NodeId=4
+HostName=ics-server101
+
+[mysqld]
+NodeId=5
+HostName=ics-server100
+

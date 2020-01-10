@@ -138,7 +138,7 @@ systemctl status rexray
 rexray volume ls
 
 docker service rm portainer
-docker pull 172.21.32.102:5000/portainer/portainer:1.22.2
+docker pull 172.21.32.102:5000/portainer/portainer:1.23.0
 
 rm -rf /opt/portainer
 mkdir -p /opt/portainer
@@ -152,7 +152,7 @@ docker service create \
 --mount type=bind,src=//opt/portainer,dst=/data \
 --container-label com.docker.stack.namespace=swarm \
 --label com.docker.stack.namespace=swarm \
-portainer/portainer:1.23.0  \
+172.21.32.102:5000/portainer/portainer:1.23.0  \
 -H unix:///var/run/docker.sock
 
 docker service rm nginx
@@ -373,3 +373,10 @@ RUN set -ex &&  apk add --no-cache  bash  curl &&  true
 rm -rf /opt/deploy/logs && mkdir -p /opt/deploy/logs
 mount -t nfs 172.21.32.130:/data/logs /opt/deploy/logs
 echo '172.21.32.130:/data/logs  /opt/deploy/logs  nfs    defaults 0      0' >> /etc/fstab
+
+
+
+docker run -d -p 52520:52520 -p 52443:52443 \
+    --restart=always \
+    --name ua-model-server \
+    172.21.32.102:5000/ua-model-server:1.0.0

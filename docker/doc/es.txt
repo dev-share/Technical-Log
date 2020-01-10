@@ -1,0 +1,45 @@
+
+deb http://cn.archive.ubuntu.com/ubuntu eoan-updates main restricted
+deb http://cn.archive.ubuntu.com/ubuntu eoan universe
+deb http://cn.archive.ubuntu.com/ubuntu eoan-updates universe
+deb http://cn.archive.ubuntu.com/ubuntu eoan multiverse
+deb http://cn.archive.ubuntu.com/ubuntu eoan-updates multiverse
+deb http://cn.archive.ubuntu.com/ubuntu eoan-backports main restricted universe multiverse
+deb http://cn.archive.ubuntu.com/ubuntu eoan-security main restricted
+deb http://cn.archive.ubuntu.com/ubuntu eoan-security universe
+deb http://cn.archive.ubuntu.com/ubuntu eoan-security multiverse
+
+
+curl -fsSL "https://repo.mysql.com/apt/ubuntu/gpg" | apt-key add
+
+
+
+mkdir -p /opt/deploy/data
+tar -C /opt/deploy/data -zxvf elasticsearch-6.8.6.tar.gz
+mv /opt/deploy/data/elasticsearch-6.8.6 /opt/deploy/data/elasticsearch
+cd /opt/deploy/data/elasticsearch
+
+kill -9 $(ps -ef|grep -v grep|grep elasticsearch|awk '{print $2}')
+
+rm -rf data/* && rm -rf logs/*
+
+groupadd elasticsearch
+useradd elasticsearch -g elasticsearch -p elasticsearch
+chown -R elasticsearch:elasticsearch  /opt/deploy/data/elasticsearch
+cd /opt/deploy/data/elasticsearch
+su elasticsearch
+./bin/elasticsearch -d
+
+scp -r /opt/deploy/data/elasticsearch root@172.21.32.85:/opt/deploy/data
+
+dpkg -l |grep mysql | grep ii 
+
+apt remove mysql-apt-config -y
+apt remove mysql-client -y
+apt remove mysql-cluster-community-client -y
+apt remove mysql-cluster-community-client-core -y
+apt remove mysql-cluster-community-server  -y
+apt remove mysql-cluster-community-server-core -y
+apt remove mysql-common -y
+apt remove mysql-server  -y
+
