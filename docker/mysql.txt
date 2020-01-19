@@ -1,0 +1,133 @@
+cd /usr/local/mysql
+cp -vr bin/ndb* /usr/local/bin/
+
+chmod +x /usr/local/bin/ndb*
+
+apt-get autoremove --purge mysql-router -y
+apt-get autoremove --purge mysql-shell -y
+
+apt-get autoremove --purge mysql-server -y
+apt-get autoremove --purge mysql-server-*
+apt-get autoremove --purge mysql-client -y
+apt-get autoremove --purge mysql-client-*
+apt-get remove mysql-common
+dpkg -l |grep ^rc|awk '{print $2}' |sudo xargs dpkg -P 
+rm -rf /etc/mysql
+rm -rf /var/lib/mysql
+
+rm -rf /usr/local/bin/ndb*
+rm -rf /etc/rc.d/init.d/mysql.server
+rm -rf /etc/init.d/mysqld
+rm -rf /usr/local/mysql
+rm -rf /usr/local/mysql-cluster-*
+rm -rf /var/lib/mysql-cluster
+rm -rf /sbin/mysqld
+
+apt autoremove
+apt autoclean
+
+rm -rf /var/lib/dpkg/info
+mkdir /var/lib/dpkg/info 
+apt-get upgrade
+
+server-id       = 101
+log-bin = mysql-bin
+binlog-format   = ROW
+max_connections = 1000
+connect_timeout = 30
+default-time-zone       = '+8:00'
+max_binlog_size = 100M
+sync_binlog     = 500
+innodb_flush_log_at_trx_commit  = 2
+
+log_timestamps                 = SYSTEM
+binlog_expire_logs_seconds = 259200
+
+skip-host-cache
+skip-name-resolve
+
+
+
+tar -C /usr/local/mysql -zxvf mysql-cluster-8.0.18-rc-linux-glibc2.12-x86_64.tar.gz
+ln -s /usr/local/mysql-cluster-8.0.18-rc-linux-glibc2.12-x86_64.tar.gz /usr/local/mysql/mysql-cluster
+mkdir -p /usr/local/mysql/data
+chown -R root /usr/local/mysql
+chown -R mysql /usr/local/mysql/data
+chgrp -R mysql /usr/local/mysql
+cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld
+chmod +x /etc/init.d/mysqld
+ln -s /etc/init.d/mysqld /sbin/mysqld
+cd /usr/local/mysql
+mysqld  --initialize-insecure lower_case_table_names=1 --user=mysql  --defaults-file=/etc/mysql/my.cnf --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
+
+
+tar -C /usr/local -Jxvf mysql-8.0.18-linux-glibc2.12-x86_64.tar.xz
+tar -C /usr/local/mysql -zxvf mysql-cluster-8.0.18-rc-linux-glibc2.12-x86_64.tar.gz
+cd  /usr/local
+mv mysql-8.0.18-linux-glibc2.12-x86_64 mysql
+mv mysql-cluster-8.0.18-rc-linux-glibc2.12-x86_64 mysql-cluster
+cd /usr/local/mysql
+mv mysql-cluster-8.0.18-rc-linux-glibc2.12-x86_64 node2
+
+cp -vr /usr/local/mysql/mysql-cluster/bin/ndbd ./bin
+cp -vr /usr/local/mysql/mysql-cluster/bin/ndbmtd ./bin
+cp -vr /usr/local/mysql/mysql-cluster/bin/ndb_mgm ./bin
+cp -vr /usr/local/mysql/mysql-cluster/bin/ndb_mgmd ./bin
+cp -vr /usr/local/mysql/mysql-cluster/bin/mysqld ./bin
+
+./bin/ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=1 --ndb-mgmd-host=172.21.32.58 --ndb-connectstring=172.21.32.58 --initial --reload --nodaemon
+./bin/ndbd --ndb-connectstring=172.21.32.58
+
+./bin/mysqld  --initialize-insecure --defaults-file=/usr/local/mysql/node2/my.cnf
+
+./bin/mysqld  --initialize-insecure --defaults-file=/usr/local/mysql/node1/my.cnf
+
+./bin/mysqld --defaults-file=/usr/local/mysql/node1/my.cnf
+
+kill -9 $(ps -ef|grep -v grep|grep mysql|awk '{print $2}')
+rm -rf data/*
+rm -rf logs/*
+
+
+
+
+ndb-connectstring=192.168.137.47,192.168.137.11,192.168.137.152
+default-storage-engine=ndbcluster
+datadir=/data/mysql
+[ndbd]
+connect-string=192.168.137.47,192.168.137.11,192.168.137.152
+[ndb_mgm]
+connect-string=192.168.137.47,192.168.137.11,192.168.137.152
+[ndb_mgmd]
+config-file=/usr/local/mysql/config.ini
+
+
+
+mysqld --defaults-file=/etc/mysql/my.cnf --initialize lower_case_table_names=1 --user=mysql --datadir=/usr/local/mysql
+
+ndb_mgmd -f /usr/local/mysql/config.ini --ndb-nodeid=1 --reload –initial
+
+ndb_mgmd -f /usr/local/mysql/config.ini --initial 
+
+
+mysqld  --initialize lower_case_table_names=1  --user=root --defaults-file=/etc/mysql/my.cnf --datadir=/var/lib/mysql –console
+mysqld --defaults-file=/etc/mysql/my.cnf --datadir=/var/lib/mysql –console
+
+
+scp -r /usr/local/mysql/mysqld/my.cnf root@172.21.32.58:/usr/local/mysql/mysqld && scp -r /usr/local/mysql/mysqld/my.cnf root@172.21.32.59:/usr/local/mysql/mysqld
+scp -r /usr/local/mysql/mysqld/mysql root@172.21.32.58:/usr/local/mysql/mysqld && scp -r /usr/local/mysql/mysqld/mysql root@172.21.32.59:/usr/local/mysql/mysqld
+scp -r /usr/local/mysql/mysql-cluster/config.ini root@172.21.32.85:/usr/local/mysql/mysql-cluster && scp -r /usr/local/mysql/mysql-cluster/config.ini root@172.21.32.59:/usr/local/mysql/mysql-cluster/
+
+
+
+
+cd /usr/local/mysql/mysql-cluster
+
+rm -rf data/*
+rm -rf mgrdata/*
+
+ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=1 --reload –-initial --bind-address=172.21.32.85
+
+ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=1 --bind-address=172.21.32.58
+ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=2 --bind-address=172.21.32.59
+ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=3 --bind-address=172.21.32.85

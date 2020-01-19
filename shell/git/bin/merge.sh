@@ -6,7 +6,7 @@ set password $env(password)
 set tag [lindex $argv 0]
 set slave [lindex $argv 1]
 set master [lindex $argv 2]
-spawn git merge $slave --ff -m $tag
+spawn git merge $slave -v -m $tag
 spawn git push origin $master
 expect {
  "Username for 'http://$server':"

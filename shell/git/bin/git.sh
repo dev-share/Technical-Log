@@ -32,8 +32,6 @@ if [[ $version != v* ]];then
 fi
 
 source ${BIN_PATH}/sshkey
-${BIN_PATH}/pull.sh
-${BIN_PATH}/tag.sh $tag $msg
 slave="develop"
 master="master"
 tmp="`git branch -a|grep -v grep|grep dbs`"
@@ -41,6 +39,9 @@ if [ -n "$tmp" ] ; then
 	slave="dbs"
 	master="master_dbs"
 fi
+git checkout $slave
+${BIN_PATH}/pull.sh
+${BIN_PATH}/tag.sh $tag $msg
 git checkout $master
 echo "--->>project:$project,master:$master,slave:$slave,version:$version,msg:$msg---"
 ${BIN_PATH}/merge.sh $tag $slave $master
