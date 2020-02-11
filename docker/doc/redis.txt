@@ -8,7 +8,7 @@ cluster-enabled yes
 cluster-config-file nodes.conf
 cluster-node-timeout 10000
 cluster-slave-validity-factor 5
-#cluster-announce-ip 172.21.32.85
+#cluster-announce-ip 172.21.32.38
 cluster-announce-port ${PORT}
 cluster-announce-bus-port 1${PORT}
 cluster-require-full-coverage no
@@ -19,6 +19,9 @@ timeout 30
 repl-ping-slave-period 60
 hz 1
 repl-timeout 60
+
+cd /opt/deploy/data/redis
+rm -rf /opt/deploy/data/redis/6*
 
 for port in `seq 6379 10 6389`; do \
   mkdir -p ./${port}/conf \
@@ -36,11 +39,13 @@ for port in `seq 6379 10 6389`; do \
   172.21.32.102:5000/redis:5.0.7-alpine redis-server /usr/local/etc/redis/redis.conf; \
 done
 
-redis-cli --cluster create 172.21.32.58:6379 172.21.32.58:6389 172.21.32.59:6379 172.21.32.59:6389 172.21.32.85:6379 172.21.32.85:6389 --cluster-replicas 1
+docker exec redis-6379 redis-cli --cluster create 172.21.32.36:6379 172.21.32.36:6389 172.21.32.37:6379 172.21.32.37:6389 172.21.32.38:6379 172.21.32.38:6389 --cluster-replicas 1
+
+redis-cli --cluster create 172.21.32.36:6379 172.21.32.36:6389 172.21.32.37:6379 172.21.32.37:6389 172.21.32.38:6379 172.21.32.38:6389 --cluster-replicas 1
 
 cd /opt/deploy/data/redis
 rm -rf /opt/deploy/data/redis/6*
-
+cat redis-cluster.tmpl
 
 rm -rf /opt/deploy/data/redis && mkdir -p /opt/deploy/data/redis && cd /opt/deploy/data/redis
 vim redis-cluster.tmpl
@@ -50,7 +55,7 @@ protected-mode no
 cluster-enabled yes
 cluster-config-file nodes.conf
 cluster-node-timeout 5000
-cluster-announce-ip 172.21.32.58
+cluster-announce-ip 172.21.32.36
 cluster-announce-port ${PORT}
 cluster-announce-bus-port 1${PORT}
 appendonly yes
@@ -70,4 +75,4 @@ docker run -d -ti -p 6379:6379 -p 16379:16379 \
   --restart always --name redis \
   --sysctl net.core.somaxconn=1024 172.21.32.102:5000/redis:5.0.7-alpine redis-server /usr/local/etc/redis/redis.conf
 
-redis-cli --cluster create 172.21.32.58:6379 172.21.32.59:6379 172.21.32.85:6379 --cluster-replicas 1
+redis-cli --cluster create 172.21.32.36:6379 172.21.32.37:6379 172.21.32.38:6379 --cluster-replicas 1

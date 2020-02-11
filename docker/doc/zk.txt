@@ -147,7 +147,8 @@ cd /opt/deploy/data/zookeeper
 cd /opt/deploy/data/kafka
 ./kafka.sh
 
-killall -9 java
+
+kill -9 $(ps -ef|grep -v grep|grep QuorumPeerMain|awk '{print $2}')
 cd /opt/deploy/data/zookeeper
 rm -rf logs/*
 rm -rf datalog/*
@@ -156,14 +157,20 @@ rm -rf data/zookeeper_server*
 ./bin/zkServer.sh start
 ./bin/zkServer.sh status
 
+kill -9 $(ps -ef|grep -v grep|grep Kafka|awk '{print $2}')
+cd /opt/deploy/data/kafka
+rm -rf logs/*
+rm -rf data/*
+
+
 sysctl kernel.hostname=ics-server100
 echo 'ics-server100' > /etc/hostname
 echo '100' > data/myid
 
 echo '#ics-server' >> /etc/hosts
-echo '172.21.32.58 ics-server102' >> /etc/hosts
-echo '172.21.32.59 ics-server101' >> /etc/hosts
-echo '172.21.32.85 ics-server100' >> /etc/hosts
+echo '172.21.32.36 ics-server102' >> /etc/hosts
+echo '172.21.32.37 ics-server101' >> /etc/hosts
+echo '172.21.32.38 ics-server100' >> /etc/hosts
 
 cat /etc/hosts
 
@@ -176,9 +183,9 @@ systemctl restart squid
 systemctl enable squid
 systemctl status squid
 
-scp -r /opt/deploy/data/kafka root@172.21.32.59:/opt/deploy/data && scp -r /opt/deploy/data/kafka root@172.21.32.85:/opt/deploy/data
+scp -r /opt/deploy/data/kafka root@172.21.32.37:/opt/deploy/data && scp -r /opt/deploy/data/kafka root@172.21.32.38:/opt/deploy/data
 
-scp -r /etc/mosquitto/mosquitto.conf root@172.21.32.59:/etc/mosquitto && scp -r /etc/mosquitto/mosquitto.conf root@172.21.32.85:/etc/mosquitto
+scp -r /etc/mosquitto/mosquitto.conf root@172.21.32.37:/etc/mosquitto && scp -r /etc/mosquitto/mosquitto.conf root@172.21.32.38:/etc/mosquitto
 
 systemctl stop mosquitto
 rm -rf /var/lib/mosquitto/*
@@ -187,6 +194,6 @@ rm -rf /var/log/messages
 systemctl restart mosquitto
 systemctl status mosquitto
 
-scp -r /opt/deploy/data/mosquitto/conf/mosquitto.conf root@172.21.32.59:/opt/deploy/data/mosquitto/conf && scp -r /opt/deploy/data/mosquitto/conf/mosquitto.conf root@172.21.32.85:/opt/deploy/data/mosquitto/conf
+scp -r /opt/deploy/data/mosquitto/conf/mosquitto.conf root@172.21.32.37:/opt/deploy/data/mosquitto/conf && scp -r /opt/deploy/data/mosquitto/conf/mosquitto.conf root@172.21.32.38:/opt/deploy/data/mosquitto/conf
 
-scp -r /opt/deploy/data/mosquitto root@172.21.32.59:/opt/deploy/data && scp -r /opt/deploy/data/mosquitto root@172.21.32.85:/opt/deploy/data
+scp -r /opt/deploy/data/mosquitto root@172.21.32.37:/opt/deploy/data && scp -r /opt/deploy/data/mosquitto root@172.21.32.38:/opt/deploy/data

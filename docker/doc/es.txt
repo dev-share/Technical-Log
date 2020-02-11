@@ -28,7 +28,7 @@ useradd elasticsearch -g elasticsearch -p elasticsearch
 chown -R elasticsearch:elasticsearch  /opt/deploy/data/elasticsearch
 cd /opt/deploy/data/elasticsearch
 su elasticsearch
-./bin/elasticsearch -d
+bin/elasticsearch -d
 
 scp -r /opt/deploy/data/elasticsearch root@172.21.32.85:/opt/deploy/data
 

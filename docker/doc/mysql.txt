@@ -1,5 +1,7 @@
 kill -9 $(ps -ef|grep -v grep|grep mysql|awk '{print $2}')
 
+scp -vr  /usr/local/mysql/mysql-cluster/config.ini root@172.21.32.37:/usr/local/mysql/mysql-cluster && scp -vr  /usr/local/mysql/mysql-cluster/config.ini root@172.21.32.38:/usr/local/mysql/mysql-cluster 
+
 cd /usr/local/mysql/mysql-cluster
 ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=1 --reload –initial
 
@@ -9,14 +11,19 @@ ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=2
 cd /usr/local/mysql/mysql-cluster
 ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=3
 
-
+cd /usr/local/mysql/mysql-cluster
 rm -rf data/*
 rm -rf mgrdata/*
 
 cd /usr/local/mysql/mysqld
+vim /usr/local/mysql/mysqld/my.cnf
+cd /usr/local/mysql/mysqld
+ndbd --ndb-connectstring=172.21.32.36,172.21.32.37,172.21.32.38
 
-ndbd --ndb-connectstring=172.21.32.58,172.21.32.59,172.21.32.85
+vim /usr/local/mysql/mysqld/my.cnf
 
+cd /usr/local/mysql/mysqld
+./mysql start
 
 
 
