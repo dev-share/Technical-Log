@@ -391,3 +391,4 @@ cat docker-compose-snapshot.yml | docker stack deploy --compose-file - dsdbs
 
 docker swarm update --cert-expiry 8760h0m0s --dispatcher-heartbeat 1m 
 
+rm -rf /var/lib/dpkg/info && mkdir -p /var/lib/dpkg/info && apt-get upgrade

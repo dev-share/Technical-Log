@@ -19,6 +19,7 @@ cd /usr/local/mysql/mysqld
 vim /usr/local/mysql/mysqld/my.cnf
 cd /usr/local/mysql/mysqld
 ndbd --ndb-connectstring=172.21.32.36,172.21.32.37,172.21.32.38
+ndb_mgm -e SHOW
 
 vim /usr/local/mysql/mysqld/my.cnf
 

@@ -1,0 +1,136 @@
+apt install -y cpu-checker
+kvm-ok
+lsmod | grep kvm
+apt-get install -y qemu qemu-kvm
+apt-get install -y libvirt-daemon-system  libvirt-daemon  bridge-utils
+apt-get install -y virtinst virt-manager  virt-viewer
+apt-get install -y kernel-package linux-source build-essential
+
+virsh list --all
+brctl show
+
+systemctl enable libvirtd
+systemctl restart libvirtd
+systemctl status libvirtd
+
+bridges:
+         vbr0:
+             interfaces: [eno1]
+             dhcp4: false
+             addresses: [192.168.32.1/24]
+             gateway4: 192.168.32.254
+             nameservers:
+                  addresses: [114.114.114.114,8.8.8.8]
+             parameters:
+                  stp: true
+                  forward-delay: 0
+
+export DISPLAY=172.21.12.2:0.0
+xhost +
+virt-manager
+
+
+virsh shutdown ics-server103
+virsh destroy ics-server103
+virsh undefine ics-server103
+rm -rf /home/kvm/disk/ics-server103.img
+qemu-img create -f qcow2 /home/kvm/disk/ics-server103.img 150G
+
+
+virt-install --name=ics-server103 \
+--virt-type=kvm \
+--vcpus=4 \
+--memory=4096 \
+--disk path=/home/kvm/disk/ics-server103.img,bus=virtio,size=150 \
+--cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
+--network bridge=vbr0 \
+--graphics vnc,listen=0.0.0.0 \
+-v
+
+
+
+virsh shutdown ics-server104
+virsh destroy ics-server104
+virsh undefine ics-server104
+rm -rf /home/kvm/disk/ics-server104.img
+qemu-img create -f qcow2 /home/kvm/disk/ics-server104.img 150G
+
+
+virt-install --name=ics-server104 \
+--virt-type=kvm \
+--vcpus=4 \
+--memory=4096 \
+--disk path=/home/kvm/disk/ics-server104.img,bus=virtio,size=150 \
+--cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
+--network bridge=vbr0 \
+--graphics vnc,listen=0.0.0.0 \
+-v
+
+
+
+virsh shutdown ics-server105
+virsh destroy ics-server105
+virsh undefine ics-server105
+rm -rf /home/kvm/disk/ics-server105.img
+qemu-img create -f qcow2 /home/kvm/disk/ics-server105.img 150G
+
+
+virt-install --name=ics-server105 \
+--virt-type=kvm \
+--vcpus=4 \
+--memory=4096 \
+--disk path=/home/kvm/disk/ics-server105.img,bus=virtio,size=150 \
+--cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
+--network bridge=vbr0 \
+--graphics vnc,listen=0.0.0.0 \
+-v
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

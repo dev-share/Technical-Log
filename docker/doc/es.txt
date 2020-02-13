@@ -32,14 +32,8 @@ bin/elasticsearch -d
 
 scp -r /opt/deploy/data/elasticsearch root@172.21.32.85:/opt/deploy/data
 
-dpkg -l |grep mysql | grep ii 
-
-apt remove mysql-apt-config -y
-apt remove mysql-client -y
-apt remove mysql-cluster-community-client -y
-apt remove mysql-cluster-community-client-core -y
-apt remove mysql-cluster-community-server  -y
-apt remove mysql-cluster-community-server-core -y
-apt remove mysql-common -y
-apt remove mysql-server  -y
-
+cd /opt/deploy/data/elasticsearch
+kill -9 $(ps -ef|grep -v grep|grep elasticsearch|awk '{print $2}')
+rm -rf data/* && rm -rf logs/*
+su elasticsearch
+bin/elasticsearch -d
