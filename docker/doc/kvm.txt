@@ -14,6 +14,15 @@ systemctl restart libvirtd
 systemctl status libvirtd
 
 bridges:
+         br0:
+             dhcp4: false
+             addresses: [192.168.32.1/24]
+             gateway4: 192.168.32.254
+             nameservers:
+                  addresses: [114.114.114.114,8.8.8.8]
+             parameters:
+                  stp: true
+                  forward-delay: 0
          vbr0:
              interfaces: [eno1]
              dhcp4: false
@@ -21,6 +30,26 @@ bridges:
              gateway4: 192.168.32.254
              nameservers:
                   addresses: [114.114.114.114,8.8.8.8]
+             parameters:
+                  stp: true
+                  forward-delay: 0
+         vbr128:
+             interfaces: [enx00e04c3600ee]
+             dhcp4: false
+             addresses: [128.0.0.1/24]
+             gateway4: 128.0.0.254
+             nameservers:
+                  addresses: [128.0.0.1]
+             parameters:
+                  stp: true
+                  forward-delay: 0
+         vbr129:
+             interfaces: [enx00e04c361a3d]
+             dhcp4: false
+             addresses: [129.0.0.1/24]
+             gateway4: 129.0.0.254
+             nameservers:
+                  addresses: [129.0.0.1]
              parameters:
                   stp: true
                   forward-delay: 0
