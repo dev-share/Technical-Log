@@ -51,6 +51,10 @@ dism/Online /Cleanup-Image /CheckHealth
 dism/Online /Cleanup-Image /RestoreHealth
 sfc /scannow
 ```
+8.Windows重置网络
+```
+netsh winsock reset
+```
 ## 四. NodeJS配置
 1. grunt安装
 ```bash
