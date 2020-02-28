@@ -21,6 +21,17 @@ hz 1
 repl-timeout 60
 
 cd /opt/deploy/data/redis
+rm -rf /opt/deploy/data/redis/6379
+ mkdir -p ./6379/conf \
+  && PORT=6379 envsubst < ./redis-cluster.tmpl > ./6379/conf/redis.conf \
+  && mkdir -p ./6379/data; 
+
+rm -rf /opt/deploy/data/redis/6389
+ mkdir -p ./6389/conf \
+  && PORT=6389 envsubst < ./redis-cluster.tmpl > ./6389/conf/redis.conf \
+  && mkdir -p ./6389/data; 
+
+cd /opt/deploy/data/redis
 rm -rf /opt/deploy/data/redis/6*
 
 for port in `seq 6379 10 6389`; do \

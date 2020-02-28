@@ -147,7 +147,7 @@ docker service create \
 --name portainer \
 --publish 9000:9000 \
 --replicas=1 \
---constraint 'node.role == manager' \
+--constraint 'node.hostname==ics-server101' \
 --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
 --mount type=bind,src=//opt/portainer,dst=/data \
 --container-label com.docker.stack.namespace=swarm \
@@ -176,7 +176,7 @@ docker run -d -p 9000:9000 \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /opt/portainer:/data \
     --label com.docker.stack.namespace=swarm \
-    172.21.32.102:5000/portainer/portainer:1.22.2 \
+    172.21.32.102:5000/portainer/portainer:1.23.0 \
     -H unix:///var/run/docker.sock
 
 
@@ -262,8 +262,8 @@ jc21/registry-ui:2.0.2
 
 
 
-sysctl kernel.hostname=dbs-server131
-echo 'dbs-server131' > /etc/hostname
+sysctl kernel.hostname=ics-server151
+echo 'ics-server151' > /etc/hostname
 vim /etc/netplan/50-cloud-init.yaml
 
 docker node demote dbs-server108

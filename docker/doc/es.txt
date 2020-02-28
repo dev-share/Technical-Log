@@ -37,3 +37,10 @@ kill -9 $(ps -ef|grep -v grep|grep elasticsearch|awk '{print $2}')
 rm -rf data/* && rm -rf logs/*
 su elasticsearch
 bin/elasticsearch -d
+
+
+cd /opt/deploy/data/elasticsearch
+kill -9 $(ps -ef|grep -v grep|grep elasticsearch|awk '{print $2}')
+rm -rf logs/*
+su elasticsearch
+bin/elasticsearch -d
