@@ -13,116 +13,261 @@ systemctl enable libvirtd
 systemctl restart libvirtd
 systemctl status libvirtd
 
-bridges:
-         br0:
-             dhcp4: false
-             addresses: [192.168.13.1/24]
-             gateway4: 192.168.13.254
-             nameservers:
-                  addresses: [114.114.114.114,8.8.8.8]
-             parameters:
-                  stp: true
-                  forward-delay: 0
+CPU个数：
+cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l
+CPU核数：
+cat /proc/cpuinfo| grep "cpu cores"| uniq
+VCPU核数：
+cat /proc/cpuinfo| grep "processor"| wc -l
+
+物理机网络：
+
+network:
+    version: 2
+    ethernets:
+        eno1:
+            dhcp4: false
+        eno2:
+            dhcp4: true
+        eno3:
+            dhcp4: true
+        eno4:
+            dhcp4: true
+    bridges:
          vbr0:
-             interfaces: [eno1]
-             dhcp4: false
-             addresses: [192.168.32.1/24]
-             gateway4: 192.168.32.254
-             nameservers:
-                  addresses: [114.114.114.114,8.8.8.8]
-             parameters:
-                  stp: true
-                  forward-delay: 0
+            interfaces: [eno2]
+            addresses:
+                - 172.21.32.59/24
+            gateway4: 172.21.32.254
+            nameservers:
+                addresses: [172.21.100.15, 172.21.100.11]
          vbr128:
-             interfaces: [enx00e04c3600ee]
-             dhcp4: false
-             addresses: [128.0.0.1/24]
-             gateway4: 128.0.0.254
-             nameservers:
-                  addresses: [128.0.0.1]
-             parameters:
-                  stp: true
-                  forward-delay: 0
+            interfaces: [eno3]
+            addresses:
+                - 128.0.0.210/16
+            routes:
+                - to: 128.0.0.0/16
+                  via: 128.0.0.254
          vbr129:
-             interfaces: [enx00e04c361a3d]
-             dhcp4: false
-             addresses: [129.0.0.1/24]
-             gateway4: 129.0.0.254
-             nameservers:
-                  addresses: [129.0.0.1]
-             parameters:
-                  stp: true
-                  forward-delay: 0
+            interfaces: [eno4]
+            addresses:
+                - 129.0.0.210/16
+            routes:
+                - to: 129.0.0.0/16
+                  via: 129.0.0.254
+
+虚拟机配置：
+
+network:
+    version: 2
+    ethernets:
+        ens3:
+            dhcp4: false
+            addresses: [172.21.32.160/24]
+            gateway4: 172.21.32.254
+            nameservers:
+                    addresses: [172.21.100.15,172.21.100.11]
+        ens4:
+            dhcp4: false
+            addresses:
+                - 128.0.0.160/16
+            routes:
+                - to: 128.0.0.0/16
+                  via: 128.0.0.254
+        ens5:
+            dhcp4: false
+            addresses:
+                - 129.0.0.160/16
+            routes:
+                - to: 129.0.0.0/16
+                  via: 129.0.0.254
+        ens6:
+            dhcp4: false
+            addresses: [192.168.122.160/24]
+            gateway4: 192.168.122.1
+            nameservers:
+                    addresses: [192.168.122.1]
+
+ifconfig vbr0 down
+brctl delbr vbr0
+
+ifconfig vbr128 down
+brctl delbr vbr128
+ifconfig vbr129 down
+brctl delbr vbr129
+
+netplan --debug apply
+
+/etc/libvirt/qemu/
 
 export DISPLAY=172.21.12.2:0.0
 xhost +
 virt-manager
 
+#修改CPU，内存
 
-virsh shutdown ics-server103
-virsh destroy ics-server103
-virsh undefine ics-server103
-rm -rf /home/kvm/disk/ics-server103.img
-qemu-img create -f qcow2 /home/kvm/disk/ics-server103.img 150G
+virsh shutdown ics-server162
+virsh setmaxmem ics-server160 16777216
+virsh edit ics-server160
+#修改xml信息
+virsh start ics-server160
+virsh setmem ics-server160 16777216
+virsh setvcpus ics-server160 6
 
 
-virt-install --name=ics-server103 \
+
+
+virt-viewer ics-server160
+
+virt-clone -o ics-server  \
+-n ics-server163  \
+-f /home/kvm/disk/ics-server163.img
+
+
+virsh shutdown ics-server160
+virsh destroy ics-server160
+virsh undefine ics-server160
+rm -rf /home/kvm/disk/ics-server160.img
+qemu-img create -f qcow2 /home/kvm/disk/ics-server160.img 500G
+
+
+virt-install --name=ics-server160 \
+--virt-type=kvm \
+--vcpus=6 \
+--memory=16384 \
+--disk path=/home/kvm/disk/ics-server160.img,bus=virtio \
+--cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
+--network bridge=vbr0 \
+--network bridge=vbr128 \
+--network bridge=vbr129 \
+--network bridge=virbr0 \
+--graphics vnc,listen=0.0.0.0 \
+--console pty,target_type=virtio \
+-v
+
+
+virsh shutdown ics-server161
+virsh destroy ics-server161
+virsh undefine ics-server161
+rm -rf /home/kvm/disk/ics-server161.img
+qemu-img create -f qcow2 /home/kvm/disk/ics-server161.img 500G
+
+
+virt-install --name=ics-server161 \
 --virt-type=kvm \
 --vcpus=4 \
 --memory=4096 \
---disk path=/home/kvm/disk/ics-server103.img,bus=virtio,size=150 \
+--disk path=/home/kvm/disk/ics-server161.img,bus=virtio \
 --cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
 --network bridge=vbr0 \
+--network bridge=vbr128 \
+--network bridge=vbr129 \
+--network bridge=virbr0 \
 --graphics vnc,listen=0.0.0.0 \
+--console pty,target_type=virtio \
+-v
+
+virsh shutdown ics-server162
+virsh destroy ics-server162
+virsh undefine ics-server162
+rm -rf /home/kvm/disk/ics-server162.img
+qemu-img create -f qcow2 /home/kvm/disk/ics-server162.img 500G
+
+
+virt-install --name=ics-server162 \
+--virt-type=kvm \
+--vcpus=4 \
+--memory=4096 \
+--disk path=/home/kvm/disk/ics-server162.img,bus=virtio \
+--cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
+--network bridge=vbr0 \
+--network bridge=vbr128 \
+--network bridge=vbr129 \
+--network bridge=virbr0 \
+--graphics vnc,listen=0.0.0.0 \
+--console pty,target_type=virtio \
+-v
+
+virt-viewer ics-server162
+
+virt-viewer windows2016
+
+virsh shutdown windows2016
+virsh destroy windows2016
+virsh undefine windows2016
+rm -rf /home/kvm/disk/windows2016.img
+qemu-img create -f qcow2 /home/kvm/disk/windows2016.img 500G
+
+
+virt-install --name=windows2016 \
+--virt-type=kvm \
+--vcpus=4 \
+--memory=4096 \
+--boot cdrom  \
+--disk path=/home/kvm/disk/windows2016.img,bus='ide' \
+--cdrom=/home/kvm/cn_windows_server_2016_9718765_x64.iso \
+--network bridge=vbr0 \
+--network bridge=vbr128 \
+--network bridge=vbr129 \
+--network bridge=virbr0 \
+--graphics vnc,listen=0.0.0.0 \
+--os-type=winxp \
+-v
+
+virsh #
+domblklist windows2016
+
+change-media --domain windows2016 hdb /home/kvm/cn_windows_server_2016_9718765_x64.iso
+
+virt-viewer windows10
+
+virsh shutdown windows10
+virsh destroy windows10
+virsh undefine windows10
+rm -rf /home/kvm/disk/windows10.img
+qemu-img create -f qcow2 /home/kvm/disk/windows10.img 500G
+
+
+virt-install --name=windows10 \
+--virt-type=kvm \
+--vcpus=4 \
+--memory=4096 \
+--boot cdrom  \
+--disk path=/home/kvm/disk/windows10.img,bus='ide' \
+--cdrom=/home/kvm/cn_windows_10_business_editions_1909_x64.iso \
+--network bridge=vbr0 \
+--network bridge=vbr128 \
+--network bridge=vbr129 \
+--network bridge=virbr0 \
+--graphics vnc,listen=0.0.0.0 \
+--os-type=winxp \
 -v
 
 
 
-virsh shutdown ics-server104
-virsh destroy ics-server104
-virsh undefine ics-server104
-rm -rf /home/kvm/disk/ics-server104.img
-qemu-img create -f qcow2 /home/kvm/disk/ics-server104.img 150G
+virt-viewer windows7
+
+virsh shutdown windows7
+virsh destroy windows7
+virsh undefine windows7
+rm -rf /home/kvm/disk/windows7.img
+qemu-img create -f qcow2 /home/kvm/disk/windows7.img 500G
 
 
-virt-install --name=ics-server104 \
+virt-install --name=windows7 \
 --virt-type=kvm \
 --vcpus=4 \
 --memory=4096 \
---disk path=/home/kvm/disk/ics-server104.img,bus=virtio,size=150 \
---cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
+--boot cdrom  \
+--disk path=/home/kvm/disk/windows7.img,bus='ide' \
+--cdrom=/home/kvm/cn_windows_7_professional_sp1_vl_677816_x64.iso \
 --network bridge=vbr0 \
+--network bridge=vbr128 \
+--network bridge=vbr129 \
+--network bridge=virbr0 \
 --graphics vnc,listen=0.0.0.0 \
+--os-type=winxp \
 -v
-
-
-
-virsh shutdown ics-server105
-virsh destroy ics-server105
-virsh undefine ics-server105
-rm -rf /home/kvm/disk/ics-server105.img
-qemu-img create -f qcow2 /home/kvm/disk/ics-server105.img 150G
-
-
-virt-install --name=ics-server105 \
---virt-type=kvm \
---vcpus=4 \
---memory=4096 \
---disk path=/home/kvm/disk/ics-server105.img,bus=virtio,size=150 \
---cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
---network bridge=vbr0 \
---graphics vnc,listen=0.0.0.0 \
--v
-
-
-
-
-
-
-
-
-
-
 
 
 

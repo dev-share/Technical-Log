@@ -134,6 +134,17 @@ kill -9 $(ps -ef|grep -v grep|grep QuorumPeerMain|awk '{print $2}')
 kill -9 $(ps -ef|grep -v grep|grep Kafka|awk '{print $2}')
 jps
 
+
+mkdir -p /opt/deploy/data
+tar -C /opt/deploy/data -zxvf apache-zookeeper-3.5.6-bin.tar.gz
+mv /opt/deploy/data/apache-zookeeper-3.5.6-bin /opt/deploy/data/zookeeper
+cd /opt/deploy/data/zookeeper
+
+mkdir -p /opt/deploy/data
+tar -C /opt/deploy/data -zxvf kafka_2.12-2.3.1.tgz
+mv /opt/deploy/data/kafka_2.12-2.3.1 /opt/deploy/data/kafka
+cd /opt/deploy/data/kafka
+
 mkdir -p /opt/deploy/data/zookeeper && cd /opt/deploy/data/zookeeper && rm -rf data && mkdir -p ./data && rm -rf datalog && mkdir -p ./datalog && rm -rf logs && mkdir -p ./logs; 
 rm -rf conf/zoo.cfg && rm -rf conf/zoo.cfg.dynamic.* && mv conf/zoo.cfg.bak conf/zoo.cfg;
 mkdir -p /opt/deploy/data/zookeeper && cd /opt/deploy/data/zookeeper && rm -rf logs/* && rm -rf datalog/* && rm -rf data/version* && rm -rf data/zookeeper_server*;
@@ -165,7 +176,7 @@ rm -rf data/*
 
 sysctl kernel.hostname=ics-server100
 echo 'ics-server100' > /etc/hostname
-echo '100' > data/myid
+echo '110' > data/myid
 
 echo '#ics-server' >> /etc/hosts
 echo '172.21.32.36 ics-server102' >> /etc/hosts
@@ -173,7 +184,10 @@ echo '172.21.32.37 ics-server101' >> /etc/hosts
 echo '172.21.32.38 ics-server100' >> /etc/hosts
 
 cat /etc/hosts
+#echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" > /etc/apt/sources.list.d/docker.list
 
+echo "deb http://ppa.launchpad.net/mosquitto-dev/mosquitto-ppa/ubuntu eoan main" > /etc/apt/sources.list.d/mosquitto.list 
+echo "deb-src http://ppa.launchpad.net/mosquitto-dev/mosquitto-ppa/ubuntu eoan main" >> /etc/apt/sources.list.d/mosquitto.list 
 
 echo 'export http_proxy=http://proxynet:123456@172.21.32.13:3128' >> /etc/profile
 echo 'export https_proxy=http://proxynet:123456@172.21.32.13:3128' >> /etc/profile

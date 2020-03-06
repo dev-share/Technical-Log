@@ -152,7 +152,7 @@ docker service create \
 --mount type=bind,src=//opt/portainer,dst=/data \
 --container-label com.docker.stack.namespace=swarm \
 --label com.docker.stack.namespace=swarm \
-172.21.32.102:5000/portainer/portainer:1.23.0  \
+172.21.32.102:5000/portainer/portainer:1.23.1  \
 -H unix:///var/run/docker.sock
 
 docker service rm nginx
@@ -176,7 +176,7 @@ docker run -d -p 9000:9000 \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /opt/portainer:/data \
     --label com.docker.stack.namespace=swarm \
-    172.21.32.102:5000/portainer/portainer:1.23.0 \
+    172.21.32.102:5000/portainer/portainer:1.23.1 \
     -H unix:///var/run/docker.sock
 
 
@@ -262,8 +262,8 @@ jc21/registry-ui:2.0.2
 
 
 
-sysctl kernel.hostname=ics-server151
-echo 'ics-server151' > /etc/hostname
+sysctl kernel.hostname=ics-server161
+echo 'ics-server161' > /etc/hostname
 vim /etc/netplan/50-cloud-init.yaml
 
 docker node demote dbs-server108
@@ -392,3 +392,5 @@ cat docker-compose-snapshot.yml | docker stack deploy --compose-file - dsdbs
 docker swarm update --cert-expiry 8760h0m0s --dispatcher-heartbeat 1m 
 
 rm -rf /var/lib/dpkg/info && mkdir -p /var/lib/dpkg/info && apt-get upgrade
+
+

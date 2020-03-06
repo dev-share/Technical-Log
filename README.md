@@ -55,6 +55,10 @@ sfc /scannow
 ```
 netsh winsock reset
 ```
+9.Windows添加硬件
+```
+HDWWIZ
+```
 ## 四. NodeJS配置
 1. grunt安装
 ```bash

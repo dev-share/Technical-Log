@@ -1,18 +1,19 @@
+vim /etc/security/limits.conf
 
-deb http://cn.archive.ubuntu.com/ubuntu eoan-updates main restricted
-deb http://cn.archive.ubuntu.com/ubuntu eoan universe
-deb http://cn.archive.ubuntu.com/ubuntu eoan-updates universe
-deb http://cn.archive.ubuntu.com/ubuntu eoan multiverse
-deb http://cn.archive.ubuntu.com/ubuntu eoan-updates multiverse
-deb http://cn.archive.ubuntu.com/ubuntu eoan-backports main restricted universe multiverse
-deb http://cn.archive.ubuntu.com/ubuntu eoan-security main restricted
-deb http://cn.archive.ubuntu.com/ubuntu eoan-security universe
-deb http://cn.archive.ubuntu.com/ubuntu eoan-security multiverse
+*            soft    nofile          65536
+*            hard    nofile          65536
+*            soft    nproc           8096
+*            hard    nproc           8096
+*            soft    memlock         unlimited
+*            hard    memlock         unlimited
 
 
-curl -fsSL "https://repo.mysql.com/apt/ubuntu/gpg" | apt-key add
-
-
+elasticsearch            soft    nofile          65536
+elasticsearch            hard    nofile          65536
+elasticsearch            soft    nproc           8096
+elasticsearch            hard    nproc           8096
+elasticsearch            soft    memlock         unlimited
+elasticsearch            hard    memlock         unlimited
 
 mkdir -p /opt/deploy/data
 tar -C /opt/deploy/data -zxvf elasticsearch-6.8.6.tar.gz
