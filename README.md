@@ -59,6 +59,15 @@ netsh winsock reset
 ```
 HDWWIZ
 ```
+10.windows由于没有远程桌面授权服务器可以提供许可证，远程会话被中断。请跟服务器管理员联系
+
+```
+运行》regedit
+删除目录：
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\RCM\GracePeriod
+#若无法删除，右键-》属性，权限--》完全控制后，再删除
+重启电脑
+```
 ## 四. NodeJS配置
 1. grunt安装
 ```bash
