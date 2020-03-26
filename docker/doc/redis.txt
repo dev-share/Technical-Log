@@ -14,7 +14,7 @@ cluster-enabled yes
 cluster-config-file nodes.conf
 cluster-node-timeout 10000
 cluster-slave-validity-factor 5
-cluster-announce-ip 172.21.32.82
+cluster-announce-ip 172.21.32.162
 cluster-announce-port ${PORT}
 cluster-announce-bus-port 1${PORT}
 cluster-require-full-coverage no
@@ -55,7 +55,7 @@ docker exec redis-6379 redis-cli --cluster create 172.21.32.36:6379 172.21.32.36
 
 redis-cli --cluster create 172.21.32.36:6379 172.21.32.36:6389 172.21.32.37:6379 172.21.32.37:6389 172.21.32.38:6379 172.21.32.38:6389 --cluster-replicas 1
 
-redis-cli --cluster create 172.21.32.80:6379 172.21.32.80:6389 172.21.32.81:6379 172.21.32.81:6389 172.21.32.82:6379 172.21.32.82:6389 --cluster-replicas 1
+redis-cli --cluster create 172.21.32.160:6379 172.21.32.160:6389 172.21.32.161:6379 172.21.32.161:6389 172.21.32.162:6379 172.21.32.162:6389 --cluster-replicas 1
 
 cd /opt/deploy/data/redis
 rm -rf /opt/deploy/data/redis/6*
@@ -90,3 +90,30 @@ docker run -d -ti -p 6379:6379 -p 16379:16379 \
   --sysctl net.core.somaxconn=1024 172.21.32.102:5000/redis:5.0.7-alpine redis-server /usr/local/etc/redis/redis.conf
 
 redis-cli --cluster create 172.21.32.36:6379 172.21.32.37:6379 172.21.32.38:6379 --cluster-replicas 1
+
+redis-cli --cluster create 172.21.32.160:6379 172.21.32.160:6389 172.21.32.161:6379 172.21.32.161:6389 172.21.32.162:6379 172.21.32.162:6389 --cluster-replicas 1
+
+cd /opt/deploy/data/redis
+kill -9 $(ps -ef|grep -v grep|grep redis|awk '{print $2}')
+rm -rf */logs/* && rm -rf */*.pid
+rm -rf */data/*
+ps -ef|grep -v grep|grep redis
+
+redis-server /opt/deploy/data/redis/6379/conf/redis.conf
+redis-server /opt/deploy/data/redis/6389/conf/redis.conf
+cat */logs/redis-server.log
+
+redis-cli --cluster create  --cluster-replicas 1 \
+192.168.32.160:6379 192.168.32.160:6389  \
+192.168.32.161:6379 192.168.32.161:6389  \
+192.168.32.162:6379 192.168.32.162:6389
+
+redis-cli -p 6379 cluster nodes
+
+cd /opt/deploy/data/redis
+kill -9 $(ps -ef|grep -v grep|grep redis|awk '{print $2}')
+rm -rf */logs/* && rm -rf */*.pid
+redis-server /opt/deploy/data/redis/6379/conf/redis.conf
+redis-server /opt/deploy/data/redis/6389/conf/redis.conf
+cat */logs/redis-server.log
+redis-cli -p 6379 cluster nodes

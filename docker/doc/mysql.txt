@@ -1,15 +1,67 @@
+mkdir -p /usr/local/mysql
+tar -C /usr/local/mysql -zxvf mysql-cluster-8.0.19-linux-glibc2.12-x86_64.tar.gz
+cd /usr/local/mysql
+mv mysql-cluster-8.0.19-linux-glibc2.12-x86_64 mysql-cluster
+cp -vr mysql-cluster ./mysqld
+
+#创建mysql用户及组
+groupadd mysql
+useradd -g mysql -s /bin/false mysql
+
+
+cd /usr/local/mysql/mysqld
+# 初始化数据
+./bin/mysqld  --initialize-insecure --lower-case-table-names=1
+# 注：lower-case-table-names=1必须在my.cnf中体现
+#授权
+echo "">error.log
+chown -R root .
+chown -R mysql data
+chgrp -R mysql .
+chmod -R 777 data
+chmod -R 777 error.log
+
+cp bin/ndbd /usr/local/bin/ndbd
+cp bin/ndbmtd /usr/local/bin/ndbmtd
+cp bin/ndb_config /usr/local/bin
+chmod +x /usr/local/bin/ndb*
+
+cd /usr/local/mysql/mysql-cluster
+cp bin/ndb_mgm* /usr/local/bin
+
+chmod +x /usr/local/bin/ndb_mgm*
+mkdir -p /usr/local/mysql/mysql-cluster/mgrdata
+mkdir -p /usr/local/mysql/mysql-cluster/data
+mkdir -p /usr/local/mysql/mysql-cluster/BACKUP/mgrdata
+mkdir -p /usr/local/mysql/mysql-cluster/BACKUP/data
+
+
+cd /usr/local/mysql/mysqld
+cp support-files/mysql.server ./mysql
+chmod +x mysql
+
+cp mysql /etc/init.d/
+chmod +x /etc/init.d/mysql
+
+#启动
+./mysql start
+
+#添加访问用户
+./bin/mysql -hlocalhost -uroot
+
+
 kill -9 $(ps -ef|grep -v grep|grep mysql|awk '{print $2}')
 
-scp -vr  /usr/local/mysql/mysql-cluster/config.ini root@172.21.32.37:/usr/local/mysql/mysql-cluster && scp -vr  /usr/local/mysql/mysql-cluster/config.ini root@172.21.32.38:/usr/local/mysql/mysql-cluster 
+scp -vr  /usr/local/mysql/mysql-cluster/cluster.cnf root@172.21.32.37:/usr/local/mysql/mysql-cluster && scp -vr  /usr/local/mysql/mysql-cluster/cluster.cnf root@172.21.32.38:/usr/local/mysql/mysql-cluster 
 
 cd /usr/local/mysql/mysql-cluster
-ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=1 --reload –initial
+ndb_mgmd -f /usr/local/mysql/mysql-cluster/cluster.cnf --ndb-nodeid=1 --initial --reload
 
 cd /usr/local/mysql/mysql-cluster
-ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=2
+ndb_mgmd -f /usr/local/mysql/mysql-cluster/cluster.cnf
 
 cd /usr/local/mysql/mysql-cluster
-ndb_mgmd -f /usr/local/mysql/mysql-cluster/config.ini --ndb-nodeid=3
+ndb_mgmd -f /usr/local/mysql/mysql-cluster/cluster.cnf
 
 cd /usr/local/mysql/mysql-cluster
 rm -rf data/*
@@ -18,57 +70,156 @@ rm -rf mgrdata/*
 cd /usr/local/mysql/mysqld
 vim /usr/local/mysql/mysqld/my.cnf
 cd /usr/local/mysql/mysqld
+ndb_mgm -e SHOW
 ndbd --ndb-connectstring=172.21.32.80,172.21.32.81,172.21.32.82
+
+ndbd --ndb-connectstring=192.168.32.160,192.168.32.161,192.168.32.162,192.168.122.160,192.168.122.161,192.168.122.162,172.21.32.160,172.21.32.161,172.21.32.162,128.0.0.160,128.0.0.161,128.0.0.162,129.0.0.160,129.0.0.161,129.0.0.162
+ndb_mgm -e SHOW
+ndbd --ndb-connectstring=192.168.122.160,192.168.122.161,192.168.122.162,172.21.32.160,172.21.32.161,172.21.32.162,128.0.0.160,128.0.0.161,128.0.0.162,129.0.0.160,129.0.0.161,129.0.0.162
+ndb_mgm -e SHOW
 ndbd --ndb-connectstring=172.21.32.36,172.21.32.37,172.21.32.38
 ndb_mgm -e SHOW
 
 vim /usr/local/mysql/mysqld/my.cnf
 
+kill -9 $(ps -ef|grep -v grep|grep mysqld|awk '{print $2}')
 cd /usr/local/mysql/mysqld
-./mysql start
+./mysql restart
+ndb_mgm -e SHOW
 
+INSERT INTO `mysql`.`user`(`Host`, `User`, `Select_priv`, `Insert_priv`, `Update_priv`, `Delete_priv`, `Create_priv`, `Drop_priv`, `Reload_priv`, `Shutdown_priv`, `Process_priv`, `File_priv`, `Grant_priv`, `References_priv`, `Index_priv`, `Alter_priv`, `Show_db_priv`, `Super_priv`, `Create_tmp_table_priv`, `Lock_tables_priv`, `Execute_priv`, `Repl_slave_priv`, `Repl_client_priv`, `Create_view_priv`, `Show_view_priv`, `Create_routine_priv`, `Alter_routine_priv`, `Create_user_priv`, `Event_priv`, `Trigger_priv`, `Create_tablespace_priv`, `ssl_type`, `ssl_cipher`, `x509_issuer`, `x509_subject`, `max_questions`, `max_updates`, `max_connections`, `max_user_connections`, `plugin`, `authentication_string`, `password_expired`, `password_last_changed`, `password_lifetime`, `account_locked`, `Create_role_priv`, `Drop_role_priv`, `Password_reuse_history`, `Password_reuse_time`, `Password_require_current`, `User_attributes`) VALUES ('%', 'root', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'Y', '', '', '', '', 0, 0, 0, 0, 'mysql_native_password', '*F85A86E6F55A370C1A115F696A9AD71A7869DB81', 'N', '2020-03-18 13:23:05', NULL, 'N', 'Y', 'Y', NULL, NULL, NULL, NULL);
 
+flush privileges;
+grant all privileges on *.* to 'root'@'%' ;  
+flush privileges;
 
 
 # Data Node Default Options
 [NDBD DEFAULT]    
 NoOfReplicas=3
-DataMemory=80M
-IndexMemory=18M
+TcpBind_INADDR_ANY=true
+DataMemory=512M
 DataDir=/usr/local/mysql/mysql-cluster/data
+BackupDataDir=/usr/local/mysql/mysql-cluster/BACKUP/data
 #ServerPort=2202
+LateAlloc=1
+StartNoNodeGroupTimeout=0
+MaxBufferedEpochs=100
+MaxBufferedEpochBytes=26214400
+MaxDiskWriteSpeed=20M
+MinDiskWriteSpeed=10M
+MaxDiskWriteSpeedOtherNodeRestart=50M
+MaxDiskWriteSpeedOwnRestart=200M
+BackupLogBufferSize=16M
+BackupReportFrequency=10
+BackupDiskWriteSpeedPct=50
+CompressedBackup=true
+CompressedLCP=false
+MemReportFrequency=0
+LogLevelStartup=1
+LogLevelShutdown=0
+LogLevelStatistic=0
+LogLevelCheckpoint=0
+LogLevelNodeRestart=0
+LogLevelConnection=0
+LogLevelError=0
+LogLevelCongestion=0
+LogLevelInfo=0
+EventLogBufferSize=8K
+StartupStatusReportFrequency=0
+MinFreePct=5
+MaxNoOfAttributes=1000
+MaxNoOfTables=128
+MaxNoOfOrderedIndexes=128
+MaxNoOfTriggers=768
+MaxNoOfSubscriptions=0
+MaxNoOfSubscribers=0
+MaxNoOfConcurrentSubOperations=256
+StringMemory=25
+MaxAllocate=32M
+MaxNoOfSavedMessages=25
+LcpScanProgressTimeout=60
+Diskless=false
+LockPagesInMainMemory=1
+Arbitration=Default
+DiskPageBufferEntries=10
+DiskPageBufferMemory=64M
+SharedGlobalMemory=32M
+DiskIOThreadPool=2
+DiskSyncSize=4096K
+LongMessageBuffer=64M
+MaxParallelCopyInstances=0
+MaxNoOfConcurrentTransactions=4096
+MaxNoOfConcurrentOperations=131072
+MaxDMLOperationsPerTransaction=4294967295
+MaxNoOfConcurrentScans=256
+MaxParallelScansPerFragment=256
+BatchSizePerLocalScan=256
+FragmentLogFileSize=64M
+NoOfFragmentLogFiles=16
+InitFragmentLogFiles=SPARSE
+RedoBuffer=32M
+RedoOverCommitCounter=3
+RedoOverCommitLimit=20
+TwoPassInitialNodeRestartCopy=false
+BuildIndexThreads=0
+MaxNoOfExecutionThreads=2
+RealtimeScheduler=false
+SchedulerResponsiveness=5
+SchedulerSpinTimer=0
+TimeBetweenLocalCheckpoints=20
+TimeBetweenGlobalCheckpoints=2000
+TimeBetweenGlobalCheckpointsTimeout=120000
+TimeBetweenEpochs=100
+TimeBetweenEpochsTimeout=32000
+TimeBetweenWatchdogCheck=6000
+TimeBetweenWatchdogCheckInitial=60000
+TransactionInactiveTimeout=4294967039
+TransactionDeadlockDetectionTimeout=1200
+TimeBetweenInactiveTransactionAbortCheck=1000
+HeartbeatIntervalDbDb=15000
+HeartbeatIntervalDbApi=15000
+ConnectCheckIntervalDelay=0
+StartPartialTimeout=30000
+StartPartitionedTimeout=4294967039
+StartFailureTimeout=0
+ArbitrationTimeout=7500
+RestartSubscriberConnectTimeout=12000
+StopOnError=0
+CrashOnCorruptedTuple=true
+StartFailRetryDelay=0
+MaxStartFailRetries=3
 
 # Mgr Node Default Options
 [NDB_MGMD DEFAULT]
 DataDir=/usr/local/mysql/mysql-cluster/mgrdata
-
 # Mgr Node Options
 [NDB_MGMD]
-HostName=172.21.32.80
+HostName=ics-server160
 [NDB_MGMD]
-HostName=172.21.32.81
+HostName=ics-server161
 [NDB_MGMD]
-HostName=172.21.32.82
+HostName=ics-server162
 
 # Data Node Options
 [NDBD]
-HostName=172.21.32.80
+HostName=ics-server160
 [NDBD]                  
-HostName=172.21.32.81
+HostName=ics-server161
 [NDBD]                  
-HostName=172.21.32.82
+HostName=ics-server162
 
 # SQL Node Options
 [MYSQLD]               
-HostName=172.21.32.80
+HostName=ics-server160
 [MYSQLD]
-HostName=172.21.32.81
+HostName=ics-server161
 [MYSQLD]
-HostName=172.21.32.82
+HostName=ics-server162
 
 
 
-#
+
 # The MySQL database server configuration file.
 #
 # One can use all long options that the program supports.
@@ -84,7 +235,9 @@ HostName=172.21.32.82
 [mysqld]
 # cluster connect
 ndbcluster   
-ndb-connectstring=172.21.32.80,172.21.32.81,172.21.32.82
+#ndb-connectstring=192.168.122.160,192.168.122.161,192.168.122.162
+ndb-connectstring=192.168.122.160,192.168.122.161,192.168.122.162,172.21.32.160,172.21.32.161,172.21.32.162,128.0.0.160,128.0.0.161,128.0.0.162,129.0.0.160,129.0.0.161,129.0.0.162
+#ndb-connectstring=172.21.32.160,172.21.32.161,172.21.32.162
 #
 # * Basic Settings
 #

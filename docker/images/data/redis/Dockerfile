@@ -1,4 +1,10 @@
-FROM redis:5.0.7-alpine 
+ARG APP_VERSION=5.0.8-alpine
+FROM redis:${APP_VERSION}
+
+ENV APP_VERSION=${APP_VERSION}
+LABEL version=${APP_VERSION}
+LABEL description="Redis Optimize"
+
 RUN mkdir -p /usr/local/etc/redis
 RUN echo "tcp-keepalive 300" >> /usr/local/etc/redis/redis.conf
 RUN echo "timeout 30" >> /usr/local/etc/redis/redis.conf
@@ -16,4 +22,5 @@ RUN echo "appendfsync no" >> /usr/local/etc/redis/redis.conf
 RUN echo "no-appendfsync-on-rewrite no" >> /usr/local/etc/redis/redis.conf
 RUN echo "auto-aof-rewrite-percentage 100" >> /usr/local/etc/redis/redis.conf
 RUN echo "auto-aof-rewrite-min-size 256mb" >> /usr/local/etc/redis/redis.conf
+
 CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]

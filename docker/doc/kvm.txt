@@ -34,6 +34,8 @@ network:
         eno4:
             dhcp4: true
     bridges:
+         virbr1:
+            dhcp4: true
          vbr0:
             interfaces: [eno2]
             addresses:
@@ -90,6 +92,19 @@ network:
             gateway4: 192.168.122.1
             nameservers:
                     addresses: [192.168.122.1]
+        ens11:
+            dhcp4: false
+            addresses: [192.168.32.160/24]
+            gateway4: 192.168.32.254
+            nameservers:
+                    addresses: [192.168.32.254]
+    bonds:
+        bond0:
+            addresses: [10.32.0.160/24]
+            gateway4: 10.32.0.254
+            nameservers:
+                    addresses: [10.32.0.254]
+            interfaces: [ens6,ens11]
 
 
 ifconfig vbr0 down
@@ -313,13 +328,20 @@ virt-install --name=windows7 \
 
 
 virt-clone -o ics-serverl  \
--n ics-server180  \
--f /home/kvm/disk/ics-server180.img
+-n ics-server99  \
+-f /home/kvm/disk/ics-server99.img
 
 
+virt-clone -o windows2016  \
+-n windows-ics-server30  \
+-f /home/kvm/disk/windows-ics-server30.img
 
+virt-clone -o windows2016  \
+-n windows-ics-server40  \
+-f /home/kvm/disk/windows-ics-server40.img
 
-
+sysctl kernel.hostname=ics-server99
+echo 'ics-server99' > /etc/hostname
 
 
 
@@ -350,18 +372,21 @@ echo '192.168.122.161 ics-server161' >> /etc/hosts
 echo '192.168.122.162 ics-server162' >> /etc/hosts
 
 
+echo "export no_proxy=192.168.122.160,192.168.122.161,192.168.122.162,192.168.32.160,192.168.32.161,192.168.32.162,127.0.0.1" >> /etc/profile
+source /etc/profile
+
+
+
+route del default
+route del -net 192.168.122.0 netmask 255.255.255.0
+
+netstat -napt
 
 
 
 
 
-
-
-
-
-
-
-
+jjdbbdhcbjmdnpdbhcilaghbbicjkldc
 
 
 

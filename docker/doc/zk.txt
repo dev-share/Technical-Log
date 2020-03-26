@@ -152,6 +152,8 @@ mkdir -p /opt/deploy/data/zookeeper && cd /opt/deploy/data/zookeeper && rm -rf d
 rm -rf conf/zoo.cfg && rm -rf conf/zoo.cfg.dynamic.* && mv conf/zoo.cfg.bak conf/zoo.cfg;
 mkdir -p /opt/deploy/data/zookeeper && cd /opt/deploy/data/zookeeper && rm -rf logs/* && rm -rf datalog/* && rm -rf data/version* && rm -rf data/zookeeper_server*;
 ./zookeeper.sh
+
+cd /opt/deploy/data/kafka
 mkdir -p /opt/deploy/data/kafka && cd /opt/deploy/data/kafka && rm -rf data && mkdir -p ./data && rm -rf logs && mkdir -p ./logs;
 ./kafka.sh
 
@@ -204,6 +206,11 @@ scp -r /opt/deploy/data/kafka root@172.21.32.37:/opt/deploy/data && scp -r /opt/
 
 scp -r /etc/mosquitto/mosquitto.conf root@172.21.32.37:/etc/mosquitto && scp -r /etc/mosquitto/mosquitto.conf root@172.21.32.38:/etc/mosquitto
 
+wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key
+apt-key add mosquitto-repo.gpg.key
+apt-get update
+apt install -y  mosquitto
+
 systemctl stop mosquitto
 rm -rf /var/lib/mosquitto/*
 rm -rf /var/log/mosquitto.log
@@ -214,3 +221,7 @@ systemctl status mosquitto
 scp -r /opt/deploy/data/mosquitto/conf/mosquitto.conf root@172.21.32.37:/opt/deploy/data/mosquitto/conf && scp -r /opt/deploy/data/mosquitto/conf/mosquitto.conf root@172.21.32.38:/opt/deploy/data/mosquitto/conf
 
 scp -r /opt/deploy/data/mosquitto root@172.21.32.37:/opt/deploy/data && scp -r /opt/deploy/data/mosquitto root@172.21.32.38:/opt/deploy/data
+
+server.160=172.21.32.160:2888:3888|192.168.122.160:2988:3988|192.168.32.160:2788:3788|128.0.0.160:2128:3128|129.0.0.160:2129:3129;2181
+server.161=172.21.32.161:2888:3888|192.168.122.161:2988:3988|192.168.32.161:2788:3788|128.0.0.161:2128:3128|129.0.0.161:2129:3129;2181
+server.162=172.21.32.162:2888:3888|192.168.122.162:2988:3988|192.168.32.162:2788:3788|128.0.0.162:2128:3128|129.0.0.162:2129:3129;2181

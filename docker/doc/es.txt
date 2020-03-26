@@ -39,9 +39,15 @@ rm -rf data/* && rm -rf logs/*
 su elasticsearch
 bin/elasticsearch -d
 
+tail -f logs/ics-elasticsearch-vir.log
 
 cd /opt/deploy/data/elasticsearch
 kill -9 $(ps -ef|grep -v grep|grep elasticsearch|awk '{print $2}')
 rm -rf logs/*
 su elasticsearch
 bin/elasticsearch -d
+
+
+curl -XGET http://192.168.32.160:9200/_cat/nodes?v
+curl -XGET http://172.21.32.160:9200/_cat/nodes?v
+

@@ -345,8 +345,10 @@ cp -vr /home/deploy/publish/app /home/deploy/sync/app
 cp -vr /home/deploy/publish/docker.sh /home/deploy/images
 cp -vr /home/deploy/publish/docker.sh /home/deploy/sync
 
-echo '172.21.32.120:/data/registry /opt/registry  nfs    defaults 0      0' >> /etc/fstab
-
+mount -t nfs 172.21.32.120:/data/central/registry /opt/central/registry
+echo '172.21.32.120:/data/central/registry /opt/central/registry  nfs    defaults 0      0' >> /etc/fstab
+mount -t nfs 172.21.32.120:/data/central/mirror /opt/central/mirror
+echo '172.21.32.120:/data/central/mirror /opt/central/mirror  nfs    defaults 0      0' >> /etc/fstab
 
 
 rm -rf /opt/deploy/conf && mkdir -p /opt/deploy/conf
@@ -392,5 +394,11 @@ cat docker-compose-snapshot.yml | docker stack deploy --compose-file - dsdbs
 docker swarm update --cert-expiry 8760h0m0s --dispatcher-heartbeat 1m 
 
 rm -rf /var/lib/dpkg/info && mkdir -p /var/lib/dpkg/info && apt-get upgrade
+
+
+
+date --s="2020-03-24 18:16:30"
+hwclock --localtime --systohc
+timedatectl
 
 
