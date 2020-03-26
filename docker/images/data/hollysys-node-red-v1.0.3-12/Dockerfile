@@ -35,6 +35,7 @@ RUN npm install node-red-contrib-credentials
 RUN npm install node-red-node-mysql
 RUN npm install node-red-contrib-soap
 RUN npm install node-red-contrib-time-range-switch
+RUN npm install node-red-contrib-rdkafka
 
 RUN npm install /home/hollysys/node-red-contrib-hollicube
 
