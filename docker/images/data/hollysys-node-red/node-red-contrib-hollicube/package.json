@@ -1,0 +1,18 @@
+{
+    "name"         : "node-red-contrib-hollicube",
+    "version"      : "1.0.3",
+    "description"  : "A node for HolliCube",
+    "dependencies": {
+        "is-utf8": "^0.2.1",
+        "mqtt": "^2.14.0"
+    },
+    "keywords": [ "node-red" ],
+    "node-red"     : {
+        "nodes": {
+            "hollicube": "hollicube.js"
+        }
+    },
+	"publishConfig" : {
+	  "registry" : "http://172.21.32.31:8082/repository/hosted-npm/"
+	}
+}

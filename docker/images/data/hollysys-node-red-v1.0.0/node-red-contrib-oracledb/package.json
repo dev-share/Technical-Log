@@ -1,0 +1,48 @@
+{
+  "name": "node-red-contrib-oracledb",
+  "version": "0.5.3",
+  "description": "Node-RED oracle database nodes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "node-red",
+    "oracle",
+    "sql",
+    "oracledb"
+  ],
+  "node-red": {
+    "nodes": {
+      "oracledb": "lib/oracledb.js"
+    }
+  },
+  "author": "Ab Reitsma",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abreits/node-red-contrib-oracledb"
+  },
+  "dependencies": {
+    "object-resolve-path": "^1.1.0",
+    "oracledb": "^3.1.2"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "del": "^2.2.0",
+    "gulp": "^3.9.0",
+    "gulp-add-src": "^0.2.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-spawn-mocha": "^2.2.1",
+    "gulp-tslint": "^4.2.1",
+    "gulp-typescript": "^2.10.0",
+    "merge2": "^0.3.6",
+    "source-map-support": "^0.4.0",
+    "tslint": "^3.2.0"
+  },
+  "publishConfig" : {
+	"registry" : "http://172.21.32.31:8082/repository/hosted-npm/"
+  }
+}

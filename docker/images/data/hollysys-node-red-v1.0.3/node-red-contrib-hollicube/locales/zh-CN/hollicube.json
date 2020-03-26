@@ -1,0 +1,57 @@
+{
+    "hollicube": {
+        "label": {
+            "broker": "服务器",
+            "example": "e.g. localhost",
+            "qos": "QoS",
+            "clientid": "Client ID",
+            "port": "端口号",
+            "keepalive": "Keep alive time (s)",
+            "cleansession": "Use clean session",
+            "use-tls": "运行安全连接 (SSL/TLS)",
+            "tls-config": "TLS Configuration",
+            "verify-server-cert": "Verify server certificate",
+            "compatmode": "Use legacy MQTT 3.1 support",
+            "domain": "域",
+            "pubtype": "上报类型",
+            "topic": "主题",
+            "name": "名称",
+            "username": "用户名",
+            "password": "密码",
+            "payload": "Payload",
+            "namespace": "名空间",
+            "compactinterval": "Compaction interval time (s)"
+        },
+        "tabs-label": {
+            "connection": "连接",
+            "security": "安全",
+            "will": "遗嘱消息",
+            "birth": "出生消息"
+        },
+        "placeholder": {
+            "clientid": "Leave blank for auto generated",
+            "clientid-nonclean": "Must be set for non-clean sessions",
+            "will-topic": "Leave blank to disable will message",
+            "birth-topic": "Leave blank to disable birth message"
+        },
+        "state": {
+            "connected": "Connected to broker: __broker__",
+            "disconnected": "Disconnected from broker: __broker__",
+            "connect-failed": "Connection failed to broker: __broker__"
+        },
+        "retain": "Retain",
+        "true": "是",
+        "false": "否",
+        "pubModel": "模型上报",
+        "pubTS": "数据上报",
+        "pubSnapshot":"快照上报",
+        "tip": "Tip: Leave topic, qos or retain blank if you want to set them via msg properties.",
+        "errors": {
+            "not-defined": "topic not defined",
+            "missing-config": "missing broker configuration",
+            "invalid-topic": "Invalid topic specified",
+            "nonclean-missingclientid": "No client ID set, using clean session"
+        },
+        "description": "上报模型和数据到 HolliCube 的模块。"
+    }
+}
