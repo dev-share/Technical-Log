@@ -51,3 +51,6 @@ bin/elasticsearch -d
 curl -XGET http://192.168.32.160:9200/_cat/nodes?v
 curl -XGET http://172.21.32.160:9200/_cat/nodes?v
 
+
+curl -XGET http://192.168.32.160:9200/_cat/indices?v
+

@@ -343,7 +343,10 @@ virt-clone -o windows2016  \
 sysctl kernel.hostname=ics-server99
 echo 'ics-server99' > /etc/hostname
 
-
+virsh shutdown ics-server90 
+virsh destroy ics-server90 
+virsh undefine ics-server90 
+rm -rf /home/kvm/disk/ics-server90.img
 
 
 
