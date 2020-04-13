@@ -380,6 +380,8 @@ rm -rf /opt/deploy/logs && mkdir -p /opt/deploy/logs
 mount -t nfs 172.21.32.130:/data/logs /opt/deploy/logs
 echo '172.21.32.130:/data/logs  /opt/deploy/logs  nfs    defaults 0      0' >> /etc/fstab
 
+mount -t nfs 172.21.32.120:/data/nexus /opt/nexus
+echo '172.21.32.120:/data/nexus /opt/nexus  nfs    defaults 0      0' >> /etc/fstab
 
 
 docker run -d -p 52520:52520 -p 52443:52443 \
