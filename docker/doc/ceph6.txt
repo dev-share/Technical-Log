@@ -138,7 +138,7 @@ systemctl status rexray
 rexray volume ls
 
 docker service rm portainer
-docker pull 172.21.32.102:5000/portainer/portainer:1.23.2
+docker pull 172.21.32.102:5000/portainer/portainer:1.24.0
 
 rm -rf /opt/portainer
 mkdir -p /opt/portainer
@@ -151,7 +151,7 @@ docker service create \
 --mount type=bind,src=//opt/portainer,dst=/data \
 --container-label com.docker.stack.namespace=swarm \
 --label com.docker.stack.namespace=swarm \
-172.21.32.102:5000/portainer/portainer:1.23.2  \
+172.21.32.102:5000/portainer/portainer:1.24.0  \
 -H unix:///var/run/docker.sock
 
 
