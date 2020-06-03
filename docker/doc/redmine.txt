@@ -18,22 +18,27 @@ dpkg --remove --force-remove-reinstreq dbconfig-common
 
 dpkg --remove --force-remove-reinstreq libpaper1:amd64
 dpkg --remove --force-remove-reinstreq libgs9:amd64
-dpkg --remove --force-remove-reinstreq dbconfig-common
 dpkg --remove --force-remove-reinstreq libpaper-utils
 dpkg --remove --force-remove-reinstreq ghostscript
+dpkg --remove --force-remove-reinstreq dbconfig-common
 dpkg --remove --force-remove-reinstreq dbconfig-sqlite3
 dpkg --remove --force-remove-reinstreq redmine
 dpkg --remove --force-remove-reinstreq redmine-sqlite
 dpkg --remove --force-remove-reinstreq redmine-pgsql
 
-apt-get install apache2 libapache2-mod-passenger
-apt-get install ruby-dev ruby-eventmachine ruby-mysql2
-apt-get install mysql-server mysql-client 
+apt-get install -y apache2 libapache2-mod-passenger apache2-dev libcurl4-openssl-dev
+apt-get install -y ruby-dev ruby-eventmachine ruby-mysql2 libpcap-dev
+apt-get install libssl-dev build-essential libboost-all-dev libsparsehash-dev git-core perl automake libgmp-dev
+apt-get install libpq-dev python-dev
+apt-get install -y libpaper1:amd64 libgs9:amd64 libpaper-utils
+apt-get install -y ghostscript
+apt-get install -y dbconfig-common dbconfig-sqlite3
+apt-get install -y mysql-server mysql-client 
 apt-get install redmine
-apt-get install redmine-mysql
-apt-get install redmine-pgsql
-apt-get install redmine-sqlite
-apt-get install ghostscript
+apt-get install -y redmine-mysql
+apt-get install -y redmine-pgsql
+apt-get install -y redmine-sqlite
+
 
 gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/
 gem update
@@ -44,17 +49,26 @@ bundle config mirror.https://rubygems.org https://gems.ruby-china.com
 bundle init
 
 
-apt-get install imagemagick libmagickwand-dev
-apt-get install libmysqlclient-dev
+apt-get install -y imagemagick libmagickwand-dev
+apt-get install -y libmysqld-dev libmysqlclient-dev
 
+gem install passenger
 gem install rmagick
-gem install mysql2
+gem install bettercap
+gem uninstall -i /usr/share/rubygems-integration/2.5.0 mysql2
+gem install mysql2 --source 'https://gems.ruby-china.com/' -- --with-mysql-config=/usr/bin/mysql_config
 gem install nokogiri
 
-apt-get install libxslt-dev libxml2-dev
+apt-get -y install libxslt-dev libxml2-dev
 
 bundle install
 bundle lock --add-platform x86-mingw32 x64-mingw32 x86-mswin32
+gem install rake
+gem install rbpdf-font 
+
+bundle exec rake generate_secret_token
+RAILS_ENV=production bundle exec rake db:migrate
+RAILS_ENV=production bundle exec rake redmine:load_default_data
 
 ruby bin/rails server webrick -e production -b 0.0.0.0 -p 3000
 

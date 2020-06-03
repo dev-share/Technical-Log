@@ -1,0 +1,231 @@
+version: '3.7'
+services:
+   zookeeper-133:
+      image: 172.21.32.102:5000/zookeeper:3.6.1
+      restart: always
+      environment:
+         ZOO_MY_ID: 133
+         ZOO_TICK_TIME: 10000
+         ZOO_INIT_LIMIT: 6
+         ZOO_SYNC_LIMIT: 6
+         ZOO_MAX_CLIENT_CNXNS: 100
+         ZOO_STANDALONE_ENABLED: 'false'
+         ZOO_ADMINSERVER_ENABLED: 'true'
+         ZOO_AUTOPURGE_PURGEINTERVAL: 0
+         ZOO_AUTOPURGE_SNAPRETAINCOUNT: 3
+         ZOO_4LW_COMMANDS_WHITELIST: srvr
+         ZOO_SERVERS: server.133=0.0.0.0:2888:3888;2181 server.134=zookeeper-134:2888:3888;zookeeper-134:2181 server.135=zookeeper-135:2888:3888;zookeeper-135:2181
+      volumes:
+      - /opt/deploy/data/zookeeper/data:/data
+      - /opt/deploy/data/zookeeper/datalog:/datalog
+      - /opt/deploy/data/zookeeper/logs:/logs
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+      - 2181:2181
+      - 28081:8080
+      deploy:
+         replicas: 1
+         placement:
+            constraints: [node.hostname==dbs-server133] 
+   zookeeper-134:
+      image: 172.21.32.102:5000/zookeeper:3.6.1
+      restart: always
+      environment:
+         ZOO_MY_ID: 134
+         ZOO_TICK_TIME: 10000
+         ZOO_INIT_LIMIT: 6
+         ZOO_SYNC_LIMIT: 6
+         ZOO_MAX_CLIENT_CNXNS: 100
+         ZOO_STANDALONE_ENABLED: 'false'
+         ZOO_ADMINSERVER_ENABLED: 'true'
+         ZOO_AUTOPURGE_PURGEINTERVAL: 0
+         ZOO_AUTOPURGE_SNAPRETAINCOUNT: 3
+         ZOO_4LW_COMMANDS_WHITELIST: srvr
+         ZOO_SERVERS: server.133=zookeeper-133:2888:3888;zookeeper-133:2181 server.134=0.0.0.0:2888:3888;2181 server.135=zookeeper-135:2888:3888;zookeeper-135:2181
+      volumes:
+      - /opt/deploy/data/zookeeper/data:/data
+      - /opt/deploy/data/zookeeper/datalog:/datalog
+      - /opt/deploy/data/zookeeper/logs:/logs
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+      - 2182:2181
+      - 28082:8080
+      deploy:
+         replicas: 1
+         placement:
+            constraints: [node.hostname==dbs-server134] 
+   zookeeper-135:
+      image: 172.21.32.102:5000/zookeeper:3.6.1
+      restart: always
+      environment:
+         ZOO_MY_ID: 135
+         ZOO_TICK_TIME: 10000
+         ZOO_INIT_LIMIT: 6
+         ZOO_SYNC_LIMIT: 6
+         ZOO_MAX_CLIENT_CNXNS: 100
+         ZOO_STANDALONE_ENABLED: 'false'
+         ZOO_ADMINSERVER_ENABLED: 'true'
+         ZOO_AUTOPURGE_PURGEINTERVAL: 0
+         ZOO_AUTOPURGE_SNAPRETAINCOUNT: 3
+         ZOO_4LW_COMMANDS_WHITELIST: srvr
+         ZOO_SERVERS: server.133=zookeeper-133:2888:3888;zookeeper-133:2181 server.134=zookeeper-134:2888:3888;zookeeper-134:2181 server.135=0.0.0.0:2888:3888;2181
+      volumes:
+      - /opt/deploy/data/zookeeper/data:/data
+      - /opt/deploy/data/zookeeper/datalog:/datalog
+      - /opt/deploy/data/zookeeper/logs:/logs
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+      - 2183:2181
+      - 28083:8080
+      deploy:
+         replicas: 1
+         placement:
+            constraints: [node.hostname==dbs-server135] 
+   kafka-133:
+      image: 172.21.32.102:5000/wurstmeister/kafka:2.12-2.5.0
+      restart: always
+      environment:
+         BROKER_ID_COMMAND: "echo 133"
+         HOSTNAME_COMMAND: "ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v inet6|grep 10.0|awk '{print $$2}'|tr -d 'addr:'"
+         KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:19092
+         KAFKA_ADVERTISED_LISTENERS: INSIDE://_{HOSTNAME_COMMAND}:9092,OUTSIDE://172.21.32.133:19092
+         KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+         KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+         KAFKA_ZOOKEEPER_CONNECT: zookeeper-133:2181,zookeeper-134:2181,zookeeper-135:2181
+         KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 60000
+         KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 10
+         KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 60000
+         KAFKA_ZOOKEEPER_SYNC_TIME_MS: 60000
+         KAFKA_LOG_DIRS: "/kafka/data"
+         KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+         KAFKA_ZOOKEEPER_CONNECT_TIMEOUT_MS: 60000
+         KAFKA_SOCKET_SEND_BUFFER_BYTES: 104857600
+         KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 104857600
+         KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600
+         KAFKA_REPLICA_FETCH_MAX_BYTES: 104857600
+         KAFKA_QUOTA_PRODUCER_DEFAULT: 104857600
+         KAFKA_QUOTA_CONSUMER_DEFAULT: 104857600
+         KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      volumes:
+      # - /opt/deploy/data/kafka/conf/server.properties:/opt/kafka/config/server.properties
+      - /opt/deploy/data/kafka/data:/kafka/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+       - target: 19092
+         published: 19092
+         protocol: tcp
+         mode: host
+      depends_on:
+      - zookeeper-133
+      - zookeeper-134
+      - zookeeper-135
+      deploy:
+         replicas: 1
+         placement:
+            constraints: [node.hostname==dbs-server133] 
+   kafka-134:
+      image: 172.21.32.102:5000/wurstmeister/kafka:2.12-2.5.0
+      restart: always
+      environment:
+         BROKER_ID_COMMAND: "echo 134"
+         HOSTNAME_COMMAND: "ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v inet6|grep 10.0|awk '{print $$2}'|tr -d 'addr:'"
+         KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:29092
+         KAFKA_ADVERTISED_LISTENERS: INSIDE://_{HOSTNAME_COMMAND}:9092,OUTSIDE://172.21.32.134:29092
+         KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+         KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+         KAFKA_ZOOKEEPER_CONNECT: zookeeper-133:2181,zookeeper-134:2181,zookeeper-135:2181
+         KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 60000
+         KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 10
+         KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 60000
+         KAFKA_ZOOKEEPER_SYNC_TIME_MS: 60000
+         KAFKA_LOG_DIRS: "/kafka/data"
+         KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+         KAFKA_ZOOKEEPER_CONNECT_TIMEOUT_MS: 60000
+         KAFKA_SOCKET_SEND_BUFFER_BYTES: 104857600
+         KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 104857600
+         KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600
+         KAFKA_REPLICA_FETCH_MAX_BYTES: 104857600
+         KAFKA_QUOTA_PRODUCER_DEFAULT: 104857600
+         KAFKA_QUOTA_CONSUMER_DEFAULT: 104857600
+         KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      volumes:
+      # - /opt/deploy/data/kafka/conf/server.properties:/opt/kafka/config/server.properties
+      - /opt/deploy/data/kafka/data:/kafka/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+       - target: 29092
+         published: 29092
+         protocol: tcp
+         mode: host
+      depends_on:
+      - zookeeper-133
+      - zookeeper-134
+      - zookeeper-135
+      deploy:
+         replicas: 1
+         placement:
+            constraints: [node.hostname==dbs-server134] 
+   kafka-135:
+      image: 172.21.32.102:5000/wurstmeister/kafka:2.12-2.5.0
+      restart: always
+      environment:
+         BROKER_ID_COMMAND: "echo 135"
+         HOSTNAME_COMMAND: "ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v 0.0.0.0|grep -v inet6|grep 10.0|awk '{print $$2}'|tr -d 'addr:'"
+         KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:39092
+         KAFKA_ADVERTISED_LISTENERS: INSIDE://_{HOSTNAME_COMMAND}:9092,OUTSIDE://172.21.32.135:39092
+         KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+         KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+         KAFKA_ZOOKEEPER_CONNECT: zookeeper-133:2181,zookeeper-134:2181,zookeeper-135:2181
+         KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 60000
+         KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 10
+         KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 60000
+         KAFKA_ZOOKEEPER_SYNC_TIME_MS: 60000
+         KAFKA_LOG_DIRS: "/kafka/data"
+         KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+         KAFKA_ZOOKEEPER_CONNECT_TIMEOUT_MS: 60000
+         KAFKA_SOCKET_SEND_BUFFER_BYTES: 104857600
+         KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 104857600
+         KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600
+         KAFKA_REPLICA_FETCH_MAX_BYTES: 104857600
+         KAFKA_QUOTA_PRODUCER_DEFAULT: 104857600
+         KAFKA_QUOTA_CONSUMER_DEFAULT: 104857600
+         KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      volumes:
+      # - /opt/deploy/data/kafka/conf/server.properties:/opt/kafka/config/server.properties
+      - /opt/deploy/data/kafka/data:/kafka/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+       - target: 39092
+         published: 39092
+         protocol: tcp
+         mode: host
+      depends_on:
+      - zookeeper-133
+      - zookeeper-134
+      - zookeeper-135
+      deploy:
+         replicas: 1
+         placement:
+            constraints: [node.hostname==dbs-server135] 
+   
+   kafka-manager:
+      image: 172.21.32.102:5000/kafkamanager/kafka-manager:3.0.0.4
+      restart: always
+      environment:
+         ZK_HOSTS: 172.21.32.133:2181,172.21.32.134:2182,172.21.32.135:2183
+      volumes:
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+      - 19000:9000
+      deploy:
+         replicas: 1

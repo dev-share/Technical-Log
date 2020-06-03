@@ -136,8 +136,8 @@ jps
 
 
 mkdir -p /opt/deploy/data
-tar -C /opt/deploy/data -zxvf apache-zookeeper-3.6.0-bin.tar.gz
-mv /opt/deploy/data/apache-zookeeper-3.6.0-bin /opt/deploy/data/zookeeper
+tar -C /opt/deploy/data -zxvf apache-zookeeper-3.6.1-bin.tar.gz
+mv /opt/deploy/data/apache-zookeeper-3.6.1-bin /opt/deploy/data/zookeeper
 cd /opt/deploy/data/zookeeper
 mkdir -p /opt/deploy/data/zookeeper && cd /opt/deploy/data/zookeeper && rm -rf data && mkdir -p ./data && rm -rf datalog && mkdir -p ./datalog && rm -rf logs && mkdir -p ./logs; 
 echo `cat /etc/hostname | tr -dc '0-9 \n'` > data/myid

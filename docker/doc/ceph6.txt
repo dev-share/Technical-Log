@@ -138,7 +138,7 @@ systemctl status rexray
 rexray volume ls
 
 docker service rm portainer
-docker pull 172.21.32.102:5000/portainer/portainer:1.23.0
+docker pull 172.21.32.102:5000/portainer/portainer:1.23.2
 
 rm -rf /opt/portainer
 mkdir -p /opt/portainer
@@ -147,13 +147,25 @@ docker service create \
 --name portainer \
 --publish 9000:9000 \
 --replicas=1 \
---constraint 'node.hostname==ics-server101' \
 --mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock \
 --mount type=bind,src=//opt/portainer,dst=/data \
 --container-label com.docker.stack.namespace=swarm \
 --label com.docker.stack.namespace=swarm \
-172.21.32.102:5000/portainer/portainer:1.23.1  \
+172.21.32.102:5000/portainer/portainer:1.23.2  \
 -H unix:///var/run/docker.sock
+
+
+
+docker service rm jenkins
+docker service create \
+--name jenkins \
+--publish 8080:8080 \
+--replicas=1 \
+--mount type=bind,src=//etc/localtime,dst=/etc/localtime \
+--mount type=bind,src=//etc/timezone,dst=/etc/timezone \
+--container-label com.docker.stack.namespace=jenkins \
+--label com.docker.stack.namespace=jenkins \
+jenkins/jenkins
 
 docker service rm nginx
 docker service create \
@@ -204,6 +216,8 @@ echo '172.21.32.120:/data/conf  /opt/deploy/conf  nfs    defaults 0      0' >> /
 
 mount 172.21.32.120:/data/images /home/deploy/sync
 echo '172.21.32.120:/data/images  /home/deploy/sync  nfs    defaults 0      0' >> /etc/fstab
+
+echo '172.26.151.200:/usr/local/data/conf  /opt/deploy/conf  nfs    defaults 0      0' >> /etc/fstab
 
 rm -rf /opt/deploy/conf/*
 cp -r /home/deploy/bak/data_backup_conf/* /opt/deploy/conf/
@@ -278,7 +292,8 @@ docker run -d -p 15000:80 \
     --label com.docker.stack.namespace=swarm \
     joxit/docker-registry-ui:static
 
-
+sysctl kernel.hostname=server-redmine242
+echo 'server-redmine242' > /etc/hostname
 
 docker service create \
 --name node-red-03 \

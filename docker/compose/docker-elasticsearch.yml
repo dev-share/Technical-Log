@@ -1,0 +1,70 @@
+version: '3.7'
+services:
+  elasticsearch131:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+    container_name: elasticsearch131
+    environment:
+      - node.name=elasticsearch131
+      - cluster.name=Elasticsearch_Cluster
+      - discovery.seed_hosts=elasticsearch132,elasticsearch133
+      - cluster.initial_master_nodes=elasticsearch131,elasticsearch132,elasticsearch133
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+  elasticsearch132:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+    container_name: elasticsearch132
+    environment:
+      - node.name=elasticsearch132
+      - cluster.name=Elasticsearch_Cluster
+      - discovery.seed_hosts=elasticsearch131,elasticsearch133
+      - cluster.initial_master_nodes=elasticsearch131,elasticsearch132,elasticsearch133
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data02:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+  elasticsearch133:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+    container_name: elasticsearch133
+    environment:
+      - node.name=elasticsearch133
+      - cluster.name=Elasticsearch_Cluster
+      - discovery.seed_hosts=elasticsearch131,elasticsearch132
+      - cluster.initial_master_nodes=elasticsearch131,elasticsearch132,elasticsearch133
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data03:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+
+volumes:
+  data01:
+    driver: local
+  data02:
+    driver: local
+  data03:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge
