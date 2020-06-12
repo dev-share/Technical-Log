@@ -67,6 +67,11 @@ HDWWIZ
 HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\RCM\GracePeriod
 #若无法删除，右键-》属性，权限--》完全控制后，再删除
 重启电脑
+
+```
+11.Windows设置桌面图标
+```
+rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0
 ```
 ## 四. NodeJS配置
 1. grunt安装
