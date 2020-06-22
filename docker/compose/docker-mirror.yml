@@ -7,18 +7,23 @@ services:
       volumes:
       - /opt/central/registry:/var/lib/registry
       - /opt/central/registry/config.yml:/etc/docker/registry/config.yml
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
       ports:
       - 5000:5000
       deploy:
          replicas: 1
    registry-ui:
-      image: joxit/docker-registry-ui:1.4
+      image: joxit/docker-registry-ui:1.5
       environment:
 #      - PULL_URL=http://172.21.32.102:5000
       - URL=http://172.21.32.102:5000
 #      - REGISTRY_URL=http://172.21.32.102:5000
       - DELETE_IMAGES=true
       - REGISTRY_TITLE="Docker Registry"
+      volumes:
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
       ports:
       - 15000:80
       deploy:
@@ -31,7 +36,22 @@ services:
       - REGISTRY_HOST=172.21.32.102:5000
       - REGISTRY_STORAGE_DELETE_ENABLED=true
       - REGISTRY_SSL=false
+      volumes:
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
       ports:
       - 25000:80
+      deploy:
+         replicas: 1
+   nexus3:
+      image: sonatype/nexus3:3.24.0
+      environment:
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+      volumes:
+      - /opt/central/nexus/nexus3/data:/nexus-data
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+      - 8000:8081
       deploy:
          replicas: 1

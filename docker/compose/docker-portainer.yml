@@ -1,7 +1,7 @@
 version: '3.7'
 services:
    portainer:
-      image: 172.21.32.31:5000/portainer/portainer:1.22.1
+      image: 172.21.32.102:5000/portainer/portainer:1.24.0
       command: -H unix:///var/run/docker.sock
       restart: always
       volumes:
@@ -9,7 +9,7 @@ services:
       - /opt/portainer:/data
       ports:
       - 9000:9000
-      - 8000:8000
+      - 18000:8000
       deploy:
          replicas: 1
    
