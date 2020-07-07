@@ -1,8 +1,5 @@
 version: '3.7'
 services:
-##############################################################################################
-####################################### data Service##########################################
-##############################################################################################
    zookeeper:
       image: 172.21.32.102:5000/zookeeper:3.5.8
       restart: always
@@ -93,11 +90,43 @@ services:
       image: 172.21.32.102:5000/eclipse-mosquitto:1.6.10
       restart: always
       volumes:
-      - /opt/deploy/data/mosquitto/conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - /opt/deploy/data/mosquitto/conf/pwfile.conf:/mosquitto/config/pwfile.conf
+      #- /opt/deploy/data/mosquitto/conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      #- /opt/deploy/data/mosquitto/conf/pwfile.conf:/mosquitto/config/pwfile.conf
       - /etc/localtime:/etc/localtime
       - /etc/timezone:/etc/timezone
       ports:
       - 1883:1883
+      deploy:
+         replicas: 1
+   mysql:
+      image: 172.21.32.102:5000/mysql-canal:5.7.28
+      restart: always
+      privileged: true
+      environment:
+      - MYSQL_ROOT_PASSWORD=root
+      volumes:
+      - /opt/deploy/data/mysql/data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+      - 13306:3306
+      deploy:
+         replicas: 1
+   sonarqube:
+      image: 172.21.32.102:5000/sonarqube:7.8-community
+      environment:
+      - SONARQUBE_JDBC_USERNAME=root
+      - SONARQUBE_JDBC_PASSWORD=root
+      - SONARQUBE_JDBC_URL=jdbc:mysql://172.21.32.102:13306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance&useSSL=false
+      volumes:
+      - /opt/sonarqube/sonarqube7.8/conf:/opt/sonarqube/conf
+      #- /opt/sonarqube/sonarqube7.8/data:/opt/sonarqube/data
+      - /opt/sonarqube/sonarqube7.8/extensions/plugins:/opt/sonarqube/extensions/plugins
+      #- /opt/sonarqube/sonarqube7.8:/opt/sonarqube
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+      - 9999:9000
+      - 9992:9092
       deploy:
          replicas: 1

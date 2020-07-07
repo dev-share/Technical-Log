@@ -9,11 +9,15 @@ if [ -n "$2" ] ; then
    version=$2
 fi
 
+docker_register=172.21.32.31:5000
+if [ -n "$3" ] ; then
+   docker_register=$3
+fi
+
 path=$1
 name=${path##*/}
 echo $name-$version
 docker_name=$name:$version
-docker_register=172.21.32.31:5000
 BASE_PATH=$(echo `pwd`)
 DOCKER_FILE=${BASE_PATH}/Dockerfile
 
@@ -38,6 +42,3 @@ fi
 docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version -t ${docker_register}/${docker_name} --rm .
 docker push ${docker_register}/${docker_name}
 
-docker_register=172.21.32.102:5000
-docker build -f ${DOCKER_FILE} --build-arg APP_VERSION=$version -t ${docker_register}/${docker_name} --rm .
-docker push ${docker_register}/${docker_name}
