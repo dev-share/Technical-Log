@@ -1,3 +1,5 @@
+ARG APP_VERSION=1.0.0
+ARG APP_DESCRIPTION="Spring Boot Project"
 FROM openjdk:8-jre
 
 RUN \
@@ -5,8 +7,9 @@ RUN \
 
 COPY *.tar.gz /opt/deploy
 
-ARG APP_VERSION
-ENV APP_VERSION=${APP_VERSION:-v1.0.0}
+ENV APP_VERSION=${APP_VERSION}
+LABEL version=${APP_VERSION}
+LABEL description=${APP_DESCRIPTION}
 
 RUN \
     tar -xzvf /opt/deploy/*.tar.gz -C /opt/deploy && \

@@ -39,6 +39,9 @@ if [ -n "$(docker images -a|grep -v grep|grep ${docker_register}/$name|grep $ver
 	docker rmi -f $(docker images -a|grep -v grep|grep ${docker_register}/$name|grep $version|awk '{print $3}')
 fi
 
-docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version -t ${docker_register}/${docker_name} --rm .
+docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version --build-arg APP_DESCRIPTION=$name -t ${docker_register}/${docker_name} --rm .
 docker push ${docker_register}/${docker_name}
 
+docker_register=172.21.32.102:5000
+docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version --build-arg APP_DESCRIPTION=$name -t ${docker_register}/${docker_name} --rm .
+docker push ${docker_register}/${docker_name}
