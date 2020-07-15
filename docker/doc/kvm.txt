@@ -134,6 +134,29 @@ virsh setmem ics-server160 16777216
 virsh setvcpus ics-server160 6
 
 
+virt-viewer ics-servert
+
+virsh shutdown ics-servert
+virsh destroy ics-servert
+virsh undefine ics-servert
+rm -rf /home/kvm/disk/ics-servert.img
+qemu-img create -f qcow2 /home/kvm/disk/ics-servert.img 200G
+
+
+virt-install --name=ics-servert \
+--virt-type=kvm \
+--vcpus=2 \
+--memory=4096 \
+--disk path=/home/kvm/disk/ics-servert.img,bus=virtio \
+--cdrom=/home/kvm/ubuntu-20.04-live-server-amd64.iso \
+--network bridge=vbr0 \
+--network bridge=vbr128 \
+--network bridge=vbr129 \
+--network bridge=virbr0 \
+--graphics vnc,listen=0.0.0.0 \
+--console pty,target_type=virtio \
+-v
+
 virt-viewer ics-serverl
 
 virsh shutdown ics-serverl
@@ -148,7 +171,7 @@ virt-install --name=ics-serverl \
 --vcpus=4 \
 --memory=16384 \
 --disk path=/home/kvm/disk/ics-serverl.img,bus=virtio \
---cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
+--cdrom=/home/kvm/ubuntu-20.04-live-server-amd64.iso \
 --network bridge=vbr0 \
 --network bridge=vbr128 \
 --network bridge=vbr129 \
@@ -171,7 +194,7 @@ virt-install --name=ics-serverh \
 --vcpus=6 \
 --memory=16384 \
 --disk path=/home/kvm/disk/ics-serverh.img,bus=virtio \
---cdrom=/home/kvm/ubuntu-19.10-live-server-amd64.iso \
+--cdrom=/home/kvm/ubuntu-20.04-live-server-amd64.iso \
 --network bridge=vbr0 \
 --network bridge=vbr128 \
 --network bridge=vbr129 \
@@ -263,7 +286,7 @@ virt-install --name=windows2016 \
 --memory=4096 \
 --boot cdrom  \
 --disk path=/home/kvm/disk/windows2016.img,bus='ide' \
---cdrom=/home/kvm/cn_windows_server_2016_9718765_x64.iso \
+--cdrom=/home/kvm/cn_windows_server_2016_vl_11636695_x64.iso \
 --network bridge=vbr0 \
 --network bridge=vbr128 \
 --network bridge=vbr129 \
