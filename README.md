@@ -73,9 +73,9 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\RCM\GracePer
 ```
 rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0
 ```
-12.Linux给目录rw无d权限
+12.Linux给目录特殊权限(仅有读写rw无删除d权限)
 ```
-#允许soft目录添加读写权限不允许删除(+/-a 让文件或目录仅供附加用途)
+#(+/-a 让文件或目录仅供附加用途)
 chattr -R +a soft
 #撤销权限
 chattr -R -a soft
