@@ -1,7 +1,7 @@
 mkdir -p /usr/local/mysql
-tar -C /usr/local/mysql -zxvf mysql-cluster-8.0.19-linux-glibc2.12-x86_64.tar.gz
+tar -C /usr/local/mysql -zxvf mysql-cluster-8.0.21-linux-glibc2.12-x86_64.tar.gz
 cd /usr/local/mysql
-mv mysql-cluster-8.0.19-linux-glibc2.12-x86_64 mysql-cluster
+mv mysql-cluster-8.0.21-linux-glibc2.12-x86_64 mysql-cluster
 cp -vr mysql-cluster ./mysqld
 
 #创建mysql用户及组
