@@ -22,23 +22,39 @@ if [ -z $3 ] ; then
    echo " no msg"
    exit 1
 fi
+
 project=$1
 version=$2
 msg=$3
+branch=${4:-"develop"}
+group=${5:-"default"}
+gurl=$6
+
+source ${BIN_PATH}/sshkey
+
+WS_PATH=${WS_PATH}/$group
+PROJECT_PATH=${WS_PATH}/$project
+if [ -z $PROJECT_PATH ] ; then
+      if [  ! -f ${PROJECT_PATH}/.git/config -a  -z $gurl ] ; then
+   	echo "please config git url param 6"
+   	exit 1
+      else
+	${BIN_PATH}/clone.sh $branch $gurl $project
+      fi
+fi
+
 cd ${WS_PATH}/$project
 tag=$version
 if [[ $version != v* ]];then
 	tag=v$version
 fi
 
-source ${BIN_PATH}/sshkey
-slave="develop"
+slave=$branch
 master="master"
-tmp="`git branch -a|grep -v grep|grep dbs`"
-if [ -n "$tmp" ] ; then
-	slave="dbs"
-	master="master_dbs"
+if [[ $slave != "develop" ]] ; then
+	master="master_$slave"
 fi
+
 git checkout $slave
 ${BIN_PATH}/pull.sh
 ${BIN_PATH}/tag.sh $tag $msg
