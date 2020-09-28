@@ -9,7 +9,7 @@ if [ -n "$2" ] ; then
    version=$2
 fi
 
-docker_register=172.21.32.31:5000
+docker_register=172.21.32.102:5000
 if [ -n "$3" ] ; then
    docker_register=$3
 fi
@@ -21,13 +21,19 @@ docker_name=$name:$version
 BASE_PATH=$(echo `pwd`)
 DOCKER_FILE=${BASE_PATH}/Dockerfile
 
-if [ -f ${path}/Dockerfile ];then
-	DOCKER_FILE=${BASE_PATH}/${path}/Dockerfile
+if [[ $* =~ 'DefaultConfig=true' || $* =~ 'DefaultConfig= true' || $* =~ 'DefaultConfig =true' || $* =~ 'DefaultConfig = true' || $* != *'DefaultConfig'* ]];then
+	DOCKER_FILE=${BASE_PATH}/Dockerfile
+else
+	if [ -f ${path}/Dockerfile ];then
+		DOCKER_FILE=${BASE_PATH}/${path}/Dockerfile
+	else                    
+		if [[ $name == *-web ]];then
+			DOCKER_FILE=${BASE_PATH}/WebDockerfile
+		fi
+	fi
 fi
 
-if [[ $name == *-web ]];then
-	DOCKER_FILE=${BASE_PATH}/WebDockerfile
-fi
+echo "---build docker image config:${DOCKER_FILE} "
 
 cd ${path}
 
@@ -42,6 +48,6 @@ fi
 docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version --build-arg APP_DESCRIPTION=$name -t ${docker_register}/${docker_name} --rm .
 docker push ${docker_register}/${docker_name}
 
-docker_register=172.21.32.102:5000
-docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version --build-arg APP_DESCRIPTION=$name -t ${docker_register}/${docker_name} --rm .
-docker push ${docker_register}/${docker_name}
+#docker_register=172.21.32.102:5000
+#docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version --build-arg APP_DESCRIPTION=$name -t ${docker_register}/${docker_name} --rm .
+#docker push ${docker_register}/${docker_name}
