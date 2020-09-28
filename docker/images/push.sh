@@ -21,8 +21,8 @@ docker_name=$name:$version
 BASE_PATH=$(echo `pwd`)
 DOCKER_FILE=${BASE_PATH}/Dockerfile
 
-if [[ $* =~ 'DefaultConfig=true' || $* =~ 'DefaultConfig= true' || $* =~ 'DefaultConfig =true' || $* =~ 'DefaultConfig = true' || $* != *'DefaultConfig'* ]];then
-	DOCKER_FILE=${BASE_PATH}/Dockerfile
+if [[ $* =~ 'DefaultConfig=false' || $* =~ 'DefaultConfig= false' || $* =~ 'DefaultConfig =false' || $* =~ 'DefaultConfig = false' ]];then
+	DOCKER_FILE=${BASE_PATH}/${path}/Dockerfile
 else
 	if [ -f ${path}/Dockerfile ];then
 		DOCKER_FILE=${BASE_PATH}/${path}/Dockerfile
