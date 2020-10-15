@@ -80,6 +80,10 @@ chattr -R +a soft
 #撤销权限
 chattr -R -a soft
 ```
+12.windows远程登录问题：“出现身份验证错误,要求函数不受支持”
+```
+cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> 系统 --> 凭据分配 -->  加密数据库修正（加密Oracle修正||Encryption Oracle Remediation） --》（启用->易受攻击）
+```
 ## 四. NodeJS配置
 1. grunt安装
 ```bash
