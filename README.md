@@ -45,21 +45,21 @@ tracert -d www.google.com
 ```bash
 w !sudo tee %
 ```
-7.Windows修复
+7. Windows修复
 ```cmd
 dism/Online /Cleanup-Image /CheckHealth
 dism/Online /Cleanup-Image /RestoreHealth
 sfc /scannow
 ```
-8.Windows重置网络
+8. Windows重置网络
 ```
 netsh winsock reset
 ```
-9.Windows添加硬件
+9. Windows添加硬件
 ```
 HDWWIZ
 ```
-10.windows由于没有远程桌面授权服务器可以提供许可证，远程会话被中断。请跟服务器管理员联系
+10. windows由于没有远程桌面授权服务器可以提供许可证，远程会话被中断。请跟服务器管理员联系
 
 ```
 运行》regedit
@@ -69,18 +69,18 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\RCM\GracePer
 重启电脑
 
 ```
-11.Windows设置桌面图标
+11. Windows设置桌面图标
 ```
 rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0
 ```
-12.Linux给目录特殊权限(仅有读写rw无删除d权限)
+12. Linux给目录特殊权限(仅有读写rw无删除d权限)
 ```
 #(+/-a 让文件或目录仅供附加用途)
 chattr -R +a soft
 #撤销权限
 chattr -R -a soft
 ```
-12.windows远程登录问题：“出现身份验证错误,要求函数不受支持”
+13. Windows远程登录问题：“出现身份验证错误,要求函数不受支持”
 ```
 cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> 系统 --> 凭据分配 -->  加密数据库修正（加密Oracle修正||Encryption Oracle Remediation） --》（启用->易受攻击）
 ```
