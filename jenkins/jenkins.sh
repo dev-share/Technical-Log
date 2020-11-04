@@ -49,7 +49,7 @@ if [ -n "$kid" ] ; then
 fi
 
 if [ -n "${HTTP_PORT}" -a ! -z "${HTTP_PORT}" ] ; then
-	occupy=`netstat -ano|grep -v grep|grep ${HTTP_PORT}|grep 'LISTEN'`
+	occupy=`netstat -ano|grep -v grep|grep ':${HTTP_PORT}'|grep 'LISTEN'`
 	if [ -n "$occupy" ] ; then
 		echo [${SERVER_IP}] Port[${HTTP_PORT}] is occupied!
 		exit 1
