@@ -1,3 +1,11 @@
+#!/bin/bash
+kid=$(ps -ef|grep Kafka|grep -v grep|awk '{print $2}')
+if [ -n "$kid" ] ; then
+	echo [`date`]Kafka process [$kid] is Running!
+	kill -9 $kid;
+	sleep 3;
+fi
+cd /opt/deploy/data/kafka
 rm -rf logs/*
 cd bin
 sh kafka-server-stop.sh
