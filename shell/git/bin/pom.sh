@@ -6,21 +6,35 @@ base=${path}/..
 BASE_PATH="$(cd "${base}";pwd)"
 WS_PATH=${BASE_PATH}/workspace
 BIN_PATH=${BASE_PATH}/bin
+
+function usage() {
+    echo "Usage: pom.sh [OPTIONS]"
+    echo "Options:"
+    echo " --1 project_name [require]"
+    echo " --2 project_version [require]"
+    echo " --3 project_group [option,default:default]"
+    exit
+}
+
 if [ -z $1 ] ; then
-   echo " no git dir"
-   exit 1
+   usage
 fi
 
 if [ -z $2 ] ; then
-   echo " no version"
-   exit 1
+   usage
 fi
+
+if [ -z $3 ] ; then
+   usage
+fi
+
 project=$1
 version=$2
+group=${3:-"default"}
 if [[ $version == v* ]];then
    version=${version#*v}
 fi
-cd ${WS_PATH}/$project
+cd ${WS_PATH}/$group/$project
 major=${version%.*}
 minor=${version##*.}
 let minor=${minor}+1

@@ -1,11 +1,31 @@
-FROM mysql:5.7.27
+FROM openjdk:8-jre
 
-RUN echo "max_connections=1000" >> /etc/mysql/conf.d/docker.cnf
-RUN echo "log-bin=mysql-bin" >> /etc/mysql/conf.d/docker.cnf
-RUN echo "binlog-format=ROW" >> /etc/mysql/conf.d/docker.cnf
-RUN echo "server-id=1" >> /etc/mysql/conf.d/docker.cnf
-RUN echo "max_binlog_size=100M" >> /etc/mysql/conf.d/docker.cnf
-RUN echo "expire_logs_days=7" >> /etc/mysql/conf.d/docker.cnf
-RUN echo "event_scheduler=1" >> /etc/mysql/conf.d/docker.cnf
-RUN echo "sync_binlog=500" >> /etc/mysql/conf.d/docker.cnf
-RUN echo "innodb_flush_log_at_trx_commit=2" >> /etc/mysql/conf.d/docker.cnf
+RUN \
+    mkdir -p /opt/deploy
+
+COPY *.tar.gz /opt/deploy
+
+ARG APP_VERSION=1.0.0
+ARG APP_NAME="Spring Boot Project"
+
+ENV APP_VERSION=${APP_VERSION}
+ENV APP_NAME=${APP_NAME}
+LABEL version=${APP_VERSION}
+LABEL description=${APP_NAME}
+
+RUN \
+    tar -xzvf /opt/deploy/*.tar.gz -C /opt/deploy && \
+    /bin/rm -rf /opt/deploy/*.tar.gz && \
+    mkdir -p /opt/deploy/logs  /opt/deploy/data && \
+    cp -vr /opt/deploy/*/* /opt/deploy && \
+    mkdir -p /opt/deploy/bin && \
+    chmod +x /opt/deploy/bin  && \
+    mv /opt/deploy/*.jar /opt/deploy/sf-app.jar && \
+    true
+
+WORKDIR /opt/deploy
+# Add a healthcheck (default every 30 secs)
+#HEALTHCHECK  --interval=60s --timeout=60s --start-period=3s --retries=5 curl http://localhost:8080/docket/health || exit 1
+
+ENTRYPOINT ["java", "-jar", "sf-app.jar" ]
+

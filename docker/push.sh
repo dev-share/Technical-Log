@@ -29,6 +29,8 @@ else
 	else                    
 		if [[ $name == *-web ]];then
 			DOCKER_FILE=${BASE_PATH}/WebDockerfile
+			cp -vr ${BASE_PATH}/nginx.conf ${path}
+			cp -vr ${BASE_PATH}/runner ${path}
 		fi
 	fi
 fi
@@ -45,7 +47,9 @@ if [ -n "$(docker images -a|grep -v grep|grep ${docker_register}/$name|grep $ver
 	docker rmi -f $(docker images -a|grep -v grep|grep ${docker_register}/$name|grep $version|awk '{print $3}')
 fi
 
-docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version --build-arg APP_DESCRIPTION=$name -t ${docker_register}/${docker_name} --rm .
+echo "docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version --build-arg APP_NAME=$name -t ${docker_register}/${docker_name} --rm ."
+
+docker build -f ${DOCKER_FILE}  --build-arg APP_VERSION=$version --build-arg APP_NAME=$name -t ${docker_register}/${docker_name} --rm .
 docker push ${docker_register}/${docker_name}
 
 #docker_register=172.21.32.102:5000

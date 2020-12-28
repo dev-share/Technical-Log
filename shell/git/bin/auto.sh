@@ -12,13 +12,14 @@ version=${2:-"1.0.0"}
 msg=${3:-"新版本"}
 branch=${4:-"develop"}
 group=${5:-"default"}
+git_url=$6
 
 WS_PATH=${WS_PATH}/$group
 
 if [[ $project != "all" ]] ; then
-	${BIN_PATH}/git.sh ${project} $version $msg $branch $group $6
+	${BIN_PATH}/git.sh ${project} $version $msg $branch $group ${git_url}
 else
-	${BIN_PATH}/curl.sh
+	${BIN_PATH}/${group}.sh
 	echo ---${WS_PATH}---$version---$msg
 	for project in `ls ${WS_PATH}`
 	do

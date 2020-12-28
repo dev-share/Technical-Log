@@ -8,19 +8,24 @@ BASE_PATH="$(cd "${base}";pwd)"
 WS_PATH=${BASE_PATH}/workspace
 BIN_PATH=${BASE_PATH}/bin
 
+function usage() {
+    echo "Usage: git.sh [OPTIONS]"
+    echo "Options:"
+    echo " --1 project_name [require]"
+    echo " --2 project_version [require]"
+    echo " --3 git_tag_msg [require]"
+    echo " --4 git_branch [option,default:develop]"
+    echo " --5 project_group [option,default:default]"
+    echo " --6 git_url [option,default:]"
+    exit
+}
+
 if [ -z $1 ] ; then
-   echo " no project"
-   exit 1
-fi
-
-if [ -z $2 ] ; then
-   echo " no version"
-   exit 1
-fi
-
-if [ -z $3 ] ; then
-   echo " no msg"
-   exit 1
+   usage
+elif [  -z $2 ] ; then
+   usage
+elif [  -z $3 ] ; then
+   usage
 fi
 
 project=$1
@@ -62,4 +67,4 @@ git checkout $master
 echo "--->>project:$project,master:$master,slave:$slave,version:$version,msg:$msg---"
 ${BIN_PATH}/merge.sh $tag $slave $master
 git checkout $slave
-${BIN_PATH}/pom.sh $project $version
+${BIN_PATH}/pom.sh $project $version $group
