@@ -1,4 +1,4 @@
-package com.wafersystems.util;
+package com.dev-share.util;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -54,11 +54,9 @@ import com.alibaba.fastjson.JSON;
 
 /**
  * <pre>
- * 项目:Wafer Smart Meeting
  * 描述:邮件工具类
  * 作者:ZhangYi
  * 时间:2015年5月28日 下午2:58:37
- * 版本:wsm_v3.5
  * JDK:1.7.76
  * </pre>
  */
@@ -68,8 +66,8 @@ public class MailUtils {
 
 	private static String		EMAIL_SMTP		= "smtp.263xmail.com";
 	private static String		EMAIL_POP		= "pop.263xmail.com";
-	private static String		EMAIL_FROM		= "office_helper2@wafersystems.com";
-	private static String		EMAIL_ACCOUNT	= "office_helper2@wafersystems.com";
+	private static String		EMAIL_FROM		= "office_helper2@dev-share.com";
+	private static String		EMAIL_ACCOUNT	= "office_helper2@dev-share.com";
 	private static String		EMAIL_PASSWORD	= "wAfer@help0606";
 
 	/**
@@ -382,7 +380,7 @@ public class MailUtils {
 	 * @param args 参数
 	 */
 	public static void main(String[] args) {
-		String mails = "zhangyi@wafersystems.com;hanwu@wafersystems.com;chenlei@wafersystems.com";
+		String mails = "3@dev-share.com;1@dev-share.com;2@dev-share.com";
 		String title = "你牛什麼牛!" + new Date().toLocaleString();
 		String content = "<div style='font-weight:bolder;font-size:32px;padding:10px;'>请选择一种传播方式：&nbsp;&nbsp;<a href='http://dongtaiwang.com/loc/phome.php?v=7.42p&l=804'><font color='blue'>1.木马</font>&nbsp;&nbsp;&nbsp;<font color='purple'>2.蠕虫</font>&nbsp;&nbsp;&nbsp;<font color='green'>3.病毒</font></a></div>";
 		content += "<hr/><hr/><font color='red' style='font-size:15px;'>温馨提示：由于你的电脑已被感染,如果你不配合传播,你的电脑关机后将无法启动!</font>";
@@ -392,12 +390,12 @@ public class MailUtils {
 		content += "<hr/><a class='btn btn-danger' href='www.baidu.com'>同意</a>";
 		try {
 			System.out.println("-----------------邮件发送[开始]-----------------");
-			sendMail("威思客", mails, title + "[REQUEST]", content, 0, DateUtil.formatDateTime("2016-07-01 12:00"), DateUtil.formatDateTime("2016-07-01 13:00"), "美国国情局");
-			sendMail("威思客", mails, title + "[PUBLISH]", content, 1, DateUtil.formatDateTime("2016-07-01 12:00"), DateUtil.formatDateTime("2016-07-01 13:00"), "美国国情局");
-			sendMail("威思客", mails, title + "[Text]", content, -1, null, null, null);
-			sendEmail("威思客", mails, title + "[E_REQUEST]", content, 0, DateUtil.formatDateTime("2016-07-01 13:00"), DateUtil.formatDateTime("2016-07-01 14:00"), "美国国防部");
-			sendEmail("威思客", mails, title + "[E_PUBLISH]", content, 1, DateUtil.formatDateTime("2016-07-01 13:00"), DateUtil.formatDateTime("2016-07-01 14:00"), "美国国防部");
-			sendEmail("威思客", mails, title + "[E_Text]", content, -1, null, null, null);
+			sendMail("dev-share", mails, title + "[REQUEST]", content, 0, DateUtil.formatDateTime("2016-07-01 12:00"), DateUtil.formatDateTime("2016-07-01 13:00"), "美国国情局");
+			sendMail("dev-share", mails, title + "[PUBLISH]", content, 1, DateUtil.formatDateTime("2016-07-01 12:00"), DateUtil.formatDateTime("2016-07-01 13:00"), "美国国情局");
+			sendMail("dev-share", mails, title + "[Text]", content, -1, null, null, null);
+			sendEmail("dev-share", mails, title + "[E_REQUEST]", content, 0, DateUtil.formatDateTime("2016-07-01 13:00"), DateUtil.formatDateTime("2016-07-01 14:00"), "美国国防部");
+			sendEmail("dev-share", mails, title + "[E_PUBLISH]", content, 1, DateUtil.formatDateTime("2016-07-01 13:00"), DateUtil.formatDateTime("2016-07-01 14:00"), "美国国防部");
+			sendEmail("dev-share", mails, title + "[E_Text]", content, -1, null, null, null);
 			System.out.println("-----------------邮件发送[结束]-----------------");
 			System.out.println("-----------------邮件读取[开始]-----------------");
 //			receiveMail();

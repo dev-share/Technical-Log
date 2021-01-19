@@ -1,4 +1,4 @@
-package com.hollysys.smartfactory.test.websocket;
+package com.dev-share.test.websocket;
 
 import java.util.Map;
 
@@ -15,7 +15,6 @@ import org.springframework.web.socket.server.support.HttpSessionHandshakeInterce
 
 /**
  * <pre>
- * 项目:ReserveMeeting
  * 描述:SocketJS拦截器
  * 作者:ZhangYi
  * 时间:2016年8月4日 下午3:24:50

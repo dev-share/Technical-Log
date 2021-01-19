@@ -64,7 +64,7 @@
 					url = "wss://"+address+"/dbsznjc/realtime/thing?thing=EnvironmentalManagement&&date=201911";
             	} else {
             		url = "ws://"+address+"/dbsznjc/realtime/thing?thing=EnvironmentalManagement&&date=201911";
-//             		url = "ws://"+address+"/smartmeeting/smart/websocket?token="+token; 
+//             		url = "ws://"+address+"/dev-share/websocket?token="+token; 
             	}
             	websocket = new WebSocket(url,[],{devel: true, debug: true,server:"token="+token,transports: transports});
             }else{

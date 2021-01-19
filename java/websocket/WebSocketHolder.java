@@ -1,4 +1,4 @@
-package com.hollysys.smartfactory.test.websocket;
+package com.dev-share.test.websocket;
 
 import java.io.IOException;
 import java.util.Map;
@@ -12,7 +12,6 @@ import org.springframework.web.socket.WebSocketSession;
 
 /**
  * <pre>
- * 项目:ReserveMeeting
  * 描述:Spring Web Socket消息广播
  * 作者:ZhangYi
  * 时间:2016年8月2日 上午10:40:00

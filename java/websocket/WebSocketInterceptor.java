@@ -1,4 +1,4 @@
-package com.hollysys.smartfactory.test.websocket;
+package com.dev-share.test.websocket;
 
 import java.util.Arrays;
 import java.util.Collection;

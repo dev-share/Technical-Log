@@ -1,4 +1,4 @@
-package com.wafersystems.util;
+package com.dev-share.util;
 
 import java.io.InputStream;
 import java.io.OutputStream;

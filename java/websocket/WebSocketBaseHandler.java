@@ -1,4 +1,4 @@
-package com.hollysys.smartfactory.test.websocket;
+package com.dev-share.test.websocket;
 
 import java.net.InetSocketAddress;
 import java.util.Date;
@@ -18,7 +18,7 @@ import com.dev.share.util.DateUtils;
 
 /**
  * <pre>
- * 项目:ReserveMeeting
+ * 项目:dev-share
  * 描述:Spring Web Socket消息处理
  * 作者:ZhangYi
  * 时间:2016年7月28日 下午4:13:37

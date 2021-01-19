@@ -1,4 +1,4 @@
-package com.ucloudlink.canal.common;
+package com.dev-share.canal.common;
 
 import java.io.IOException;
 import java.io.InputStream;

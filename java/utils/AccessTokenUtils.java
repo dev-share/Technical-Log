@@ -1,4 +1,4 @@
-package com.wafersystems.util;
+package com.dev-share.util;
 
 import java.security.SecureRandom;
 
@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 
 /**
  * <pre>
- * 项目:aliyun[smartmeeting3.5]
+ * 项目:aliyun
  * 描述:访问令牌工具类3.0
  * 作者:ZhangYi
  * 时间:2016年3月29日 下午2:45:00
@@ -391,7 +391,7 @@ public class AccessTokenUtils {
 	}
 
 	public static void main(String[] args) {
-		String userId = "zhangyi@wafersystems.com";
+		String userId = "zhangyi@dev-share.com";
 		String token = "";
 		token = encryptToken(userId, "pc", "4.0");
 		System.out.println(token);

@@ -1,4 +1,4 @@
-package com.wafersystems.util;
+package com.dev-share.util;
 
 import java.util.List;
 
@@ -11,11 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 
 /**
  * <pre>
- * 项目:ReserveMeeting
  * 描述:XML转化工具
  * 作者:ZhangYi
  * 时间:2016年7月20日 下午5:41:23
- * 版本:wrm_v4.0
  * JDK:1.7.80
  * </pre>
  */
@@ -144,7 +142,7 @@ public class XMLUtil {
 		xml += "	</serv:header>";
 		xml += "	<serv:body>";
 		xml += "		<serv:bodyContent xsi:type='meet:gethosturlMeetingResponse' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>";
-		xml += "			<meet:hostMeetingURL>https://wafersystems.webex.com.cn/wafersystems/p.php?AT=LI&TK=5495ff056eeaaafe1ee494107e28573db27e8ee9020a9e145f9e91b235c41c99&MU=https://wafersystems.webex.com.cn/wafersystems/m.php?AT=HM&MK=180208468&Rnd=0.4129517587427822";
+		xml += "			<meet:hostMeetingURL>https://dev-share.webex.com.cn/dev-share/p.php?AT=LI&TK=5495ff056eeaaafe1ee494107e28573db27e8ee9020a9e145f9e91b235c41c99&MU=https://dev-share.webex.com.cn/dev-share/m.php?AT=HM&MK=180208468&Rnd=0.4129517587427822";
 		xml += "			</meet:hostMeetingURL>";
 		xml += "		</serv:bodyContent>";
 		xml += "	</serv:body>";

@@ -5,7 +5,7 @@
 		<artifactId>oss-parent</artifactId>
 		<version>9</version>
 	</parent>
-	<groupId>com.ucloudlink.css</groupId>
+	<groupId>com.dev-share.css</groupId>
 	<artifactId>css-elasticsearch</artifactId>
 	<version>5.5.0</version>
 	<name>css-elasticsearch</name>
@@ -29,7 +29,7 @@
 	<developers>
 		<developer>
 			<name>ukelink</name>
-			<email>yi.zhang@ucloudlink.com</email>
+			<email>yi.zhang@dev-share.com</email>
 			<url>https://github.com/dev-share/css-elasticsearch</url>
 		</developer>
 	</developers>

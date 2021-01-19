@@ -1,4 +1,4 @@
-package com.hollysys.smartfactory.test.websocket;
+package com.dev-share.test.websocket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,6 @@ import com.alibaba.fastjson.support.spring.FastjsonSockJsMessageCodec;
 
 /**
  * <pre>
- * 项目:ReserveMeeting
  * 描述:Spring Web Socket适配器
  * 作者:ZhangYi
  * 时间:2016年7月28日 下午4:00:35

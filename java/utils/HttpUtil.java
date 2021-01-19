@@ -1,4 +1,4 @@
-package com.ucloudlink.canal.util;
+package com.dev-share.canal.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

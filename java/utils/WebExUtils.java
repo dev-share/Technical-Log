@@ -1,4 +1,4 @@
-package com.wafersystems.util;
+package com.dev-share.util;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -24,13 +24,9 @@ import org.apache.log4j.Logger;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.wafersystems.dto.Meeting;
-import com.wafersystems.dto.WebexResource;
-import com.wafersystems.exception.WSMException;
 
 /**
  * <pre>
- * 项目:ReserveMeeting
  * 描述:WebEx工具类
  * 作者:ZhangYi
  * 时间:2016年7月5日 上午9:29:27
@@ -266,10 +262,10 @@ public class WebExUtils {
 	 * @param meeting	会议内容
 	 * @param resource	资源对象
 	 * @return
-	 * @throws WSMException
+	 * @throws Exception
 	 * </pre>
 	 */
-	public static String synWebEx(Meeting meeting, WebexResource resource) throws WSMException {
+	public static String synWebEx(Meeting meeting, WebexResource resource) throws Exception {
 		String key = "";
 		try {
 			HttpClient client = new HttpClient();
@@ -373,10 +369,10 @@ public class WebExUtils {
 	 * @param key		WebEx唯一标示
 	 * @param resource	资源对象
 	 * @return
-	 * @throws WSMException
+	 * @throws Exception
 	 * </pre>
 	 */
-	public static boolean deleteWebEx(String oid, WebexResource resource) throws WSMException {
+	public static boolean deleteWebEx(String oid, WebexResource resource) throws Exception {
 		try {
 			HttpClient client = new HttpClient();
 			client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
@@ -628,10 +624,10 @@ public class WebExUtils {
 	 * @param meeting	会议内容
 	 * @param resource	资源对象
 	 * @return
-	 * @throws WSMException
+	 * @throws Exception
 	 * </pre>
 	 */
-	public static String synXMLWebEx(Meeting meeting, WebexResource resource) throws WSMException {
+	public static String synXMLWebEx(Meeting meeting, WebexResource resource) throws Exception {
 		String key = meeting.getOid();
 		try {
 			String url = resource.getSiteURL() + "/WBXService/XMLService";
@@ -715,10 +711,10 @@ public class WebExUtils {
 	 * @param key		WebEx唯一标示
 	 * @param resource	资源对象
 	 * @return
-	 * @throws WSMException
+	 * @throws Exception
 	 * </pre>
 	 */
-	public static String findXMLWebEx(String key, WebexResource resource) throws WSMException {
+	public static String findXMLWebEx(String key, WebexResource resource) throws Exception {
 		try {
 			String url = resource.getSiteURL() + "/WBXService/XMLService";
 			String xml = "";
@@ -800,10 +796,10 @@ public class WebExUtils {
 	 * @param start		开始时间
 	 * @param end		结束时间
 	 * @return
-	 * @throws WSMException
+	 * @throws Exception
 	 * </pre>
 	 */
-	public static JSONArray findXMLWebExs(String key, WebexResource resource, Date start, Date end) throws WSMException {
+	public static JSONArray findXMLWebExs(String key, WebexResource resource, Date start, Date end) throws Exception {
 		try {
 			String url = resource.getSiteURL() + "/WBXService/XMLService";
 			String xml = "";
@@ -933,10 +929,10 @@ public class WebExUtils {
 	 * @param key		WebEx唯一标示
 	 * @param resource	资源对象
 	 * @return
-	 * @throws WSMException
+	 * @throws Exception
 	 * </pre>
 	 */
-	public static boolean deleteXMLWebEx(String key, WebexResource resource) throws WSMException {
+	public static boolean deleteXMLWebEx(String key, WebexResource resource) throws Exception {
 		try {
 			String url = resource.getSiteURL() + "/WBXService/XMLService";
 			String xml = "";
@@ -1038,12 +1034,12 @@ public class WebExUtils {
 			resource.setSiteURL("https://beboldmc8.webex.com.cn");
 			resource.setLoginURL("https://beboldmc8.webex.com.cn/beboldmc8/p.php");
 			resource.setAPIURL("https://beboldmc8.webex.com.cn/beboldmc8/m.php");
-			resource.setAccount("lisong@wafersystems.com");
+			resource.setAccount("lisong@dev-share.com");
 			resource.setPassword("P@ss1234");
-			resource.setSiteURL("https://wafersystems.webex.com.cn");
-			resource.setLoginURL("https://wafersystems.webex.com.cn/wafersystems/p.php");
-			resource.setAPIURL("https://wafersystems.webex.com.cn/wafersystems/m.php");
-			resource.setAccount("lisong@wafersystems.com");
+			resource.setSiteURL("https://dev-share.webex.com.cn");
+			resource.setLoginURL("https://dev-share.webex.com.cn/dev-share/p.php");
+			resource.setAPIURL("https://dev-share.webex.com.cn/dev-share/m.php");
+			resource.setAccount("lisong@dev-share.com");
 			resource.setPassword("W@ferbeX123");
 			System.out.println("-------------WebEx XML API[开始]---------------");
 			Date start = DateUtil.formatDateTime("2016-07-19 20:50:00");
