@@ -84,6 +84,10 @@ chattr -R -a soft
 ```
 cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> 系统 --> 凭据分配 -->  加密数据库修正（加密Oracle修正||Encryption Oracle Remediation） --》（启用->易受攻击）
 ```
+14. Windows访问目标计算机特定盘符目录
+```
+\\132.0.5.5\c$
+```
 ## 四. NodeJS配置
 1. grunt安装
 ```bash
