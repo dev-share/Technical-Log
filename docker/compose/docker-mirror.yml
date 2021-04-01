@@ -1,12 +1,12 @@
 version: '3.7'
 services:
    registry:
-      image: registry:2.7.1
+      image: registry:latest
       environment:
       - REGISTRY_STORAGE_DELETE_ENABLED=true
       volumes:
-      - /opt/central/registry:/var/lib/registry
-      - /opt/central/registry/config.yml:/etc/docker/registry/config.yml
+      - /data/registry:/var/lib/registry
+      - /data/registry/config.yml:/etc/docker/registry/config.yml
       - /etc/localtime:/etc/localtime
       - /etc/timezone:/etc/timezone
       ports:
@@ -16,9 +16,9 @@ services:
    registry-ui:
       image: joxit/docker-registry-ui:1.5
       environment:
-#      - PULL_URL=http://172.21.32.102:5000
-      - URL=http://172.21.32.102:5000
-#      - REGISTRY_URL=http://172.21.32.102:5000
+#      - PULL_URL=http://172.21.32.31:5000
+      - URL=http://172.21.32.31:5000
+#      - REGISTRY_URL=http://172.21.32.31:5000
       - DELETE_IMAGES=true
       - REGISTRY_TITLE="Docker Registry"
       volumes:
@@ -32,8 +32,8 @@ services:
       image: jc21/registry-ui:2.0.2
       environment:
       - NODE_ENV=production
-      - REGISTRY_DOMAIN=172.21.32.102:5000
-      - REGISTRY_HOST=172.21.32.102:5000
+      - REGISTRY_DOMAIN=172.21.32.31:5000
+      - REGISTRY_HOST=172.21.32.31:5000
       - REGISTRY_STORAGE_DELETE_ENABLED=true
       - REGISTRY_SSL=false
       volumes:

@@ -1,0 +1,35 @@
+version: '3.7'
+services: 
+   mysql:
+      image: 172.21.32.31:5000/mysqld:5.7.30
+      restart: always
+      privileged: true
+      environment:
+      - MYSQL_ROOT_PASSWORD=root
+      volumes:
+      - /opt/deploy/data/mysql:/var/lib/mysql
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+      - 3306:3306
+      deploy:
+         replicas: 1
+   redmine:
+      image: 172.21.32.30:5000/redmine:3.4.13
+      environment:
+      - REDMINE_NO_DB_MIGRATE=1
+      - REDMINE_DB_MYSQL=mysql
+      - REDMINE_DB_USERNAME=redmine
+      - REDMINE_DB_PASSWORD=red*654321
+      - REDMINE_DB_DATABASE=redmine
+      volumes:
+      - /opt/deploy/data/redmine/plugins:/usr/src/redmine/plugins
+      - /opt/deploy/data/redmine/themes:/usr/src/redmine/public/themes
+      - /opt/deploy/data/redmine/config:/usr/src/redmine/config
+      - /opt/deploy/data/redmine/files:/usr/src/redmine/files
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      ports:
+      - 3000:3000
+      deploy:
+         replicas: 1
