@@ -88,6 +88,13 @@ cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> 系统 --> 凭据分
 ```
 \\132.0.5.5\c$
 ```
+15. Windows激活
+- 2016
+```
+slmgr /ipk WC2BQ-8NRM3-FDDYY-2BFGV-KHKQY
+slmgr /skms kms.03k.org
+slmgr /ato
+```
 ## 四. NodeJS配置
 1. grunt安装
 ```bash
