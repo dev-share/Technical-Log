@@ -95,6 +95,10 @@ slmgr /ipk WC2BQ-8NRM3-FDDYY-2BFGV-KHKQY
 slmgr /skms kms.03k.org
 slmgr /ato
 ```
+16. 记住远程登录密码
+```
+ cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> 系统 --> 凭据分配 --> 允许分配保存的凭据用于仅 NTLM 服务器身份验证 --> 启用  --> 显示  --> TERMSRV/*
+```
 ## 四. NodeJS配置
 1. grunt安装
 ```bash
