@@ -5,8 +5,8 @@ services:
       environment:
       - REGISTRY_STORAGE_DELETE_ENABLED=true
       volumes:
-      - /data/registry:/var/lib/registry
-      - /data/registry/config.yml:/etc/docker/registry/config.yml
+      - /opt/registry:/var/lib/registry
+      - /opt/registry/config.yml:/etc/docker/registry/config.yml
       - /etc/localtime:/etc/localtime
       - /etc/timezone:/etc/timezone
       ports:

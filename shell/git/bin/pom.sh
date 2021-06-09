@@ -42,6 +42,12 @@ latest="${major}.${minor}"
 echo ---major:${major},minor:${minor},latest:${latest}------
 tmp=`ls|grep -v grep|grep "pom.xml"`
 if [ -n "$tmp" ] ; then
-	sed -i "s/<version>$(echo $version)</<version>$(echo $latest)</" pom.xml
+	#sed -i "s/<version>$(echo $version)</<version>$(echo $latest)</" pom.xml
+	sed -i "s#<version>.*#<version>$(echo $latest)</version>#" pom.xml
+	${BIN_PATH}/push.sh $latest
+fi
+tmp=`ls|grep -v grep|grep "package.json"`
+if [ -n "$tmp" ] ; then
+	sed -i "s#\"version\":.*#\"version\": \"$(echo $latest)\",#" package.json
 	${BIN_PATH}/push.sh $latest
 fi
