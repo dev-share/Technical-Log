@@ -45,21 +45,44 @@ tracert -d www.google.com
 ```bash
 w !sudo tee %
 ```
-7. Windows修复
+7. Linux给目录特殊权限(仅有读写rw无删除d权限)
+```
+#(+/-a 让文件或目录仅供附加用途)
+chattr -R +a soft
+#撤销权限
+chattr -R -a soft
+```
+
+8. Windows修复
 ```cmd
 dism/Online /Cleanup-Image /CheckHealth
 dism/Online /Cleanup-Image /RestoreHealth
 sfc /scannow
 ```
-8. Windows重置网络
+9. Windows重置网络
 ```
 netsh winsock reset
 ```
-9. Windows添加硬件
+10. Windows添加硬件
 ```
 HDWWIZ
 ```
-10. windows由于没有远程桌面授权服务器可以提供许可证，远程会话被中断。请跟服务器管理员联系
+11. Windows设置桌面图标
+```
+rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0
+```
+12. Windows访问目标计算机特定盘符目录
+```
+\\132.0.5.5\c$
+```
+13. Windows激活
+- 2016
+```
+slmgr /ipk WC2BQ-8NRM3-FDDYY-2BFGV-KHKQY
+slmgr /skms kms.03k.org
+slmgr /ato
+```
+14. windows由于没有远程桌面授权服务器可以提供许可证，远程会话被中断。请跟服务器管理员联系
 
 ```
 运行》regedit
@@ -69,35 +92,18 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\RCM\GracePer
 重启电脑
 
 ```
-11. Windows设置桌面图标
-```
-rundll32.exe shell32.dll,Control_RunDLL desk.cpl,,0
-```
-12. Linux给目录特殊权限(仅有读写rw无删除d权限)
-```
-#(+/-a 让文件或目录仅供附加用途)
-chattr -R +a soft
-#撤销权限
-chattr -R -a soft
-```
-13. Windows远程登录问题：“出现身份验证错误,要求函数不受支持”
+15. Windows远程登录问题：“出现身份验证错误,要求函数不受支持”
 ```
 cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> 系统 --> 凭据分配 -->  加密数据库修正（加密Oracle修正||Encryption Oracle Remediation） --》（启用->易受攻击）
 ```
-14. Windows访问目标计算机特定盘符目录
-```
-\\132.0.5.5\c$
-```
-15. Windows激活
-- 2016
-```
-slmgr /ipk WC2BQ-8NRM3-FDDYY-2BFGV-KHKQY
-slmgr /skms kms.03k.org
-slmgr /ato
-```
+
 16. 记住远程登录密码
 ```
  cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> 系统 --> 凭据分配 --> 允许分配保存的凭据用于仅 NTLM 服务器身份验证 --> 启用  --> 显示  --> TERMSRV/*
+```
+16. 多用户登录问题
+```
+ cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> Windows组件 --> 远程桌面服务 --> 远程桌面会话主机 --> 连接 --> 限制连接的数量 --> 启用 --> 允许的RD最大连接数 999999
 ```
 ## 四. NodeJS配置
 1. grunt安装
