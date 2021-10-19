@@ -1,0 +1,241 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>WebSocket/SockJS</title>
+    <style type="text/css">
+	
+		#server-container {
+            float: left;
+			margin: 5px;
+            width: 98%
+        }
+
+		#server-container input {
+			margin-right: 5px;
+        }
+
+		#connect-container {
+            float: left;
+			margin: 5px;
+            width: 28%
+        }
+
+        #connect-container div {
+            padding: 5px;
+        }
+
+        #connect-container button {
+            margin-right: 10px;
+        }
+
+        #console-container {
+            float: left;
+            margin: 5px;
+            width: 70%;
+        }
+
+        #console {
+        	background: black;
+            color : yellow;
+            border: 1px solid #03A9F4;
+            border-right-color: #777878;
+            border-bottom-color: #777878;
+            height: 650px;
+            overflow-y: scroll;
+            padding: 5px;
+        }
+
+        #console p {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+	<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet"></link>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script> -->
+	<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css" rel="stylesheet"></link>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.min.js"></script> -->
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" rel="stylesheet"></link>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/js/bootstrap.min.js"></script>
+    <!-- <script src="http://cdn.jsdelivr.net/sockjs/1/sockjs.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/socket.io-client/1.3.2/socket.io.js"></script> -->
+	<!-- <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script> -->
+	<!-- <script src="http://apps.bdimg.com/libs/sockjs-client/0.3.4/sockjs.min.js"></script> -->
+    <script type="text/javascript">
+        var websocket = null;
+        var url = null;
+        var transports = null;
+
+        function common(flag) {
+            document.getElementById('connect').disabled = flag;
+            document.getElementById('disconnect').disabled = !flag;
+            document.getElementById('send').disabled = !flag;
+            document.getElementById('clear').disabled=false;
+        }
+		
+		function process(){
+			for(var i=0;i<10;i++){
+				connect(i);
+			}
+		}
+
+        function connect(pid) {
+			pid=(pid?pid:0);
+			var address = document.getElementById("Server").value;
+			var url = document.getElementById("url").value;
+			var token = document.getElementById("token").value;
+			if(url){
+				if(!url.startsWith("/")){
+					url = "/" + url;
+				}
+				if(url.indexOf("?")==-1){
+					url += "?token="+token;
+				}else{
+					url += "&token="+token;
+				}
+			}
+			
+            var protocol= document.getElementById("WebSocket").checked?document.getElementById("WebSocket").value:document.getElementById("SockJS").value;
+            if(protocol&&protocol=="websocket"){
+            	if (window.location.protocol == 'https:') {
+					url = "wss://"+address+url;
+            	} else {
+            		url = "ws://"+address+url;
+            	}
+            	websocket = new WebSocket(url,[],{devel: true, debug: true,server:"pid="+pid,transports: transports});
+            }else{
+            	url= "http://"+address+url;
+                websocket = new SockJS(url,transports,{devel: false, debug: true,server:"pid="+pid,transports: transports,timeout: 3000,sessionId: 8});
+            }
+			log(url);
+            websocket.onopen = function (event) {
+            	common(true);
+				sys(event);
+				send();
+                log("--打开连接-----","#00FF00");
+            };
+			var i=0;
+            websocket.onmessage = function (event) {
+				sys(event);
+				i++;
+				if(i%100==0){
+					common(true);
+				}
+                log(i+"---["+pid+"]接收收据: " + JSON.stringify(event.data),"#00FF00");
+            };
+            websocket.onerror = function (evnt) {
+				sys(event);
+            	log("---异常收据: " + JSON.stringify(event),"red");
+            };
+            websocket.onclose = function (event) {
+            	common(false);
+				sys(event);
+                log("--关闭连接连接-----" + event.reason,"#FF0033");
+            };
+
+        }
+
+        function disconnect() {
+            if (websocket != null) {
+            	websocket.close();
+            	websocket = null;
+            }
+            common(false);
+        }
+		function clean(){
+			document.getElementById('console').innerHTML="";
+			document.getElementById('clear').disabled=true;
+		}
+        function send() {
+            if (websocket != null) {
+				sys(websocket);
+                var message = document.getElementById('message').value;
+                log("---发送收据: " + message,"white");
+                websocket.send(message);
+            }
+        }
+
+        function updateTransport(transport) {
+            transports = (!transport||transport == 'all') ?  ['xdr-streaming','xhr-streaming','eventsource','iframe-eventsource','htmlfile','iframe-htmlfile','xdr-polling','xhr-polling','iframe-xhr-polling','jsonp-polling'] : [transport];
+        }
+        
+        function log(message,color) {
+            var console = document.getElementById('console');
+            var p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+			var span = document.createElement("span");
+			span.style.color=color?color:"yellow";
+            span.appendChild(document.createTextNode(message));
+			p.appendChild(span);
+            console.appendChild(p);
+            while (console.childNodes.length > 20) {
+                console.removeChild(console.firstChild);
+            }
+            console.scrollTop = console.scrollHeight;
+        }
+		function sys(event){
+			console.info(event);
+		}
+    </script>
+</head>
+<body>
+<noscript>
+	<h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websockets 
+    rely on Javascript being enabled. Please enable
+    Javascript and reload this page!</h2>
+</noscript>
+<div>
+    <div id="server-container" class="input-group">
+		<span class="input-group-text active" id="span-server">Server</span>
+		<input id="server" class="form-control" type="text" name="type" value="172.21.27.9:8080" placeholder="server" aria-label="server" aria-describedby="span-server">
+		<span class="input-group-text" id="span-url">URL</span>
+		<input id="url" style="width: 300px;" class="form-control" type="text" name="type" value="/dbsznjc/realtime/thing?thing=EnvironmentalManagement" placeholder="url" aria-label="url" aria-describedby="span-url">
+		<span class="input-group-text" id="span-token">Token</span>
+		<input id="token" class="form-control" type="text" name="type" placeholder="token" aria-label="token" aria-describedby="span-url">
+    </div>
+    <div id="connect-container">
+        <input id="WebSocket" class="form-check-input" type="radio" name="type" value="websocket" onchange="javascript:{document.getElementById('transport').style.display='none';}">
+		<label class="form-check-label" for="WebSocket">W3C WebSocket</label>
+		<br/>
+        <input id="SockJS" class="form-check-input" type="radio" name="type" checked="checked" value="socketjs" onchange="javascript:{document.getElementById('transport').style.display='block';}">
+		<label class="form-check-label" for="SockJS">SockJS</label>
+		<br/>
+        <div id="transport" class="well well-lg">
+            <select id="protocol" class="form-select" onchange="updateTransport(this.value)">
+              <option value="">all</option>
+              <option value="websocket">websocket</option>
+              <option value="xdr-streaming">xdr-streaming</option>
+              <option value="xhr-streaming">xhr-streaming</option>
+              <option value="xdr-polling">xdr-polling</option>
+              <option value="xhr-polling">xhr-polling</option>
+              <option value="jsonp-polling">jsonp-polling</option>
+              <option value="iframe-eventsource">iframe-eventsource</option>
+              <option value="iframe-htmlfile">iframe-htmlfile</option>
+              <option value="iframe-xhr-polling">iframe-xhr-polling</option>
+              <option value="eventsource">eventsource</option>
+			  <option value="htmlfile">htmlfile</option>
+            </select>
+        </div>
+        <div class="btn-group">
+			<button id="process" onclick="process();" class="btn btn-warning">多线程</button>
+            <button id="connect" onclick="connect();" class="btn btn-success">连接</button>
+            <button id="disconnect" disabled="disabled" onclick="disconnect();" class="btn btn-danger">断开</button>
+            <button id="clear" disabled="disabled" onclick="clean();" class="btn btn-primary">清除</button>
+        </div>
+        <div class="panel panel-primary">
+            <textarea id="message" class="panel-body form-control" style="width: 100%;resize: none;height:450px;">refresh</textarea>
+        </div>
+        <div class="btn-group">
+            <button id="send" onclick="send();" disabled="disabled" class="btn btn-info">发送</button>
+        </div>
+    </div>
+    <div id="console-container" class="panel panel-primary">
+		<div class="panel-heading">
+			<h3 class="panel-title">Web Socket 控制台</h3>
+		 </div>
+        <div id="console" class="panel-body"></div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,7 +1,10 @@
-version: '3.7'
+version: '3.8'
+volumes:
+  portaince:
+    external: true
 services:
   portainer_agent:
-    image: 172.21.32.102:5000/portainer/agent:1.6.0
+    image: 172.21.32.31:5000/portainer/agent:2.6.0
     environment:
       - AGENT_CLUSTER_ADDR=tasks.portainer_agent
     volumes:
@@ -9,7 +12,7 @@ services:
       - /var/lib/docker/volumes:/var/lib/docker/volumes
     # - /:/host
     networks:
-      - agent_network
+      - swarm_network
     ports:
       - 9001:9001
     deploy:
@@ -17,16 +20,16 @@ services:
       placement:
         constraints: [node.platform.os == linux] 
   portainer:
-    image: 172.21.32.102:5000/portainer/portainer:1.24.0
+    image: 172.21.32.31:5000/portainer/portainer-ce:2.6.0
     command: -H tcp://tasks.portainer_agent:9001 --tlsskipverify
     networks:
-      - agent_network
+      - swarm_network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       #	- /opt/portainer:/data
+      - portaince:/data
     ports:
       - 9000:9000
-      - 18000:8000
     deploy:
         mode: replicated
         replicas: 1
@@ -34,23 +37,6 @@ services:
             constraints: [node.role == manager]
 
 networks:
-  agent_network:
+  swarm_network:
     driver: overlay
     attachable: true
-
-
-
-version: '3.7'
-services:
-   portainer:
-      image: 172.21.32.102:5000/portainer/portainer:1.24.0
-      command: -H unix:///var/run/docker.sock
-      restart: always
-      volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/portainer:/data
-      ports:
-      - 9000:9000
-      - 18000:8000
-      deploy:
-         replicas: 1   
