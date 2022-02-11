@@ -105,6 +105,12 @@ cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> 系统 --> 凭据分
 ```
  cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> Windows组件 --> 远程桌面服务 --> 远程桌面会话主机 --> 连接 --> 限制连接的数量 --> 启用 --> 允许的RD最大连接数 999999
 ```
+18. 管理员模式打开应用问题
+```
+ cmd --> regedit.msc --> HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\UIPI --> (默认) ,其值为1
+ cmd --> regedit.msc --> HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System --> FilterAdministratorToken ,其值为1 (新建 DWORD（32位）值)
+```
+
 ## 四. NodeJS配置
 1. grunt安装
 ```bash
