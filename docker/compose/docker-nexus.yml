@@ -1,0 +1,16 @@
+version: '3.9'
+services:
+   nexus3:
+      image: sonatype/nexus3:latest
+      volumes:
+      #chown -R 200 /opt/deploy/nexus
+      - /opt/nexus3:/nexus-data
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone
+      #- /var/run/docker.sock:/var/run/docker.sock
+      ports:
+      - 8000:8081
+      - 5000:5000
+      - 6000:6000
+      deploy:
+         replicas: 1
