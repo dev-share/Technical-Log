@@ -110,6 +110,10 @@ cmd --> gpedit.msc --> 计算机配置 --> 管理模板 --> 系统 --> 凭据分
  cmd --> regedit.msc --> HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\UIPI --> (默认) ,其值为1
  cmd --> regedit.msc --> HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System --> FilterAdministratorToken ,其值为1 (新建 DWORD（32位）值)
 ```
+19. Windows下载wsl
+```
+https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi
+```
 
 ## 四. NodeJS配置
 1. grunt安装
